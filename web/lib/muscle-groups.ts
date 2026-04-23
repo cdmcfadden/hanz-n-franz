@@ -89,6 +89,8 @@ export const MOVE_GROUPS: Record<string, string[]> = {
   belt_squat: ["legs"],
   machine_squat: ["legs"],
   lat_pullover: ["back"],
+  hip_thrust: ["legs"],
+  glute_bridge: ["legs"],
 
   // Selectorized
   lat_pulldown: ["back", "arms"],

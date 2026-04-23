@@ -82,6 +82,10 @@
     ] },
     { "id": "lat_pullover", "name": "Lat pullover machine", "count": 1, "confidence": "high", "muscles": ["lats", "back"], "moves": [
       { "id": "lat_pullover", "name": "Lat pullover" }
+    ] },
+    { "id": "booty_builder", "name": "Booty Builder Platinum", "brand_guess": "Booty Builder", "count": 1, "confidence": "high", "muscles": ["glutes", "hamstrings"], "moves": [
+      { "id": "hip_thrust", "name": "Hip thrust" },
+      { "id": "glute_bridge", "name": "Glute bridge" }
     ] }
   ],
   "selectorized_machines": [
