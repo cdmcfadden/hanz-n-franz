@@ -23,7 +23,10 @@ create table if not exists log_entries (
   move_id text not null,
   log_date date not null,
   weight numeric not null check (weight > 0),
-  created_at timestamptz not null default now()
+  created_at timestamptz not null default now(),
+  -- One log row per (user, equipment, move, day). Same-day re-logs upsert.
+  constraint log_entries_unique_per_day
+    unique (user_id, equipment_id, move_id, log_date)
 );
 
 create index if not exists log_entries_user_idx
@@ -46,6 +49,10 @@ create policy "anon read log_entries" on log_entries
 drop policy if exists "anon insert log_entries" on log_entries;
 create policy "anon insert log_entries" on log_entries
   for insert to anon with check (true);
+
+drop policy if exists "anon update log_entries" on log_entries;
+create policy "anon update log_entries" on log_entries
+  for update to anon using (true) with check (true);
 
 drop policy if exists "anon delete log_entries" on log_entries;
 create policy "anon delete log_entries" on log_entries

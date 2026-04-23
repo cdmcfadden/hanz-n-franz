@@ -91,15 +91,20 @@ export async function addEntry(
   weight: number,
 ): Promise<LogEntry> {
   const sb = getSupabase();
+  // Upsert on the (user, equipment, move, day) unique constraint so a second
+  // log for the same day replaces the first instead of creating a duplicate.
   const { data, error } = await sb
     .from("log_entries")
-    .insert({
-      user_id: userId,
-      equipment_id: equipmentId,
-      move_id: moveId,
-      log_date: date,
-      weight,
-    })
+    .upsert(
+      {
+        user_id: userId,
+        equipment_id: equipmentId,
+        move_id: moveId,
+        log_date: date,
+        weight,
+      },
+      { onConflict: "user_id,equipment_id,move_id,log_date" },
+    )
     .select("id, log_date, weight")
     .single();
   if (error) throw error;

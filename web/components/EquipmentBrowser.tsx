@@ -3,9 +3,9 @@
 import { useMemo, useState } from "react";
 import { MoveLogger } from "@/components/MoveLogger";
 import { MuscleFilter } from "@/components/MuscleFilter";
+import { useEntries } from "@/contexts/EntriesContext";
 import {
   CATEGORIES,
-  categoryLabels,
   type EquipmentCategory,
   type EquipmentItem,
   type Move,
@@ -28,64 +28,66 @@ export function EquipmentBrowser({
   itemsByCategory: ItemsByCategory;
   availableImageIds: string[];
 }) {
-  const [selected, setSelected] = useState<Set<string>>(
-    () => new Set(ALL_GROUP_IDS),
-  );
+  // Default: no chips selected. The user opts in to what they're training.
+  const [selected, setSelected] = useState<Set<string>>(() => new Set());
+
+  const { lastActivity } = useEntries();
 
   const available = useMemo(
     () => new Set(availableImageIds),
     [availableImageIds],
   );
 
-  const total = useMemo(
-    () =>
-      CATEGORIES.reduce(
-        (sum, cat) => sum + (itemsByCategory[cat]?.length ?? 0),
-        0,
-      ),
-    [itemsByCategory],
-  );
-
-  const filteredByCategory: Partial<Record<EquipmentCategory, FilteredItem[]>> =
-    useMemo(() => {
-      const out: Partial<Record<EquipmentCategory, FilteredItem[]>> = {};
-      for (const cat of CATEGORIES) {
-        const list = itemsByCategory[cat];
-        if (!list) continue;
-        const kept: FilteredItem[] = [];
-        for (const item of list) {
-          if (item.moves && item.moves.length > 0) {
-            const visibleMoves = item.moves.filter((mv) => {
-              const groups = groupsForMove(mv.id, item.muscles ?? []);
-              for (const g of groups) {
-                if (selected.has(g)) return true;
-              }
-              return false;
-            });
-            if (visibleMoves.length > 0) kept.push({ item, visibleMoves });
-          } else {
-            const groups = groupsForItem(item.muscles ?? []);
-            for (const g of groups) {
-              if (selected.has(g)) {
-                kept.push({ item, visibleMoves: [] });
-                break;
-              }
-            }
-          }
-        }
-        if (kept.length > 0) out[cat] = kept;
+  // Flatten the catalog once and remember each item's catalog index so we
+  // can use it as a stable tiebreaker after the recency sort.
+  const catalogOrder = useMemo(() => {
+    const order: { item: EquipmentItem; idx: number }[] = [];
+    let i = 0;
+    for (const cat of CATEGORIES) {
+      for (const item of itemsByCategory[cat] ?? []) {
+        order.push({ item, idx: i++ });
       }
-      return out;
-    }, [itemsByCategory, selected]);
+    }
+    return order;
+  }, [itemsByCategory]);
 
-  const shown = useMemo(
-    () =>
-      CATEGORIES.reduce(
-        (sum, cat) => sum + (filteredByCategory[cat]?.length ?? 0),
-        0,
-      ),
-    [filteredByCategory],
-  );
+  const total = catalogOrder.length;
+
+  const filteredItems: FilteredItem[] = useMemo(() => {
+    if (selected.size === 0) return [];
+
+    const withOrder: { f: FilteredItem; idx: number; recency: string }[] = [];
+    for (const { item, idx } of catalogOrder) {
+      let visibleMoves: Move[] = [];
+      if (item.moves && item.moves.length > 0) {
+        visibleMoves = item.moves.filter((mv) => {
+          const groups = groupsForMove(mv.id, item.muscles ?? []);
+          for (const g of groups) if (selected.has(g)) return true;
+          return false;
+        });
+        if (visibleMoves.length === 0) continue;
+      } else {
+        const groups = groupsForItem(item.muscles ?? []);
+        let any = false;
+        for (const g of groups) if (selected.has(g)) { any = true; break; }
+        if (!any) continue;
+      }
+      withOrder.push({
+        f: { item, visibleMoves },
+        idx,
+        recency: lastActivity(item.id) ?? "",
+      });
+    }
+
+    // Sort: most-recent log date descending; items without any log fall to
+    // the bottom; catalog order breaks ties.
+    withOrder.sort((a, b) => {
+      if (a.recency !== b.recency) return b.recency.localeCompare(a.recency);
+      return a.idx - b.idx;
+    });
+
+    return withOrder.map((x) => x.f);
+  }, [catalogOrder, selected, lastActivity]);
 
   function toggle(id: string) {
     setSelected((prev) => {
@@ -98,57 +100,39 @@ export function EquipmentBrowser({
 
   return (
     <>
-      {/* Filter card stays in the padded column */}
       <div className="px-4 sm:px-6">
         <MuscleFilter
           selected={selected}
           onToggle={toggle}
           onSelectAll={() => setSelected(new Set(ALL_GROUP_IDS))}
           onClearAll={() => setSelected(new Set())}
-          shown={shown}
+          shown={filteredItems.length}
           total={total}
         />
       </div>
 
-      {shown === 0 && (
+      {filteredItems.length === 0 && (
         <div className="px-4 sm:px-6 text-center py-16 text-neutral-500">
-          <p className="text-sm">No equipment matches the selected filters.</p>
-          <button
-            onClick={() => setSelected(new Set(ALL_GROUP_IDS))}
-            className="mt-3 text-xs text-white hover:underline"
-          >
-            Reset filters
-          </button>
+          <p className="text-sm">
+            {selected.size === 0
+              ? "Tap a muscle group above to see matching equipment."
+              : "No equipment matches the selected filters."}
+          </p>
         </div>
       )}
 
-      {/* Cards extend to the LEFT viewport edge (no left padding on the list) */}
-      <div className="space-y-10 pr-3 sm:pr-6">
-        {CATEGORIES.map((cat) => {
-          const list = filteredByCategory[cat];
-          if (!list || list.length === 0) return null;
-          return (
-            <section key={cat}>
-              <h2 className="px-4 sm:px-6 text-xs font-semibold tracking-widest uppercase text-neutral-500 mb-3">
-                {categoryLabels[cat]}
-                <span className="ml-2 normal-case font-normal tracking-normal text-neutral-600">
-                  · {list.length}
-                </span>
-              </h2>
-              <ul className="space-y-2">
-                {list.map(({ item, visibleMoves }) => (
-                  <EquipmentRow
-                    key={item.id}
-                    item={item}
-                    visibleMoves={visibleMoves}
-                    hasImage={available.has(item.id)}
-                  />
-                ))}
-              </ul>
-            </section>
-          );
-        })}
-      </div>
+      {filteredItems.length > 0 && (
+        <ul className="space-y-2 pr-3 sm:pr-6">
+          {filteredItems.map(({ item, visibleMoves }) => (
+            <EquipmentRow
+              key={item.id}
+              item={item}
+              visibleMoves={visibleMoves}
+              hasImage={available.has(item.id)}
+            />
+          ))}
+        </ul>
+      )}
     </>
   );
 }
@@ -167,7 +151,6 @@ function EquipmentRow({
 
   return (
     <li className="relative bg-[var(--surface-soft)] ring-1 ring-[var(--ring)] rounded-r-2xl pl-4 pr-3 sm:pl-6 py-3 sm:py-4">
-      {/* Image floats in the upper-right corner of the card */}
       <div className="absolute top-3 right-3 sm:top-4 sm:right-4 w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden bg-black ring-1 ring-[var(--ring)] flex items-center justify-center">
         {hasImage ? (
           // eslint-disable-next-line @next/next/no-img-element
@@ -185,7 +168,6 @@ function EquipmentRow({
         )}
       </div>
 
-      {/* Content reserves room for the floating image on the right */}
       <div className="pr-20 sm:pr-24 min-w-0">
         <div className="flex items-baseline justify-between gap-3 min-w-0">
           <div className="min-w-0">

@@ -25,6 +25,12 @@ type EntriesContextValue = {
   loading: boolean;
   error: string | null;
   getEntries: (equipmentId: string, moveId: string) => LogEntry[];
+  /**
+   * Most recent log_date across every move for this equipment, or null if
+   * the current user has never logged it. Used by /equipment to sort items
+   * by recency.
+   */
+  lastActivity: (equipmentId: string) => string | null;
   add: (
     equipmentId: string,
     moveId: string,
@@ -75,6 +81,27 @@ export function EntriesProvider({ children }: { children: ReactNode }) {
     [entries],
   );
 
+  // Pre-compute lastActivity per equipment once per entries-map change so
+  // sorting N items is O(N) lookups instead of O(N × moves).
+  const lastActivityMap = useMemo(() => {
+    const m = new Map<string, string>();
+    for (const [key, list] of entries) {
+      if (list.length === 0) continue;
+      const equipmentId = key.split(":")[0];
+      const latest = list[list.length - 1].date; // list is sorted ascending
+      const prev = m.get(equipmentId);
+      if (!prev || latest > prev) m.set(equipmentId, latest);
+    }
+    return m;
+  }, [entries]);
+
+  const lastActivity = useCallback(
+    (equipmentId: string): string | null => {
+      return lastActivityMap.get(equipmentId) ?? null;
+    },
+    [lastActivityMap],
+  );
+
   const add = useCallback(
     async (
       equipmentId: string,
@@ -92,9 +119,10 @@ export function EntriesProvider({ children }: { children: ReactNode }) {
       setEntries((prev) => {
         const next = new Map(prev);
         const k = keys.moveKey(equipmentId, moveId);
-        const list = [...(next.get(k) ?? []), created].sort((a, b) =>
-          a.date.localeCompare(b.date),
-        );
+        // Replace any existing entry for the same date (one row per day).
+        const list = (next.get(k) ?? []).filter((e) => e.date !== created.date);
+        list.push(created);
+        list.sort((a, b) => a.date.localeCompare(b.date));
         next.set(k, list);
         return next;
       });
@@ -122,8 +150,8 @@ export function EntriesProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const value = useMemo(
-    () => ({ loading, error, getEntries, add, remove, deleteAll }),
-    [loading, error, getEntries, add, remove, deleteAll],
+    () => ({ loading, error, getEntries, lastActivity, add, remove, deleteAll }),
+    [loading, error, getEntries, lastActivity, add, remove, deleteAll],
   );
 
   return (
