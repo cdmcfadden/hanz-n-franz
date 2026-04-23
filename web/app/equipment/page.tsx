@@ -1,5 +1,6 @@
 import { readdirSync } from "node:fs";
 import path from "node:path";
+import Link from "next/link";
 import {
   EquipmentBrowser,
   type ItemsByCategory,
@@ -46,9 +47,14 @@ export default async function EquipmentPage() {
         availableImageIds={availableImageIds}
       />
 
-      <footer className="mt-12 px-4 sm:px-6 flex items-center justify-between text-xs text-neutral-600">
+      <footer className="mt-12 px-4 sm:px-6 flex items-center justify-between gap-4 text-xs text-neutral-600">
         <span>Cataloged {data.cataloged_at} from a video walkthrough.</span>
-        <ResetButton />
+        <div className="flex items-center gap-4">
+          <Link href="/qr" className="hover:text-white">
+            Print QR sheet
+          </Link>
+          <ResetButton />
+        </div>
       </footer>
     </main>
   );
