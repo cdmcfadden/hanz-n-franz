@@ -8,7 +8,8 @@ import {
   type EquipmentCategory,
   type EquipmentItem,
 } from "@/lib/equipment";
-import { fetchAllEntries, type EntryMap } from "@/lib/log-store";
+import { fetchAllEntries, keys, type EntryMap } from "@/lib/log-store";
+import { USERS } from "@/lib/users";
 
 export function TrendsView({
   itemsByCategory,
@@ -46,34 +47,56 @@ export function TrendsView({
     );
   }
 
-  return (
-    <div className="space-y-12">
-      {CATEGORIES.map((cat) => {
-        const items = (itemsByCategory[cat] ?? []).filter(
-          (i) => i.moves && i.moves.length > 0,
-        );
-        if (items.length === 0) return null;
-        return (
-          <section key={cat}>
-            <h2 className="text-xs font-semibold tracking-widest uppercase text-zinc-500 mb-4">
-              {categoryLabels[cat]}
-            </h2>
-            <div className="space-y-3">
-              {items.flatMap((item) =>
-                (item.moves ?? []).map((mv) => (
-                  <TrendChart
-                    key={`${item.id}:${mv.id}`}
-                    equipmentId={item.id}
-                    moveId={mv.id}
-                    moveName={`${mv.name} — ${item.name}`}
-                    allEntries={allEntries}
-                  />
-                )),
-              )}
-            </div>
-          </section>
-        );
-      })}
-    </div>
-  );
+  function moveHasEntries(equipmentId: string, moveId: string): boolean {
+    for (const u of USERS) {
+      const list = allEntries.get(keys.userMoveKey(u.id, equipmentId, moveId));
+      if (list && list.length > 0) return true;
+    }
+    return false;
+  }
+
+  let totalRendered = 0;
+
+  const sections = CATEGORIES.map((cat) => {
+    const items = itemsByCategory[cat] ?? [];
+    const moves = items.flatMap((item) =>
+      (item.moves ?? [])
+        .filter((mv) => moveHasEntries(item.id, mv.id))
+        .map((mv) => ({ item, mv })),
+    );
+    if (moves.length === 0) return null;
+    totalRendered += moves.length;
+    return (
+      <section key={cat}>
+        <h2 className="text-xs font-semibold tracking-widest uppercase text-zinc-500 mb-4">
+          {categoryLabels[cat]}
+        </h2>
+        <div className="space-y-3">
+          {moves.map(({ item, mv }) => (
+            <TrendChart
+              key={`${item.id}:${mv.id}`}
+              equipmentId={item.id}
+              moveId={mv.id}
+              moveName={`${mv.name} — ${item.name}`}
+              allEntries={allEntries}
+            />
+          ))}
+        </div>
+      </section>
+    );
+  });
+
+  if (totalRendered === 0) {
+    return (
+      <p className="text-sm text-zinc-400 text-center py-12">
+        No logged entries yet. Head to{" "}
+        <a href="/equipment" className="underline hover:text-zinc-700">
+          Equipment
+        </a>{" "}
+        and log a few weights to see trends here.
+      </p>
+    );
+  }
+
+  return <div className="space-y-12">{sections}</div>;
 }
