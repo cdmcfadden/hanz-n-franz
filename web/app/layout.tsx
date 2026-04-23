@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { TopNav } from "@/components/TopNav";
 import { EntriesProvider } from "@/contexts/EntriesContext";
+import { NotesProvider } from "@/contexts/NotesContext";
 import { UserProvider } from "@/contexts/UserContext";
 import "./globals.css";
 
@@ -50,8 +51,10 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col">
         <UserProvider>
           <EntriesProvider>
-            <TopNav />
-            {children}
+            <NotesProvider>
+              <TopNav />
+              {children}
+            </NotesProvider>
           </EntriesProvider>
         </UserProvider>
       </body>

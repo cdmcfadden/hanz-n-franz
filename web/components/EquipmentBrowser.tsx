@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { MoveLogger } from "@/components/MoveLogger";
 import { MuscleFilter } from "@/components/MuscleFilter";
+import { VoiceNoteButton } from "@/components/VoiceNoteButton";
 import { useEntries } from "@/contexts/EntriesContext";
 import {
   CATEGORIES,
@@ -144,7 +145,7 @@ function EquipmentRow({
 
   return (
     <li className="rounded-2xl bg-[var(--surface-soft)] ring-1 ring-[var(--ring)] p-4 sm:p-5">
-      {/* Header: name block on the left, clickable image anchored top-right */}
+      {/* Header: name + voice-note row on the left, clickable image top-right */}
       <header className="flex items-start justify-between gap-3 mb-4">
         <div className="min-w-0 pt-1">
           <h3 className="font-semibold text-white tracking-tight text-lg sm:text-xl truncate">
@@ -160,6 +161,7 @@ function EquipmentRow({
               ×{item.count} in gym
             </div>
           )}
+          <VoiceNoteButton equipmentId={item.id} />
         </div>
 
         <Link
