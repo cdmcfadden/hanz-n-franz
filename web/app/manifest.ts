@@ -13,13 +13,13 @@ export default function manifest(): MetadataRoute.Manifest {
     orientation: "portrait",
     icons: [
       {
-        src: "/hanz-icon.png",
+        src: "/cadet-icon.png",
         sizes: "192x192",
         type: "image/png",
         purpose: "any",
       },
       {
-        src: "/hanz.png",
+        src: "/cadet.png",
         sizes: "any",
         type: "image/png",
         purpose: "any",

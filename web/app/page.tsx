@@ -45,10 +45,10 @@ export default function Home() {
       <section className="mb-10 rounded-3xl overflow-hidden ring-1 ring-[var(--ring)] bg-black relative">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src="/hanz.png"
-          alt="Hanz and Franz logo"
-          width={980}
-          height={492}
+          src="/cadet.png"
+          alt="C.A.D.E.T. logo"
+          width={704}
+          height={564}
           className="w-full h-auto block"
         />
         <div className="px-5 py-4 border-t border-[var(--ring)]">

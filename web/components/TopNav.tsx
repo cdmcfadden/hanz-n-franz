@@ -27,7 +27,7 @@ export function TopNav() {
           <Link href="/" className="flex items-center gap-2.5 shrink-0">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src="/hanz-icon.png"
+              src="/cadet-icon.png"
               alt="C.A.D.E.T. logo"
               width={40}
               height={40}
