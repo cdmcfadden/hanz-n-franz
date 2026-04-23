@@ -79,6 +79,9 @@
     { "id": "squat_sled_pl", "name": "Plate-loaded squat / belt-squat sled", "count": 1, "confidence": "low", "muscles": ["quads", "glutes"], "moves": [
       { "id": "belt_squat", "name": "Belt squat" },
       { "id": "machine_squat", "name": "Machine squat" }
+    ] },
+    { "id": "lat_pullover", "name": "Lat pullover machine", "count": 1, "confidence": "high", "muscles": ["lats", "back"], "moves": [
+      { "id": "lat_pullover", "name": "Lat pullover" }
     ] }
   ],
   "selectorized_machines": [

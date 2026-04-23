@@ -4,19 +4,23 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import type { EquipmentData } from "@/lib/equipment";
 
+const isDev = process.env.NODE_ENV !== "production";
+
 let stringCache: string | null = null;
 let parsedCache: EquipmentData | null = null;
 
 export async function loadEquipmentJson(): Promise<string> {
-  if (stringCache) return stringCache;
+  if (!isDev && stringCache) return stringCache;
   const p = path.join(process.cwd(), "equipment.json");
-  stringCache = await readFile(p, "utf8");
-  return stringCache;
+  const raw = await readFile(p, "utf8");
+  stringCache = raw;
+  return raw;
 }
 
 export async function loadEquipmentData(): Promise<EquipmentData> {
-  if (parsedCache) return parsedCache;
+  if (!isDev && parsedCache) return parsedCache;
   const raw = await loadEquipmentJson();
-  parsedCache = JSON.parse(raw) as EquipmentData;
-  return parsedCache;
+  const parsed = JSON.parse(raw) as EquipmentData;
+  parsedCache = parsed;
+  return parsed;
 }

@@ -88,6 +88,7 @@ export const MOVE_GROUPS: Record<string, string[]> = {
   iso_pulldown: ["back", "arms"],
   belt_squat: ["legs"],
   machine_squat: ["legs"],
+  lat_pullover: ["back"],
 
   // Selectorized
   lat_pulldown: ["back", "arms"],
