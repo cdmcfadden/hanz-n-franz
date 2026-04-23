@@ -34,6 +34,38 @@ function getRecognitionCtor(): SRCtor | null {
 
 type Phase = "idle" | "listening" | "saving" | "error";
 
+function MicIcon({ className = "" }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden="true"
+    >
+      <rect x="9" y="2" width="6" height="12" rx="3" />
+      <path d="M5 11v1a7 7 0 0 0 14 0v-1" />
+      <line x1="12" y1="19" x2="12" y2="22" />
+    </svg>
+  );
+}
+
+function StopSquare({ className = "" }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className={className}
+      aria-hidden="true"
+      fill="currentColor"
+    >
+      <rect x="6" y="6" width="12" height="12" rx="1" />
+    </svg>
+  );
+}
+
 export function VoiceNoteButton({ equipmentId }: { equipmentId: string }) {
   const { getLatest, add } = useNotes();
   const latest = getLatest(equipmentId);
@@ -114,10 +146,7 @@ export function VoiceNoteButton({ equipmentId }: { equipmentId: string }) {
     return () => recognitionRef.current?.abort();
   }, []);
 
-  if (!supported) {
-    // Quietly hide on unsupported browsers — the rest of the card still works.
-    return null;
-  }
+  if (!supported) return null;
 
   return (
     <div className="mt-1.5 flex items-start gap-2">
@@ -133,9 +162,13 @@ export function VoiceNoteButton({ equipmentId }: { equipmentId: string }) {
         ].join(" ")}
         aria-label={phase === "listening" ? "Stop recording" : "Record a note"}
       >
-        <span aria-hidden="true">
-          {phase === "listening" ? "■" : phase === "saving" ? "…" : "●"}
-        </span>
+        {phase === "listening" ? (
+          <StopSquare className="w-3.5 h-3.5" />
+        ) : phase === "saving" ? (
+          <span aria-hidden="true">…</span>
+        ) : (
+          <MicIcon className="w-3.5 h-3.5" />
+        )}
         {phase === "listening"
           ? "Listening…"
           : phase === "saving"

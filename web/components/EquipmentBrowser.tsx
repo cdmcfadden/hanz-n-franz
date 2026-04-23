@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
+import { FormVideoButton } from "@/components/FormVideoButton";
 import { MoveLogger } from "@/components/MoveLogger";
 import { MuscleFilter } from "@/components/MuscleFilter";
 import { VoiceNoteButton } from "@/components/VoiceNoteButton";
@@ -152,6 +153,7 @@ function EquipmentRow({
             {item.name}
           </h3>
           <VoiceNoteButton equipmentId={item.id} />
+          <FormVideoButton equipmentName={item.name} />
         </div>
 
         <Link
