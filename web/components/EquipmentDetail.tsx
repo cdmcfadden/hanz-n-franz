@@ -4,7 +4,7 @@ import Link from "next/link";
 import { MoveLogger } from "@/components/MoveLogger";
 import type { EquipmentItem } from "@/lib/equipment";
 
-const IMG_VERSION = "2";
+const IMG_VERSION = "3";
 
 export function EquipmentDetail({
   item,
