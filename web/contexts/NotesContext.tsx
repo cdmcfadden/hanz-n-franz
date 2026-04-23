@@ -16,10 +16,12 @@ import {
   type Note,
 } from "@/lib/notes-store";
 import { useUser } from "@/contexts/UserContext";
+import { isTodayLocal } from "@/lib/log-store";
 
 type NotesContextValue = {
   loading: boolean;
   getLatest: (equipmentId: string) => Note | null;
+  hasNoteToday: (equipmentId: string) => boolean;
   add: (equipmentId: string, transcript: string) => Promise<Note>;
 };
 
@@ -54,6 +56,14 @@ export function NotesProvider({ children }: { children: ReactNode }) {
     [notes],
   );
 
+  const hasNoteToday = useCallback(
+    (equipmentId: string): boolean => {
+      const latest = notes.get(equipmentId);
+      return !!latest && isTodayLocal(latest.createdAt);
+    },
+    [notes],
+  );
+
   const add = useCallback(
     async (equipmentId: string, transcript: string): Promise<Note> => {
       const saved = await saveNote(currentUser.id, equipmentId, transcript);
@@ -68,8 +78,8 @@ export function NotesProvider({ children }: { children: ReactNode }) {
   );
 
   const value = useMemo(
-    () => ({ loading, getLatest, add }),
-    [loading, getLatest, add],
+    () => ({ loading, getLatest, hasNoteToday, add }),
+    [loading, getLatest, hasNoteToday, add],
   );
 
   return (

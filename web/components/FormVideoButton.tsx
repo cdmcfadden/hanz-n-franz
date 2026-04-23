@@ -47,8 +47,8 @@ export function FormVideoButton({
   equipmentId: string;
   equipmentName: string;
 }) {
-  const { hasVideo, saveVideo } = useVideos();
-  const captured = hasVideo(equipmentId);
+  const { hasVideoToday, saveVideo } = useVideos();
+  const captured = hasVideoToday(equipmentId);
 
   const [open, setOpen] = useState(false);
   const [phase, setPhase] = useState<Phase>("idle");

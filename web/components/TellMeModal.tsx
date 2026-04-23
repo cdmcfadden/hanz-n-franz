@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useNotes } from "@/contexts/NotesContext";
+import { isTodayLocal } from "@/lib/log-store";
 
 type SRResult = { transcript: string };
 type SREvent = {
@@ -43,11 +44,17 @@ export function TellMeModal({
 }) {
   const { getLatest, add } = useNotes();
   const existing = getLatest(equipmentId);
+  const existingIsToday = !!existing && isTodayLocal(existing.createdAt);
 
-  const [phase, setPhase] = useState<Phase>(existing ? "review" : "ready");
+  // Only open in "review" shortcut if the latest note is from today.
+  // Otherwise start fresh, but we still surface the prior summary as context.
+  const [phase, setPhase] = useState<Phase>(existingIsToday ? "review" : "ready");
   const [interim, setInterim] = useState("");
   const [savedSummary, setSavedSummary] = useState<string | null>(
-    existing?.summary ?? null,
+    existingIsToday ? existing!.summary : null,
+  );
+  const [priorSummary] = useState<string | null>(
+    !existingIsToday && existing ? existing.summary : null,
   );
   const [err, setErr] = useState<string | null>(null);
 
@@ -142,19 +149,19 @@ export function TellMeModal({
         </header>
 
         <div className="min-h-[8rem] mb-5">
-          {phase === "ready" && !savedSummary && (
+          {phase === "ready" && !priorSummary && (
             <p className="text-sm text-neutral-400">
               Tap record and describe what you did on this machine.
             </p>
           )}
-          {phase === "ready" && savedSummary && (
+          {phase === "ready" && priorSummary && (
             <div>
               <div className="text-xs uppercase tracking-widest text-neutral-500 mb-1">
-                Previous note
+                Last time
               </div>
-              <p className="text-sm text-neutral-300">{savedSummary}</p>
+              <p className="text-sm text-neutral-400">{priorSummary}</p>
               <p className="text-xs text-neutral-500 mt-3">
-                Recording again replaces this with the new one.
+                Record a fresh note for today.
               </p>
             </div>
           )}
@@ -199,7 +206,7 @@ export function TellMeModal({
             Cancel
           </button>
           <div className="flex items-center gap-2">
-            {(phase === "ready" || phase === "review") && savedSummary && (
+            {phase === "review" && savedSummary && (
               <button
                 onClick={start}
                 className="text-sm text-neutral-300 hover:text-white px-3 py-2 rounded-lg ring-1 ring-[var(--ring)]"
@@ -207,7 +214,7 @@ export function TellMeModal({
                 Re-record
               </button>
             )}
-            {phase === "ready" && !savedSummary && (
+            {phase === "ready" && (
               <button
                 onClick={start}
                 className="inline-flex items-center gap-2 bg-sky-300 text-sky-950 text-sm font-semibold px-4 py-2 rounded-lg hover:bg-sky-200"

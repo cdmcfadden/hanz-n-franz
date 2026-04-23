@@ -11,15 +11,17 @@ import {
   type ReactNode,
 } from "react";
 import {
-  fetchVideoEquipmentIds,
+  fetchLatestVideoMap,
   uploadAndRecordVideo,
   type VideoMeta,
 } from "@/lib/videos-store";
 import { useUser } from "@/contexts/UserContext";
+import { isTodayLocal } from "@/lib/log-store";
 
 type VideosContextValue = {
   loading: boolean;
-  hasVideo: (equipmentId: string) => boolean;
+  hasVideoToday: (equipmentId: string) => boolean;
+  getLatest: (equipmentId: string) => VideoMeta | null;
   saveVideo: (args: {
     equipmentId: string;
     blob: Blob;
@@ -32,7 +34,7 @@ const VideosContext = createContext<VideosContextValue | null>(null);
 
 export function VideosProvider({ children }: { children: ReactNode }) {
   const { currentUser, hydrated: userHydrated } = useUser();
-  const [ids, setIds] = useState<Set<string>>(() => new Set());
+  const [latest, setLatest] = useState<Map<string, VideoMeta>>(() => new Map());
   const [loading, setLoading] = useState(true);
   const reqId = useRef(0);
 
@@ -40,10 +42,10 @@ export function VideosProvider({ children }: { children: ReactNode }) {
     if (!userHydrated) return;
     const myReq = ++reqId.current;
     setLoading(true);
-    fetchVideoEquipmentIds(currentUser.id)
-      .then((s) => {
+    fetchLatestVideoMap(currentUser.id)
+      .then((m) => {
         if (reqId.current === myReq) {
-          setIds(s);
+          setLatest(m);
           setLoading(false);
         }
       })
@@ -52,9 +54,18 @@ export function VideosProvider({ children }: { children: ReactNode }) {
       });
   }, [currentUser.id, userHydrated]);
 
-  const hasVideo = useCallback(
-    (equipmentId: string) => ids.has(equipmentId),
-    [ids],
+  const getLatest = useCallback(
+    (equipmentId: string): VideoMeta | null =>
+      latest.get(equipmentId) ?? null,
+    [latest],
+  );
+
+  const hasVideoToday = useCallback(
+    (equipmentId: string): boolean => {
+      const v = latest.get(equipmentId);
+      return !!v && isTodayLocal(v.createdAt);
+    },
+    [latest],
   );
 
   const saveVideo = useCallback(
@@ -68,9 +79,9 @@ export function VideosProvider({ children }: { children: ReactNode }) {
         userId: currentUser.id,
         ...args,
       });
-      setIds((prev) => {
-        const next = new Set(prev);
-        next.add(args.equipmentId);
+      setLatest((prev) => {
+        const next = new Map(prev);
+        next.set(args.equipmentId, saved);
         return next;
       });
       return saved;
@@ -79,8 +90,8 @@ export function VideosProvider({ children }: { children: ReactNode }) {
   );
 
   const value = useMemo(
-    () => ({ loading, hasVideo, saveVideo }),
-    [loading, hasVideo, saveVideo],
+    () => ({ loading, hasVideoToday, getLatest, saveVideo }),
+    [loading, hasVideoToday, getLatest, saveVideo],
   );
 
   return (

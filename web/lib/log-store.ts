@@ -131,4 +131,17 @@ export function todayISO(): string {
   return `${y}-${m}-${day}`;
 }
 
+// Returns true if the given ISO timestamp falls on the same calendar day as
+// "now" in the browser's local timezone. Used to scope "captured today"
+// indicators.
+export function isTodayLocal(iso: string | null | undefined): boolean {
+  if (!iso) return false;
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return false;
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}` === todayISO();
+}
+
 export const keys = { moveKey, userMoveKey };

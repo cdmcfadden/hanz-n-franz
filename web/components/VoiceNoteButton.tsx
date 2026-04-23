@@ -47,8 +47,8 @@ export function VoiceNoteButton({
   equipmentId: string;
   equipmentName: string;
 }) {
-  const { getLatest } = useNotes();
-  const captured = !!getLatest(equipmentId);
+  const { hasNoteToday } = useNotes();
+  const captured = hasNoteToday(equipmentId);
   const [open, setOpen] = useState(false);
   const [supported, setSupported] = useState(true);
 
