@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { useState } from "react";
+import { TopNav } from "@/components/TopNav";
 import type { Workout } from "@/lib/schema";
 
 type Goal = "strength" | "hypertrophy" | "conditioning" | "general";
@@ -41,124 +41,136 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100">
-      <main className="mx-auto max-w-2xl px-6 py-12">
-        <header className="mb-8">
-          <h1 className="text-3xl font-semibold tracking-tight">
+    <main className="mx-auto max-w-2xl px-4 sm:px-6 py-4 sm:py-6">
+      <TopNav active="workout" />
+
+      {/* Hero with the brand banner — sets the tone the moment the page loads */}
+      <section className="mt-6 mb-8 rounded-2xl overflow-hidden ring-1 ring-violet-800/60 bg-gradient-to-b from-violet-950 to-[var(--bg-elev)]">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/max.png"
+          alt="Max — Hanz and Franz flexing"
+          className="w-full h-auto block"
+        />
+        <div className="px-4 py-3 border-t border-violet-900/60">
+          <h1 className="text-base font-semibold tracking-tight text-violet-50">
             Daily workout
           </h1>
-          <p className="text-sm text-zinc-500 mt-1">
+          <p className="text-xs text-violet-300/80 mt-0.5">
             Generated around the equipment at your gym.
           </p>
-          <nav className="mt-5 flex items-center gap-1 text-sm">
-            <span className="px-3 py-1.5 rounded-full bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 font-medium">
-              Workout
-            </span>
-            <Link
-              href="/equipment"
-              className="px-3 py-1.5 rounded-full text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition"
+        </div>
+      </section>
+
+      <div className="rounded-2xl bg-[var(--surface-soft)] p-5 ring-1 ring-violet-800/40 backdrop-blur-sm">
+        <div className="grid grid-cols-2 gap-3 mb-4">
+          <Field label="Goal">
+            <select
+              className="form-control"
+              value={goal}
+              onChange={(e) => setGoal(e.target.value as Goal)}
             >
-              Equipment
-            </Link>
-            <Link
-              href="/trends"
-              className="px-3 py-1.5 rounded-full text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition"
+              <option value="general">General</option>
+              <option value="strength">Strength</option>
+              <option value="hypertrophy">Hypertrophy</option>
+              <option value="conditioning">Conditioning</option>
+            </select>
+          </Field>
+          <Field label="Fatigue">
+            <select
+              className="form-control"
+              value={fatigue}
+              onChange={(e) => setFatigue(e.target.value as Fatigue)}
             >
-              Trends
-            </Link>
-          </nav>
-        </header>
-
-        <div className="rounded-2xl bg-white dark:bg-zinc-900 p-5 ring-1 ring-zinc-200/70 dark:ring-zinc-800 shadow-sm">
-          <div className="grid grid-cols-2 gap-3 mb-4">
-            <Field label="Goal">
-              <select
-                className="w-full text-sm rounded-md border-0 ring-1 ring-zinc-200 dark:ring-zinc-700 bg-white dark:bg-zinc-900 px-2.5 py-2 focus:ring-2 focus:ring-zinc-900 dark:focus:ring-zinc-300 focus:outline-none"
-                value={goal}
-                onChange={(e) => setGoal(e.target.value as Goal)}
-              >
-                <option value="general">General</option>
-                <option value="strength">Strength</option>
-                <option value="hypertrophy">Hypertrophy</option>
-                <option value="conditioning">Conditioning</option>
-              </select>
-            </Field>
-            <Field label="Fatigue">
-              <select
-                className="w-full text-sm rounded-md border-0 ring-1 ring-zinc-200 dark:ring-zinc-700 bg-white dark:bg-zinc-900 px-2.5 py-2 focus:ring-2 focus:ring-zinc-900 dark:focus:ring-zinc-300 focus:outline-none"
-                value={fatigue}
-                onChange={(e) => setFatigue(e.target.value as Fatigue)}
-              >
-                <option value="fresh">Fresh</option>
-                <option value="moderate">Moderate</option>
-                <option value="tired">Tired</option>
-              </select>
-            </Field>
-            <Field label="Minutes">
-              <input
-                type="number"
-                min={20}
-                max={120}
-                className="w-full text-sm rounded-md border-0 ring-1 ring-zinc-200 dark:ring-zinc-700 bg-white dark:bg-zinc-900 px-2.5 py-2 focus:ring-2 focus:ring-zinc-900 dark:focus:ring-zinc-300 focus:outline-none"
-                value={minutes}
-                onChange={(e) => setMinutes(parseInt(e.target.value) || 60)}
-              />
-            </Field>
-            <Field label="Focus hint">
-              <input
-                type="text"
-                placeholder="legs, upper push…"
-                className="w-full text-sm rounded-md border-0 ring-1 ring-zinc-200 dark:ring-zinc-700 bg-white dark:bg-zinc-900 px-2.5 py-2 focus:ring-2 focus:ring-zinc-900 dark:focus:ring-zinc-300 focus:outline-none"
-                value={focusHint}
-                onChange={(e) => setFocusHint(e.target.value)}
-              />
-            </Field>
-          </div>
-
-          <button
-            onClick={generate}
-            disabled={loading}
-            className="w-full bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 py-2.5 rounded-lg font-medium hover:opacity-90 disabled:opacity-40 transition"
-          >
-            {loading ? "Generating…" : "Generate today's workout"}
-          </button>
-
-          {error && (
-            <p className="mt-4 text-sm text-red-600">Error: {error}</p>
-          )}
+              <option value="fresh">Fresh</option>
+              <option value="moderate">Moderate</option>
+              <option value="tired">Tired</option>
+            </select>
+          </Field>
+          <Field label="Minutes">
+            <input
+              type="number"
+              min={20}
+              max={120}
+              className="form-control"
+              value={minutes}
+              onChange={(e) => setMinutes(parseInt(e.target.value) || 60)}
+            />
+          </Field>
+          <Field label="Focus hint">
+            <input
+              type="text"
+              placeholder="legs, upper push…"
+              className="form-control"
+              value={focusHint}
+              onChange={(e) => setFocusHint(e.target.value)}
+            />
+          </Field>
         </div>
 
-        {workout && (
-          <section className="mt-10 space-y-6">
-            <header>
-              <h2 className="text-2xl font-semibold tracking-tight">
-                {workout.title}
-              </h2>
-              <p className="text-sm text-zinc-500">
-                {workout.focus} · ~{workout.estimated_minutes} min
-              </p>
-            </header>
+        <button
+          onClick={generate}
+          disabled={loading}
+          className="w-full bg-violet-500 hover:bg-violet-400 text-white py-2.5 rounded-lg font-medium disabled:opacity-40 transition shadow-sm shadow-violet-900/40"
+        >
+          {loading ? "Generating…" : "Generate today's workout"}
+        </button>
 
-            <Block title="Warm-up" items={workout.warmup} />
-            <Block title="Main" items={workout.main} />
-            {workout.finisher && workout.finisher.length > 0 && (
-              <Block title="Finisher" items={workout.finisher} />
-            )}
-
-            <p className="text-sm italic text-zinc-600 dark:text-zinc-400 border-l-2 border-zinc-300 dark:border-zinc-700 pl-3">
-              {workout.coach_note}
-            </p>
-          </section>
+        {error && (
+          <p className="mt-4 text-sm text-rose-300">Error: {error}</p>
         )}
-      </main>
-    </div>
+      </div>
+
+      {workout && (
+        <section className="mt-10 space-y-6">
+          <header>
+            <h2 className="text-2xl font-semibold tracking-tight text-violet-50">
+              {workout.title}
+            </h2>
+            <p className="text-sm text-violet-300/80">
+              {workout.focus} · ~{workout.estimated_minutes} min
+            </p>
+          </header>
+
+          <Block title="Warm-up" items={workout.warmup} />
+          <Block title="Main" items={workout.main} />
+          {workout.finisher && workout.finisher.length > 0 && (
+            <Block title="Finisher" items={workout.finisher} />
+          )}
+
+          <p className="text-sm italic text-violet-300/80 border-l-2 border-violet-700 pl-3">
+            {workout.coach_note}
+          </p>
+        </section>
+      )}
+
+      <style jsx>{`
+        .form-control {
+          width: 100%;
+          font-size: 0.875rem;
+          border-radius: 0.375rem;
+          border: 0;
+          box-shadow: 0 0 0 1px rgba(76, 42, 122, 0.6);
+          background: rgba(20, 8, 45, 0.6);
+          color: var(--text);
+          padding: 0.5rem 0.625rem;
+        }
+        .form-control:focus {
+          outline: none;
+          box-shadow: 0 0 0 2px var(--accent);
+        }
+        .form-control::placeholder {
+          color: var(--text-faint);
+        }
+      `}</style>
+    </main>
   );
 }
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="text-sm">
-      <span className="block text-xs font-medium text-zinc-500 mb-1">
+      <span className="block text-xs font-medium text-violet-400 mb-1 uppercase tracking-wider">
         {label}
       </span>
       {children}
@@ -175,25 +187,23 @@ function Block({
 }) {
   return (
     <div>
-      <h3 className="text-xs font-semibold tracking-widest uppercase text-zinc-500 mb-3">
+      <h3 className="text-xs font-semibold tracking-widest uppercase text-violet-400 mb-3">
         {title}
       </h3>
       <ol className="space-y-2">
         {items.map((ex, i) => (
           <li
             key={i}
-            className="rounded-xl bg-white dark:bg-zinc-900 p-3 text-sm ring-1 ring-zinc-200/70 dark:ring-zinc-800 shadow-sm"
+            className="rounded-xl bg-[var(--surface-soft)] p-3 text-sm ring-1 ring-violet-800/40"
           >
-            <div className="font-medium">{ex.name}</div>
-            <div className="text-zinc-500 text-xs mb-1">{ex.equipment}</div>
-            <div className="tabular-nums">
+            <div className="font-medium text-violet-50">{ex.name}</div>
+            <div className="text-violet-400 text-xs mb-1">{ex.equipment}</div>
+            <div className="tabular-nums text-violet-200">
               {ex.sets} × {ex.reps}
-              <span className="text-zinc-500"> · rest {ex.rest_seconds}s</span>
+              <span className="text-violet-500"> · rest {ex.rest_seconds}s</span>
             </div>
             {ex.notes && (
-              <div className="text-zinc-600 dark:text-zinc-400 mt-1">
-                {ex.notes}
-              </div>
+              <div className="text-violet-300/80 mt-1">{ex.notes}</div>
             )}
           </li>
         ))}

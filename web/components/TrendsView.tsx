@@ -34,14 +34,14 @@ export function TrendsView({
 
   if (loading) {
     return (
-      <p className="text-sm text-zinc-400 text-center py-12">
+      <p className="text-sm text-violet-400 text-center py-12">
         Loading entries…
       </p>
     );
   }
   if (error) {
     return (
-      <p className="text-sm text-red-600 text-center py-12">
+      <p className="text-sm text-rose-300 text-center py-12">
         Could not load entries: {error}
       </p>
     );
@@ -68,7 +68,7 @@ export function TrendsView({
     totalRendered += moves.length;
     return (
       <section key={cat}>
-        <h2 className="text-xs font-semibold tracking-widest uppercase text-zinc-500 mb-4">
+        <h2 className="text-xs font-semibold tracking-widest uppercase text-violet-400 mb-4">
           {categoryLabels[cat]}
         </h2>
         <div className="space-y-3">
@@ -88,9 +88,9 @@ export function TrendsView({
 
   if (totalRendered === 0) {
     return (
-      <p className="text-sm text-zinc-400 text-center py-12">
+      <p className="text-sm text-violet-400 text-center py-12">
         No logged entries yet. Head to{" "}
-        <a href="/equipment" className="underline hover:text-zinc-700">
+        <a href="/equipment" className="underline hover:text-violet-100">
           Equipment
         </a>{" "}
         and log a few weights to see trends here.

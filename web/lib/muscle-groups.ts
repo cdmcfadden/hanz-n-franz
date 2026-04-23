@@ -9,26 +9,26 @@ export type MuscleGroup = {
   dotClass: string;
 };
 
-// Muted, editorial palette — darker shades (700-900) so chips read as
-// sophisticated tags rather than candy buttons. Each group still has a unique
-// hue for quick scanning, but saturation is dialed back.
+// Palette tuned for the deep purple "Max" theme. Each group keeps a unique
+// accent so they're scannable, but the hues are pushed cooler/darker so they
+// sit well against an aubergine background.
 export const MUSCLE_GROUPS: readonly MuscleGroup[] = [
   { id: "chest", label: "Chest", muscles: ["chest", "upper chest", "lower chest"],
-    activeBg: "bg-rose-900", activeText: "text-rose-50", dotClass: "bg-rose-800" },
+    activeBg: "bg-pink-700", activeText: "text-pink-50", dotClass: "bg-pink-500" },
   { id: "back", label: "Back", muscles: ["back", "lats", "rhomboids"],
-    activeBg: "bg-slate-700", activeText: "text-slate-50", dotClass: "bg-slate-600" },
+    activeBg: "bg-sky-800", activeText: "text-sky-50", dotClass: "bg-sky-500" },
   { id: "shoulders", label: "Shoulders", muscles: ["shoulders", "front delts", "rear delts"],
-    activeBg: "bg-amber-800", activeText: "text-amber-50", dotClass: "bg-amber-700" },
+    activeBg: "bg-amber-700", activeText: "text-amber-50", dotClass: "bg-amber-500" },
   { id: "arms", label: "Arms", muscles: ["biceps", "triceps", "brachialis", "grip"],
-    activeBg: "bg-indigo-900", activeText: "text-indigo-50", dotClass: "bg-indigo-700" },
+    activeBg: "bg-fuchsia-700", activeText: "text-fuchsia-50", dotClass: "bg-fuchsia-500" },
   { id: "legs", label: "Legs", muscles: ["legs", "quads", "hamstrings", "calves", "glutes", "glute medius", "adductors"],
-    activeBg: "bg-emerald-900", activeText: "text-emerald-50", dotClass: "bg-emerald-800" },
+    activeBg: "bg-teal-700", activeText: "text-teal-50", dotClass: "bg-teal-500" },
   { id: "core", label: "Core", muscles: ["abs", "core"],
-    activeBg: "bg-orange-900", activeText: "text-orange-50", dotClass: "bg-orange-800" },
+    activeBg: "bg-orange-700", activeText: "text-orange-50", dotClass: "bg-orange-500" },
   { id: "cardio", label: "Cardio", muscles: ["cardio"],
-    activeBg: "bg-red-900", activeText: "text-red-50", dotClass: "bg-red-800" },
+    activeBg: "bg-rose-700", activeText: "text-rose-50", dotClass: "bg-rose-500" },
   { id: "fullbody", label: "Full-body", muscles: ["full-body power", "varies"],
-    activeBg: "bg-stone-700", activeText: "text-stone-50", dotClass: "bg-stone-600" },
+    activeBg: "bg-violet-700", activeText: "text-violet-50", dotClass: "bg-violet-400" },
 ];
 
 export const GROUP_BY_ID: Record<string, MuscleGroup> = Object.fromEntries(

@@ -2,20 +2,26 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Hanz n Franz",
-    short_name: "Hanz n Franz",
+    name: "Max (by Hanz and Franz)",
+    short_name: "Max",
     description:
-      "Daily workouts + per-move weight tracking for your gym's equipment.",
-    start_url: "/equipment",
+      "Daily workouts and per-move weight tracking for your gym's equipment.",
+    start_url: "/",
     display: "standalone",
-    background_color: "#fafafa",
-    theme_color: "#09090b",
+    background_color: "#16092e",
+    theme_color: "#16092e",
     orientation: "portrait",
     icons: [
       {
-        src: "/users/chris.jpg",
+        src: "/max-icon.png",
+        sizes: "192x192",
+        type: "image/png",
+        purpose: "any",
+      },
+      {
+        src: "/max.png",
         sizes: "any",
-        type: "image/jpeg",
+        type: "image/png",
         purpose: "any",
       },
     ],

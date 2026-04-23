@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { TopNav } from "@/components/TopNav";
 import { TrendsView } from "@/components/TrendsView";
 import {
   CATEGORIES,
@@ -18,46 +18,27 @@ export default async function TrendsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100">
-      <main className="mx-auto max-w-3xl px-4 sm:px-6 py-8 sm:py-10">
-        <header className="mb-8">
-          <Link
-            href="/"
-            className="text-xs text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
-          >
-            ← Workout generator
-          </Link>
+    <main className="mx-auto max-w-3xl px-4 sm:px-6 py-4 sm:py-6">
+      <TopNav active="trends" />
 
-          <div className="mt-3">
-            <h1 className="text-3xl font-semibold tracking-tight">Trends</h1>
-            <p className="text-sm text-zinc-500 mt-1 flex items-center gap-3 flex-wrap">
-              <span className="inline-flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-blue-600" />
-                David
-              </span>
-              <span className="inline-flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-red-600" />
-                Chris
-              </span>
-              <span className="text-zinc-400">— overlaid per move</span>
-            </p>
-          </div>
+      <div className="mt-6 mb-6">
+        <h1 className="text-xl sm:text-2xl font-semibold tracking-tight text-violet-50">
+          Trends
+        </h1>
+        <p className="text-sm text-violet-300/80 mt-1 flex items-center gap-3 flex-wrap">
+          <span className="inline-flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-blue-500" />
+            David
+          </span>
+          <span className="inline-flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-pink-500" />
+            Chris
+          </span>
+          <span className="text-violet-500">— overlaid per move</span>
+        </p>
+      </div>
 
-          <nav className="mt-5 flex items-center gap-1 text-sm">
-            <Link
-              href="/equipment"
-              className="px-3 py-1.5 rounded-full text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition"
-            >
-              Equipment
-            </Link>
-            <span className="px-3 py-1.5 rounded-full bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 font-medium">
-              Trends
-            </span>
-          </nav>
-        </header>
-
-        <TrendsView itemsByCategory={itemsByCategory} />
-      </main>
-    </div>
+      <TrendsView itemsByCategory={itemsByCategory} />
+    </main>
   );
 }

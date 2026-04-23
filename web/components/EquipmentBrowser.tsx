@@ -103,7 +103,7 @@ export function EquipmentBrowser({
 
   return (
     <>
-      <div className="sticky top-0 z-10 -mx-4 sm:-mx-6 px-4 sm:px-6 pt-2 pb-1 bg-zinc-50/80 dark:bg-zinc-950/80 backdrop-blur-md">
+      <div className="sticky top-[5.5rem] z-10 -mx-4 sm:-mx-6 px-4 sm:px-6 pt-2 pb-1 bg-[var(--bg)]/85 backdrop-blur-md">
         <MuscleFilter
           selected={selected}
           onToggle={toggle}
@@ -115,12 +115,12 @@ export function EquipmentBrowser({
       </div>
 
       {shown === 0 && (
-        <div className="text-center py-16 text-zinc-400">
+        <div className="text-center py-16 text-violet-400">
           <div className="text-4xl mb-2">·</div>
           <p className="text-sm">No equipment matches the selected filters.</p>
           <button
             onClick={() => setSelected(new Set(ALL_GROUP_IDS))}
-            className="mt-3 text-xs text-zinc-600 dark:text-zinc-300 hover:underline"
+            className="mt-3 text-xs text-violet-200 hover:underline"
           >
             Reset filters
           </button>
@@ -133,9 +133,9 @@ export function EquipmentBrowser({
           if (!list || list.length === 0) return null;
           return (
             <section key={cat}>
-              <h2 className="text-xs font-semibold tracking-widest uppercase text-zinc-500 mb-4">
+              <h2 className="text-xs font-semibold tracking-widest uppercase text-violet-400 mb-4">
                 {categoryLabels[cat]}
-                <span className="ml-2 normal-case font-normal tracking-normal text-zinc-400">
+                <span className="ml-2 normal-case font-normal tracking-normal text-violet-500">
                   · {list.length}
                 </span>
               </h2>
@@ -171,8 +171,8 @@ function EquipmentRow({
   const hidden = totalMoves - visibleMoves.length;
 
   return (
-    <li className="flex gap-3 sm:gap-4 rounded-2xl bg-white dark:bg-zinc-900 p-3 sm:p-4 ring-1 ring-zinc-200/70 dark:ring-zinc-800 shadow-sm hover:shadow-md hover:ring-zinc-300 dark:hover:ring-zinc-700 transition">
-      <div className="shrink-0 w-20 h-20 sm:w-28 sm:h-28 rounded-xl overflow-hidden bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center ring-1 ring-zinc-200/70 dark:ring-zinc-700/60">
+    <li className="flex gap-3 sm:gap-4 rounded-2xl bg-[var(--surface-soft)] p-3 sm:p-4 ring-1 ring-violet-800/40 shadow-sm hover:ring-violet-700/60 hover:bg-[var(--surface)]/60 transition">
+      <div className="shrink-0 w-20 h-20 sm:w-28 sm:h-28 rounded-xl overflow-hidden bg-violet-950/60 flex items-center justify-center ring-1 ring-violet-800/40">
         {hasImage ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -183,7 +183,7 @@ function EquipmentRow({
             className="w-full h-full object-cover"
           />
         ) : (
-          <span className="text-[10px] text-zinc-400 text-center px-1">
+          <span className="text-[10px] text-violet-400 text-center px-1">
             no photo
           </span>
         )}
@@ -192,15 +192,15 @@ function EquipmentRow({
       <div className="flex-1 min-w-0">
         <div className="flex items-baseline justify-between gap-3">
           <div className="min-w-0">
-            <h3 className="font-semibold text-zinc-900 dark:text-zinc-100 truncate tracking-tight">
+            <h3 className="font-semibold text-violet-50 truncate tracking-tight">
               {item.name}
             </h3>
             {item.brand_guess && (
-              <div className="text-xs text-zinc-400">{item.brand_guess}</div>
+              <div className="text-xs text-violet-400">{item.brand_guess}</div>
             )}
           </div>
           {item.count !== undefined && (
-            <span className="text-xs font-medium text-zinc-500 whitespace-nowrap tabular-nums">
+            <span className="text-xs font-medium text-violet-400 whitespace-nowrap tabular-nums">
               ×{item.count}
             </span>
           )}
@@ -214,7 +214,7 @@ function EquipmentRow({
               return (
                 <span
                   key={gid}
-                  className="inline-flex items-center gap-1 text-[11px] font-medium text-zinc-600 dark:text-zinc-300"
+                  className="inline-flex items-center gap-1 text-[11px] font-medium text-violet-300"
                 >
                   <span
                     className={`w-1.5 h-1.5 rounded-full ${g.dotClass}`}
@@ -237,7 +237,7 @@ function EquipmentRow({
               />
             ))}
             {hidden > 0 && (
-              <p className="text-[11px] text-zinc-400 italic pl-1">
+              <p className="text-[11px] text-violet-500 italic pl-1">
                 +{hidden} other {hidden === 1 ? "move" : "moves"} hidden by
                 filter
               </p>

@@ -18,7 +18,7 @@ export function MuscleFilter({
   total: number;
 }) {
   return (
-    <div className="rounded-xl bg-white/80 dark:bg-zinc-900/80 ring-1 ring-zinc-200/70 dark:ring-zinc-800 backdrop-blur-md shadow-sm p-4 mb-8">
+    <div className="rounded-xl bg-[var(--surface-soft)] ring-1 ring-violet-800/40 backdrop-blur-md shadow-lg shadow-violet-950/40 p-4 mb-8">
       <div className="flex flex-wrap gap-2 mb-3">
         {MUSCLE_GROUPS.map((g) => {
           const active = selected.has(g.id);
@@ -31,7 +31,7 @@ export function MuscleFilter({
                 "inline-flex items-center gap-1.5 text-sm font-medium px-3 py-1.5 rounded-full transition",
                 active
                   ? `${g.activeBg} ${g.activeText} shadow-sm hover:opacity-90`
-                  : "bg-zinc-100 dark:bg-zinc-800 text-zinc-500 hover:bg-zinc-200 dark:hover:bg-zinc-700 ring-1 ring-zinc-200 dark:ring-zinc-700",
+                  : "bg-violet-900/40 text-violet-300 hover:bg-violet-900/70 hover:text-violet-100 ring-1 ring-violet-800/60",
               ].join(" ")}
             >
               <span
@@ -48,20 +48,18 @@ export function MuscleFilter({
       <div className="flex items-center gap-4 text-xs">
         <button
           onClick={onSelectAll}
-          className="text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 hover:underline"
+          className="text-violet-400 hover:text-violet-100 hover:underline"
         >
           Select all
         </button>
         <button
           onClick={onClearAll}
-          className="text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 hover:underline"
+          className="text-violet-400 hover:text-violet-100 hover:underline"
         >
           Clear all
         </button>
-        <span className="ml-auto tabular-nums text-zinc-500">
-          <span className="font-medium text-zinc-900 dark:text-zinc-100">
-            {shown}
-          </span>
+        <span className="ml-auto tabular-nums text-violet-400">
+          <span className="font-medium text-violet-100">{shown}</span>
           {" / "}
           {total} items
         </span>

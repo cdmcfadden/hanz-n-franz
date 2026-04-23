@@ -27,7 +27,7 @@ export function ResetButton() {
     <button
       onClick={reset}
       disabled={busy}
-      className="text-xs text-zinc-400 hover:text-red-500 hover:underline disabled:opacity-50"
+      className="text-xs text-violet-400 hover:text-rose-300 hover:underline disabled:opacity-50"
     >
       {busy ? "Clearing…" : "Clear all logs"}
     </button>

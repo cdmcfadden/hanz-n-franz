@@ -4,8 +4,8 @@ import { type EntryMap, type LogEntry, keys } from "@/lib/log-store";
 import { USERS } from "@/lib/users";
 
 const COLORS: Record<string, string> = {
-  david: "#2563eb",
-  chris: "#dc2626",
+  david: "#60a5fa", // sky-400 — readable on dark purple
+  chris: "#f472b6", // pink-400 — readable on dark purple
 };
 
 export function TrendChart({
@@ -27,9 +27,9 @@ export function TrendChart({
   const hasAny = Object.values(series).some((s) => s.length > 0);
 
   return (
-    <div className="rounded-2xl bg-white dark:bg-zinc-900 p-4 ring-1 ring-zinc-200/70 dark:ring-zinc-800 shadow-sm hover:shadow-md transition">
+    <div className="rounded-2xl bg-[var(--surface-soft)] p-4 ring-1 ring-violet-800/40 shadow-sm hover:ring-violet-700/60 transition">
       <div className="flex items-baseline justify-between gap-3 mb-3 flex-wrap">
-        <h3 className="text-sm font-medium text-zinc-900 dark:text-zinc-100 truncate">
+        <h3 className="text-sm font-medium text-violet-50 truncate">
           {moveName}
         </h3>
         <div className="flex gap-3 text-[11px] tabular-nums shrink-0">
@@ -45,14 +45,16 @@ export function TrendChart({
                   className="inline-block w-2 h-2 rounded-full"
                   style={{ background: COLORS[u.id] }}
                 />
-                <span className="text-zinc-500">{u.name.split(" ")[0]}:</span>
+                <span className="text-violet-400">{u.name.split(" ")[0]}:</span>
                 {latest ? (
                   <>
-                    <span className="font-medium">{latest.weight} lb</span>
+                    <span className="font-medium text-violet-100">
+                      {latest.weight} lb
+                    </span>
                     {delta !== 0 && (
                       <span
                         className={
-                          delta > 0 ? "text-emerald-600" : "text-orange-600"
+                          delta > 0 ? "text-teal-300" : "text-orange-300"
                         }
                       >
                         ({delta > 0 ? "+" : ""}
@@ -61,7 +63,7 @@ export function TrendChart({
                     )}
                   </>
                 ) : (
-                  <span className="text-zinc-400">—</span>
+                  <span className="text-violet-500">—</span>
                 )}
               </span>
             );
@@ -72,7 +74,7 @@ export function TrendChart({
       {hasAny ? (
         <Chart series={series} />
       ) : (
-        <p className="text-xs text-zinc-400 italic py-4 text-center">
+        <p className="text-xs text-violet-500 italic py-4 text-center">
           no entries yet
         </p>
       )}

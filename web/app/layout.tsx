@@ -13,25 +13,22 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Hanz n Franz",
+  title: "Max (by Hanz and Franz)",
   description:
-    "Daily workouts and per-move weight tracking, built around the equipment at your gym.",
+    "Daily workouts and per-move weight tracking for the equipment at your gym.",
   appleWebApp: {
     capable: true,
-    title: "Hanz n Franz",
+    title: "Max",
     statusBarStyle: "black-translucent",
   },
   icons: {
-    icon: "/favicon.ico",
-    apple: "/users/chris.jpg",
+    icon: "/max-icon.png",
+    apple: "/max-icon.png",
   },
 };
 
 export const viewport: Viewport = {
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#fafafa" },
-    { media: "(prefers-color-scheme: dark)", color: "#09090b" },
-  ],
+  themeColor: "#16092e",
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
@@ -47,9 +44,7 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-zinc-50 dark:bg-zinc-950">
-        {children}
-      </body>
+      <body className="min-h-full flex flex-col">{children}</body>
     </html>
   );
 }

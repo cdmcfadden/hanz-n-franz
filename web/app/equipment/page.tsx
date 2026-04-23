@@ -1,11 +1,11 @@
 import { readdirSync } from "node:fs";
 import path from "node:path";
-import Link from "next/link";
 import {
   EquipmentBrowser,
   type ItemsByCategory,
 } from "@/components/EquipmentBrowser";
 import { ResetButton } from "@/components/ResetButton";
+import { TopNav } from "@/components/TopNav";
 import { UserSwitcher } from "@/components/UserSwitcher";
 import { EntriesProvider } from "@/contexts/EntriesContext";
 import { UserProvider } from "@/contexts/UserContext";
@@ -37,54 +37,35 @@ export default async function EquipmentPage() {
   return (
     <UserProvider>
       <EntriesProvider>
-      <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100">
-        <main className="mx-auto max-w-3xl px-4 sm:px-6 py-8 sm:py-10">
-          <header className="mb-8">
-            <Link
-              href="/"
-              className="text-xs text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
-            >
-              ← Workout generator
-            </Link>
-
-            <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-              <div>
-                <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight">
-                  Your gym
-                </h1>
-                <p className="text-sm text-zinc-500 mt-1">
-                  Filter by what you're training and log per-move weights.
-                </p>
-              </div>
-              <UserSwitcher />
-            </div>
-
-            <nav className="mt-5 flex items-center gap-1 text-sm">
-              <span className="px-3 py-1.5 rounded-full bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 font-medium">
-                Equipment
-              </span>
-              <Link
-                href="/trends"
-                className="px-3 py-1.5 rounded-full text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition"
-              >
-                Trends
-              </Link>
-              <span className="ml-auto">
+        <main className="mx-auto max-w-3xl px-4 sm:px-6 py-4 sm:py-6">
+          <TopNav
+            active="equipment"
+            right={
+              <>
+                <UserSwitcher />
                 <ResetButton />
-              </span>
-            </nav>
-          </header>
+              </>
+            }
+          />
+
+          <div className="mt-6 mb-6">
+            <h1 className="text-xl sm:text-2xl font-semibold tracking-tight text-violet-50">
+              Your gym
+            </h1>
+            <p className="text-sm text-violet-300/80 mt-1">
+              Filter by what you're training. Log per-move weights.
+            </p>
+          </div>
 
           <EquipmentBrowser
             itemsByCategory={itemsByCategory}
             availableImageIds={availableImageIds}
           />
 
-          <footer className="mt-16 text-xs text-zinc-400 text-center">
+          <footer className="mt-16 text-xs text-violet-500 text-center">
             Cataloged {data.cataloged_at} from a video walkthrough.
           </footer>
         </main>
-      </div>
       </EntriesProvider>
     </UserProvider>
   );

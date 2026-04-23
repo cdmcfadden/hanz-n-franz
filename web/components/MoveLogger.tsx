@@ -43,12 +43,17 @@ export function MoveLogger({
     if (e.key === "Enter") save();
   }
 
+  const inputClass =
+    "text-sm rounded-md border-0 bg-violet-950/40 ring-1 ring-violet-800/60 text-violet-50 placeholder:text-violet-500 px-2 py-1 focus:ring-2 focus:ring-violet-500 focus:outline-none";
+
   return (
-    <div className="rounded-lg bg-zinc-50 dark:bg-zinc-800/50 px-3 py-2 ring-1 ring-zinc-200/60 dark:ring-zinc-700/60">
+    <div className="rounded-lg bg-violet-950/40 px-3 py-2 ring-1 ring-violet-900/50">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
         <div className="min-w-0">
-          <div className="text-sm font-medium truncate">{moveName}</div>
-          <div className="text-[11px] text-zinc-500 tabular-nums">
+          <div className="text-sm font-medium text-violet-100 truncate">
+            {moveName}
+          </div>
+          <div className="text-[11px] text-violet-400 tabular-nums">
             {loading
               ? "loading…"
               : latest
@@ -67,25 +72,25 @@ export function MoveLogger({
             onChange={(e) => setWeight(e.target.value)}
             onKeyDown={handleKey}
             placeholder="lb"
-            className="w-16 text-sm rounded-md border-0 ring-1 ring-zinc-200 dark:ring-zinc-700 bg-white dark:bg-zinc-900 px-2 py-1 focus:ring-2 focus:ring-zinc-900 dark:focus:ring-zinc-300 focus:outline-none"
+            className={`${inputClass} w-16`}
           />
           <input
             type="date"
             value={date}
             onChange={(e) => setDate(e.target.value)}
-            className="text-sm rounded-md border-0 ring-1 ring-zinc-200 dark:ring-zinc-700 bg-white dark:bg-zinc-900 px-2 py-1 focus:ring-2 focus:ring-zinc-900 dark:focus:ring-zinc-300 focus:outline-none"
+            className={inputClass}
           />
           <button
             onClick={save}
             disabled={!weight || saving}
-            className="text-xs font-medium px-2.5 py-1 rounded-md bg-zinc-900 text-white hover:bg-zinc-700 disabled:opacity-30 disabled:hover:bg-zinc-900 transition"
+            className="text-xs font-medium px-2.5 py-1 rounded-md bg-violet-500 text-white hover:bg-violet-400 disabled:opacity-30 disabled:hover:bg-violet-500 transition"
           >
             {saving ? "…" : "Log"}
           </button>
           {entries.length > 0 && (
             <button
               onClick={() => setExpanded(!expanded)}
-              className="text-[11px] text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 hover:underline px-1"
+              className="text-[11px] text-violet-400 hover:text-violet-100 hover:underline px-1"
             >
               {expanded ? "hide" : entries.length}
             </button>
@@ -93,17 +98,17 @@ export function MoveLogger({
         </div>
       </div>
 
-      {err && <p className="mt-1 text-[11px] text-red-600">{err}</p>}
+      {err && <p className="mt-1 text-[11px] text-rose-300">{err}</p>}
 
       {expanded && entries.length > 0 && (
-        <ul className="mt-2 pt-2 border-t border-zinc-200 dark:border-zinc-700 text-xs space-y-1 tabular-nums">
+        <ul className="mt-2 pt-2 border-t border-violet-900/60 text-xs space-y-1 tabular-nums">
           {[...entries].reverse().map((e) => (
             <li key={e.id} className="flex items-center gap-2">
-              <span className="text-zinc-500 w-20">{e.date}</span>
-              <span className="font-medium">{e.weight} lb</span>
+              <span className="text-violet-400 w-20">{e.date}</span>
+              <span className="font-medium text-violet-100">{e.weight} lb</span>
               <button
                 onClick={() => remove(equipmentId, moveId, e.id)}
-                className="ml-auto text-zinc-400 hover:text-red-500"
+                className="ml-auto text-violet-500 hover:text-rose-400"
                 aria-label="delete entry"
               >
                 ×
