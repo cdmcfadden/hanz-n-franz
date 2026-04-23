@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@ai-sdk/gateway": "^3.0.104",
+    "@supabase/supabase-js": "^2.104.0",
     "ai": "^6.0.168",
     "next": "16.2.4",
     "react": "19.2.4",

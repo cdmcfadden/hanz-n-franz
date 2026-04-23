@@ -1,41 +1,34 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { getEntries, type LogEntry } from "@/lib/log-storage";
+import { type EntryMap, type LogEntry, keys } from "@/lib/log-store";
 import { USERS } from "@/lib/users";
 
 const COLORS: Record<string, string> = {
-  david: "#2563eb", // blue
-  chris: "#dc2626", // red
+  david: "#2563eb",
+  chris: "#dc2626",
 };
 
 export function TrendChart({
   equipmentId,
   moveId,
   moveName,
+  allEntries,
 }: {
   equipmentId: string;
   moveId: string;
   moveName: string;
+  allEntries: EntryMap;
 }) {
-  const [series, setSeries] = useState<Record<string, LogEntry[]>>({});
-  const [hydrated, setHydrated] = useState(false);
-
-  useEffect(() => {
-    const next: Record<string, LogEntry[]> = {};
-    for (const u of USERS) {
-      next[u.id] = getEntries(u.id, equipmentId, moveId);
-    }
-    setSeries(next);
-    setHydrated(true);
-  }, [equipmentId, moveId]);
-
-  const allEntries = Object.values(series).flat();
-  const hasAny = allEntries.length > 0;
+  const series: Record<string, LogEntry[]> = {};
+  for (const u of USERS) {
+    series[u.id] =
+      allEntries.get(keys.userMoveKey(u.id, equipmentId, moveId)) ?? [];
+  }
+  const hasAny = Object.values(series).some((s) => s.length > 0);
 
   return (
     <div className="rounded-2xl bg-white dark:bg-zinc-900 p-4 ring-1 ring-zinc-200/70 dark:ring-zinc-800 shadow-sm hover:shadow-md transition">
-      <div className="flex items-baseline justify-between gap-3 mb-3">
+      <div className="flex items-baseline justify-between gap-3 mb-3 flex-wrap">
         <h3 className="text-sm font-medium text-zinc-900 dark:text-zinc-100 truncate">
           {moveName}
         </h3>
@@ -76,11 +69,11 @@ export function TrendChart({
         </div>
       </div>
 
-      {hydrated && hasAny ? (
+      {hasAny ? (
         <Chart series={series} />
       ) : (
         <p className="text-xs text-zinc-400 italic py-4 text-center">
-          {hydrated ? "no entries yet" : "loading…"}
+          no entries yet
         </p>
       )}
     </div>

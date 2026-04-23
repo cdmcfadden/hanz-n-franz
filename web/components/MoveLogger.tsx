@@ -1,14 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useUser } from "@/contexts/UserContext";
-import {
-  addEntry,
-  getEntries,
-  removeEntry,
-  todayISO,
-  type LogEntry,
-} from "@/lib/log-storage";
+import { useState } from "react";
+import { useEntries } from "@/contexts/EntriesContext";
+import { todayISO } from "@/lib/log-store";
 
 export function MoveLogger({
   equipmentId,
@@ -19,30 +13,30 @@ export function MoveLogger({
   moveId: string;
   moveName: string;
 }) {
-  const { currentUser, hydrated: userHydrated } = useUser();
-  const userId = currentUser.id;
+  const { getEntries, add, remove, loading } = useEntries();
+  const entries = getEntries(equipmentId, moveId);
+  const latest = entries[entries.length - 1];
 
-  const [entries, setEntries] = useState<LogEntry[]>([]);
   const [weight, setWeight] = useState("");
   const [date, setDate] = useState(todayISO());
   const [expanded, setExpanded] = useState(false);
-  const [hydrated, setHydrated] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!userHydrated) return;
-    setEntries(getEntries(userId, equipmentId, moveId));
-    setHydrated(true);
-  }, [userId, equipmentId, moveId, userHydrated]);
-
-  const latest = entries[entries.length - 1];
-
-  function save() {
+  async function save() {
     const w = parseFloat(weight);
     if (!w || Number.isNaN(w) || w <= 0) return;
-    const next = addEntry(userId, equipmentId, moveId, { date, weight: w });
-    setEntries(next);
-    setWeight("");
-    setDate(todayISO());
+    setSaving(true);
+    setErr(null);
+    try {
+      await add(equipmentId, moveId, date, w);
+      setWeight("");
+      setDate(todayISO());
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : "save failed");
+    } finally {
+      setSaving(false);
+    }
   }
 
   function handleKey(e: React.KeyboardEvent<HTMLInputElement>) {
@@ -50,24 +44,25 @@ export function MoveLogger({
   }
 
   return (
-    <div className="group rounded-lg bg-zinc-50 dark:bg-zinc-800/50 px-3 py-2 ring-1 ring-zinc-200/60 dark:ring-zinc-700/60">
-      <div className="flex items-center justify-between gap-3">
+    <div className="rounded-lg bg-zinc-50 dark:bg-zinc-800/50 px-3 py-2 ring-1 ring-zinc-200/60 dark:ring-zinc-700/60">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
         <div className="min-w-0">
           <div className="text-sm font-medium truncate">{moveName}</div>
           <div className="text-[11px] text-zinc-500 tabular-nums">
-            {hydrated && latest
-              ? `${latest.weight} lb · ${latest.date}`
-              : hydrated
-                ? "no log yet"
-                : ""}
+            {loading
+              ? "loading…"
+              : latest
+                ? `${latest.weight} lb · ${latest.date}`
+                : "no log yet"}
           </div>
         </div>
 
-        <div className="flex items-center gap-1.5 shrink-0">
+        <div className="flex items-center gap-1.5 shrink-0 flex-wrap">
           <input
             type="number"
             step="0.5"
             min="0"
+            inputMode="decimal"
             value={weight}
             onChange={(e) => setWeight(e.target.value)}
             onKeyDown={handleKey}
@@ -82,10 +77,10 @@ export function MoveLogger({
           />
           <button
             onClick={save}
-            disabled={!weight}
+            disabled={!weight || saving}
             className="text-xs font-medium px-2.5 py-1 rounded-md bg-zinc-900 text-white hover:bg-zinc-700 disabled:opacity-30 disabled:hover:bg-zinc-900 transition"
           >
-            Log
+            {saving ? "…" : "Log"}
           </button>
           {entries.length > 0 && (
             <button
@@ -98,32 +93,23 @@ export function MoveLogger({
         </div>
       </div>
 
+      {err && <p className="mt-1 text-[11px] text-red-600">{err}</p>}
+
       {expanded && entries.length > 0 && (
         <ul className="mt-2 pt-2 border-t border-zinc-200 dark:border-zinc-700 text-xs space-y-1 tabular-nums">
-          {[...entries].reverse().map((e, idx) => {
-            const realIdx = entries.length - 1 - idx;
-            return (
-              <li key={realIdx} className="flex items-center gap-2">
-                <span className="text-zinc-500 w-20">{e.date}</span>
-                <span className="font-medium">{e.weight} lb</span>
-                <button
-                  onClick={() => {
-                    const next = removeEntry(
-                      userId,
-                      equipmentId,
-                      moveId,
-                      realIdx,
-                    );
-                    setEntries(next);
-                  }}
-                  className="ml-auto text-zinc-400 hover:text-red-500"
-                  aria-label="delete entry"
-                >
-                  ×
-                </button>
-              </li>
-            );
-          })}
+          {[...entries].reverse().map((e) => (
+            <li key={e.id} className="flex items-center gap-2">
+              <span className="text-zinc-500 w-20">{e.date}</span>
+              <span className="font-medium">{e.weight} lb</span>
+              <button
+                onClick={() => remove(equipmentId, moveId, e.id)}
+                className="ml-auto text-zinc-400 hover:text-red-500"
+                aria-label="delete entry"
+              >
+                ×
+              </button>
+            </li>
+          ))}
         </ul>
       )}
     </div>

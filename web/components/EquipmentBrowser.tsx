@@ -103,7 +103,7 @@ export function EquipmentBrowser({
 
   return (
     <>
-      <div className="sticky top-0 z-10 -mx-6 px-6 pt-2 pb-1 bg-zinc-50/80 dark:bg-zinc-950/80 backdrop-blur-md">
+      <div className="sticky top-0 z-10 -mx-4 sm:-mx-6 px-4 sm:px-6 pt-2 pb-1 bg-zinc-50/80 dark:bg-zinc-950/80 backdrop-blur-md">
         <MuscleFilter
           selected={selected}
           onToggle={toggle}
@@ -171,8 +171,8 @@ function EquipmentRow({
   const hidden = totalMoves - visibleMoves.length;
 
   return (
-    <li className="flex gap-4 rounded-2xl bg-white dark:bg-zinc-900 p-4 ring-1 ring-zinc-200/70 dark:ring-zinc-800 shadow-sm hover:shadow-md hover:ring-zinc-300 dark:hover:ring-zinc-700 transition">
-      <div className="shrink-0 w-28 h-28 rounded-xl overflow-hidden bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center ring-1 ring-zinc-200/70 dark:ring-zinc-700/60">
+    <li className="flex gap-3 sm:gap-4 rounded-2xl bg-white dark:bg-zinc-900 p-3 sm:p-4 ring-1 ring-zinc-200/70 dark:ring-zinc-800 shadow-sm hover:shadow-md hover:ring-zinc-300 dark:hover:ring-zinc-700 transition">
+      <div className="shrink-0 w-20 h-20 sm:w-28 sm:h-28 rounded-xl overflow-hidden bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center ring-1 ring-zinc-200/70 dark:ring-zinc-700/60">
         {hasImage ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img

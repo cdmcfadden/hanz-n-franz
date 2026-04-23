@@ -7,6 +7,7 @@ import {
 } from "@/components/EquipmentBrowser";
 import { ResetButton } from "@/components/ResetButton";
 import { UserSwitcher } from "@/components/UserSwitcher";
+import { EntriesProvider } from "@/contexts/EntriesContext";
 import { UserProvider } from "@/contexts/UserContext";
 import { CATEGORIES } from "@/lib/equipment";
 import { loadEquipmentData } from "@/lib/equipment-server";
@@ -35,8 +36,9 @@ export default async function EquipmentPage() {
 
   return (
     <UserProvider>
+      <EntriesProvider>
       <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100">
-        <main className="mx-auto max-w-3xl px-6 py-10">
+        <main className="mx-auto max-w-3xl px-4 sm:px-6 py-8 sm:py-10">
           <header className="mb-8">
             <Link
               href="/"
@@ -45,9 +47,9 @@ export default async function EquipmentPage() {
               ← Workout generator
             </Link>
 
-            <div className="mt-3 flex items-end justify-between gap-4">
+            <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <h1 className="text-3xl font-semibold tracking-tight">
+                <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight">
                   Your gym
                 </h1>
                 <p className="text-sm text-zinc-500 mt-1">
@@ -83,6 +85,7 @@ export default async function EquipmentPage() {
           </footer>
         </main>
       </div>
+      </EntriesProvider>
     </UserProvider>
   );
 }
