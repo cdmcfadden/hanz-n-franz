@@ -1,20 +1,19 @@
 @import "tailwindcss";
 
-/* "Max" theme — derived from the brand banner. Deep aubergine background,
-   violet/lavender accents, white-cream text. Always dark; the brand reads
-   poorly on a light surface. */
+/* "Hanz" theme — derived from the brand mark (red circle, black tank tops,
+   white text). Black surfaces, red accent, white text. */
 :root {
-  --bg: #16092e;
-  --bg-elev: #1f1140;
-  --surface: #28154f;
-  --surface-soft: rgba(56, 30, 100, 0.45);
-  --ring: #4c2a7a;
-  --ring-strong: #6b3fb0;
-  --text: #f4ecff;
-  --text-muted: #b8a3d4;
-  --text-faint: #7e6394;
-  --accent: #a855f7;
-  --accent-strong: #c084fc;
+  --bg: #0a0a0a;
+  --bg-elev: #141414;
+  --surface: #161616;
+  --surface-soft: #1a1a1a;
+  --ring: #2a2a2a;
+  --ring-strong: #3a3a3a;
+  --text: #ffffff;
+  --text-muted: #a1a1a1;
+  --text-faint: #6a6a6a;
+  --accent: #d92027;
+  --accent-strong: #ef4444;
 }
 
 @theme inline {
@@ -34,8 +33,6 @@ body {
   font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
 }
 
-/* Scrollbar tinted to fit the dark purple theme so it doesn't read as a
-   bright stripe in the corner. */
 ::-webkit-scrollbar {
   width: 10px;
   height: 10px;

@@ -4,8 +4,8 @@ import { type EntryMap, type LogEntry, keys } from "@/lib/log-store";
 import { USERS } from "@/lib/users";
 
 const COLORS: Record<string, string> = {
-  david: "#60a5fa", // sky-400 — readable on dark purple
-  chris: "#f472b6", // pink-400 — readable on dark purple
+  david: "#60a5fa",
+  chris: "#ef4444",
 };
 
 export function TrendChart({
@@ -27,11 +27,9 @@ export function TrendChart({
   const hasAny = Object.values(series).some((s) => s.length > 0);
 
   return (
-    <div className="rounded-2xl bg-[var(--surface-soft)] p-4 ring-1 ring-violet-800/40 shadow-sm hover:ring-violet-700/60 transition">
-      <div className="flex items-baseline justify-between gap-3 mb-3 flex-wrap">
-        <h3 className="text-sm font-medium text-violet-50 truncate">
-          {moveName}
-        </h3>
+    <div className="rounded-2xl bg-[var(--surface-soft)] p-3 ring-1 ring-[var(--ring)]">
+      <div className="flex items-baseline justify-between gap-2 mb-2 flex-wrap">
+        <h3 className="text-sm font-medium text-white truncate">{moveName}</h3>
         <div className="flex gap-3 text-[11px] tabular-nums shrink-0">
           {USERS.map((u) => {
             const entries = series[u.id] ?? [];
@@ -45,16 +43,18 @@ export function TrendChart({
                   className="inline-block w-2 h-2 rounded-full"
                   style={{ background: COLORS[u.id] }}
                 />
-                <span className="text-violet-400">{u.name.split(" ")[0]}:</span>
+                <span className="text-neutral-500">
+                  {u.name.split(" ")[0]}:
+                </span>
                 {latest ? (
                   <>
-                    <span className="font-medium text-violet-100">
+                    <span className="font-medium text-white">
                       {latest.weight} lb
                     </span>
                     {delta !== 0 && (
                       <span
                         className={
-                          delta > 0 ? "text-teal-300" : "text-orange-300"
+                          delta > 0 ? "text-emerald-400" : "text-orange-400"
                         }
                       >
                         ({delta > 0 ? "+" : ""}
@@ -63,7 +63,7 @@ export function TrendChart({
                     )}
                   </>
                 ) : (
-                  <span className="text-violet-500">—</span>
+                  <span className="text-neutral-600">—</span>
                 )}
               </span>
             );
@@ -74,7 +74,7 @@ export function TrendChart({
       {hasAny ? (
         <Chart series={series} />
       ) : (
-        <p className="text-xs text-violet-500 italic py-4 text-center">
+        <p className="text-xs text-neutral-600 italic py-3 text-center">
           no entries yet
         </p>
       )}
@@ -83,8 +83,8 @@ export function TrendChart({
 }
 
 function Chart({ series }: { series: Record<string, LogEntry[]> }) {
-  const w = 560;
-  const h = 80;
+  const w = 320;
+  const h = 60;
   const padX = 4;
   const padY = 6;
 
@@ -142,7 +142,7 @@ function Chart({ series }: { series: Record<string, LogEntry[]> }) {
                 key={i}
                 cx={x(e.date)}
                 cy={y(e.weight)}
-                r="2.5"
+                r="2"
                 fill={color}
               />
             ))}

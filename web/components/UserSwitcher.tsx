@@ -7,7 +7,7 @@ export function UserSwitcher() {
   const { currentUser, setCurrentUserId, hydrated } = useUser();
 
   return (
-    <div className="inline-flex items-center gap-1 p-1 rounded-full bg-violet-950/60 ring-1 ring-violet-800/60">
+    <div className="inline-flex items-center gap-1 p-1 rounded-full bg-neutral-900 ring-1 ring-[var(--ring)]">
       {USERS.map((u) => {
         const active = hydrated && u.id === currentUser.id;
         return (
@@ -17,18 +17,16 @@ export function UserSwitcher() {
             title={u.name}
             aria-pressed={active}
             className={[
-              "inline-flex items-center gap-2 rounded-full transition",
+              "inline-flex items-center gap-2 rounded-full transition-colors",
               active
-                ? "bg-violet-700/60 pl-1 pr-3 py-1 shadow-sm ring-1 ring-violet-500/60"
-                : "p-1 hover:bg-violet-900/60",
+                ? "bg-[var(--surface)] pl-1 pr-3 py-1 ring-1 ring-[var(--accent)]"
+                : "p-1 hover:bg-neutral-800",
             ].join(" ")}
           >
             <span
               className={[
-                "block w-7 h-7 rounded-full overflow-hidden bg-violet-900",
-                active
-                  ? "ring-2 ring-violet-200"
-                  : "opacity-60 grayscale",
+                "block w-7 h-7 rounded-full overflow-hidden bg-neutral-800",
+                active ? "ring-2 ring-[var(--accent)]" : "opacity-60 grayscale",
               ].join(" ")}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -41,7 +39,7 @@ export function UserSwitcher() {
               />
             </span>
             {active && (
-              <span className="text-sm font-medium text-violet-50">
+              <span className="text-sm font-medium text-white">
                 {u.shortName}
               </span>
             )}

@@ -5,10 +5,6 @@ import {
   type ItemsByCategory,
 } from "@/components/EquipmentBrowser";
 import { ResetButton } from "@/components/ResetButton";
-import { TopNav } from "@/components/TopNav";
-import { UserSwitcher } from "@/components/UserSwitcher";
-import { EntriesProvider } from "@/contexts/EntriesContext";
-import { UserProvider } from "@/contexts/UserContext";
 import { CATEGORIES } from "@/lib/equipment";
 import { loadEquipmentData } from "@/lib/equipment-server";
 
@@ -35,38 +31,25 @@ export default async function EquipmentPage() {
   }
 
   return (
-    <UserProvider>
-      <EntriesProvider>
-        <main className="mx-auto max-w-3xl px-4 sm:px-6 py-4 sm:py-6">
-          <TopNav
-            active="equipment"
-            right={
-              <>
-                <UserSwitcher />
-                <ResetButton />
-              </>
-            }
-          />
+    <main className="mx-auto max-w-3xl py-4 sm:py-6 w-full">
+      <div className="px-4 sm:px-6 mb-4">
+        <h1 className="text-xl sm:text-2xl font-semibold tracking-tight text-white">
+          Your gym
+        </h1>
+        <p className="text-sm text-neutral-500 mt-1">
+          Filter by what you're training. Log per-move weights.
+        </p>
+      </div>
 
-          <div className="mt-6 mb-6">
-            <h1 className="text-xl sm:text-2xl font-semibold tracking-tight text-violet-50">
-              Your gym
-            </h1>
-            <p className="text-sm text-violet-300/80 mt-1">
-              Filter by what you're training. Log per-move weights.
-            </p>
-          </div>
+      <EquipmentBrowser
+        itemsByCategory={itemsByCategory}
+        availableImageIds={availableImageIds}
+      />
 
-          <EquipmentBrowser
-            itemsByCategory={itemsByCategory}
-            availableImageIds={availableImageIds}
-          />
-
-          <footer className="mt-16 text-xs text-violet-500 text-center">
-            Cataloged {data.cataloged_at} from a video walkthrough.
-          </footer>
-        </main>
-      </EntriesProvider>
-    </UserProvider>
+      <footer className="mt-12 px-4 sm:px-6 flex items-center justify-between text-xs text-neutral-600">
+        <span>Cataloged {data.cataloged_at} from a video walkthrough.</span>
+        <ResetButton />
+      </footer>
+    </main>
   );
 }

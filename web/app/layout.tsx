@@ -1,5 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { TopNav } from "@/components/TopNav";
+import { EntriesProvider } from "@/contexts/EntriesContext";
+import { UserProvider } from "@/contexts/UserContext";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -22,13 +25,13 @@ export const metadata: Metadata = {
     statusBarStyle: "black-translucent",
   },
   icons: {
-    icon: "/max-icon.png",
-    apple: "/max-icon.png",
+    icon: "/hanz-icon.png",
+    apple: "/hanz-icon.png",
   },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#16092e",
+  themeColor: "#0a0a0a",
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
@@ -44,7 +47,14 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <UserProvider>
+          <EntriesProvider>
+            <TopNav />
+            {children}
+          </EntriesProvider>
+        </UserProvider>
+      </body>
     </html>
   );
 }

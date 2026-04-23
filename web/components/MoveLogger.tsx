@@ -44,16 +44,16 @@ export function MoveLogger({
   }
 
   const inputClass =
-    "text-sm rounded-md border-0 bg-violet-950/40 ring-1 ring-violet-800/60 text-violet-50 placeholder:text-violet-500 px-2 py-1 focus:ring-2 focus:ring-violet-500 focus:outline-none";
+    "text-sm rounded-md border-0 bg-black ring-1 ring-[var(--ring)] text-white placeholder:text-neutral-600 px-2 py-1 focus:ring-2 focus:ring-[var(--accent)] focus:outline-none";
 
   return (
-    <div className="rounded-lg bg-violet-950/40 px-3 py-2 ring-1 ring-violet-900/50">
+    <div className="rounded-lg bg-black/40 px-3 py-2 ring-1 ring-[var(--ring)]">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
         <div className="min-w-0">
-          <div className="text-sm font-medium text-violet-100 truncate">
+          <div className="text-sm font-medium text-white truncate">
             {moveName}
           </div>
-          <div className="text-[11px] text-violet-400 tabular-nums">
+          <div className="text-[11px] text-neutral-500 tabular-nums">
             {loading
               ? "loading…"
               : latest
@@ -83,14 +83,14 @@ export function MoveLogger({
           <button
             onClick={save}
             disabled={!weight || saving}
-            className="text-xs font-medium px-2.5 py-1 rounded-md bg-violet-500 text-white hover:bg-violet-400 disabled:opacity-30 disabled:hover:bg-violet-500 transition"
+            className="text-xs font-medium px-2.5 py-1 rounded-md bg-[var(--accent)] text-white hover:bg-[var(--accent-strong)] disabled:opacity-30 disabled:hover:bg-[var(--accent)] transition-colors"
           >
             {saving ? "…" : "Log"}
           </button>
           {entries.length > 0 && (
             <button
               onClick={() => setExpanded(!expanded)}
-              className="text-[11px] text-violet-400 hover:text-violet-100 hover:underline px-1"
+              className="text-[11px] text-neutral-500 hover:text-white hover:underline px-1"
             >
               {expanded ? "hide" : entries.length}
             </button>
@@ -98,17 +98,17 @@ export function MoveLogger({
         </div>
       </div>
 
-      {err && <p className="mt-1 text-[11px] text-rose-300">{err}</p>}
+      {err && <p className="mt-1 text-[11px] text-[var(--accent-strong)]">{err}</p>}
 
       {expanded && entries.length > 0 && (
-        <ul className="mt-2 pt-2 border-t border-violet-900/60 text-xs space-y-1 tabular-nums">
+        <ul className="mt-2 pt-2 border-t border-[var(--ring)] text-xs space-y-1 tabular-nums">
           {[...entries].reverse().map((e) => (
             <li key={e.id} className="flex items-center gap-2">
-              <span className="text-violet-400 w-20">{e.date}</span>
-              <span className="font-medium text-violet-100">{e.weight} lb</span>
+              <span className="text-neutral-500 w-20">{e.date}</span>
+              <span className="font-medium text-white">{e.weight} lb</span>
               <button
                 onClick={() => remove(equipmentId, moveId, e.id)}
-                className="ml-auto text-violet-500 hover:text-rose-400"
+                className="ml-auto text-neutral-600 hover:text-[var(--accent-strong)]"
                 aria-label="delete entry"
               >
                 ×

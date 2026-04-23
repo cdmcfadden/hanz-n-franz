@@ -8,18 +8,18 @@ export default function manifest(): MetadataRoute.Manifest {
       "Daily workouts and per-move weight tracking for your gym's equipment.",
     start_url: "/",
     display: "standalone",
-    background_color: "#16092e",
-    theme_color: "#16092e",
+    background_color: "#0a0a0a",
+    theme_color: "#0a0a0a",
     orientation: "portrait",
     icons: [
       {
-        src: "/max-icon.png",
+        src: "/hanz-icon.png",
         sizes: "192x192",
         type: "image/png",
         purpose: "any",
       },
       {
-        src: "/max.png",
+        src: "/hanz.png",
         sizes: "any",
         type: "image/png",
         purpose: "any",

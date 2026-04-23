@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { TopNav } from "@/components/TopNav";
 import type { Workout } from "@/lib/schema";
 
 type Goal = "strength" | "hypertrophy" | "conditioning" | "general";
@@ -41,28 +40,28 @@ export default function Home() {
   }
 
   return (
-    <main className="mx-auto max-w-2xl px-4 sm:px-6 py-4 sm:py-6">
-      <TopNav active="workout" />
-
-      {/* Hero with the brand banner — sets the tone the moment the page loads */}
-      <section className="mt-6 mb-8 rounded-2xl overflow-hidden ring-1 ring-violet-800/60 bg-gradient-to-b from-violet-950 to-[var(--bg-elev)]">
+    <main className="mx-auto max-w-2xl px-4 sm:px-6 py-4 sm:py-6 w-full">
+      {/* Hanz hero — fixed dimensions reserve layout space before decode */}
+      <section className="mb-8 rounded-2xl overflow-hidden ring-1 ring-[var(--ring)] bg-black">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src="/max.png"
-          alt="Max — Hanz and Franz flexing"
+          src="/hanz.png"
+          alt="Hanz and Franz logo"
+          width={600}
+          height={471}
           className="w-full h-auto block"
         />
-        <div className="px-4 py-3 border-t border-violet-900/60">
-          <h1 className="text-base font-semibold tracking-tight text-violet-50">
+        <div className="px-4 py-3 border-t border-[var(--ring)]">
+          <h1 className="text-base font-semibold tracking-tight text-white">
             Daily workout
           </h1>
-          <p className="text-xs text-violet-300/80 mt-0.5">
+          <p className="text-xs text-neutral-500 mt-0.5">
             Generated around the equipment at your gym.
           </p>
         </div>
       </section>
 
-      <div className="rounded-2xl bg-[var(--surface-soft)] p-5 ring-1 ring-violet-800/40 backdrop-blur-sm">
+      <div className="rounded-2xl bg-[var(--surface-soft)] p-5 ring-1 ring-[var(--ring)]">
         <div className="grid grid-cols-2 gap-3 mb-4">
           <Field label="Goal">
             <select
@@ -111,23 +110,25 @@ export default function Home() {
         <button
           onClick={generate}
           disabled={loading}
-          className="w-full bg-violet-500 hover:bg-violet-400 text-white py-2.5 rounded-lg font-medium disabled:opacity-40 transition shadow-sm shadow-violet-900/40"
+          className="w-full bg-[var(--accent)] hover:bg-[var(--accent-strong)] text-white py-2.5 rounded-lg font-medium disabled:opacity-40 transition-colors"
         >
           {loading ? "Generating…" : "Generate today's workout"}
         </button>
 
         {error && (
-          <p className="mt-4 text-sm text-rose-300">Error: {error}</p>
+          <p className="mt-4 text-sm text-[var(--accent-strong)]">
+            Error: {error}
+          </p>
         )}
       </div>
 
       {workout && (
         <section className="mt-10 space-y-6">
           <header>
-            <h2 className="text-2xl font-semibold tracking-tight text-violet-50">
+            <h2 className="text-2xl font-semibold tracking-tight text-white">
               {workout.title}
             </h2>
-            <p className="text-sm text-violet-300/80">
+            <p className="text-sm text-neutral-500">
               {workout.focus} · ~{workout.estimated_minutes} min
             </p>
           </header>
@@ -138,7 +139,7 @@ export default function Home() {
             <Block title="Finisher" items={workout.finisher} />
           )}
 
-          <p className="text-sm italic text-violet-300/80 border-l-2 border-violet-700 pl-3">
+          <p className="text-sm italic text-neutral-400 border-l-2 border-[var(--accent)] pl-3">
             {workout.coach_note}
           </p>
         </section>
@@ -150,8 +151,8 @@ export default function Home() {
           font-size: 0.875rem;
           border-radius: 0.375rem;
           border: 0;
-          box-shadow: 0 0 0 1px rgba(76, 42, 122, 0.6);
-          background: rgba(20, 8, 45, 0.6);
+          box-shadow: 0 0 0 1px var(--ring);
+          background: #000;
           color: var(--text);
           padding: 0.5rem 0.625rem;
         }
@@ -170,7 +171,7 @@ export default function Home() {
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="text-sm">
-      <span className="block text-xs font-medium text-violet-400 mb-1 uppercase tracking-wider">
+      <span className="block text-xs font-medium text-neutral-500 mb-1 uppercase tracking-wider">
         {label}
       </span>
       {children}
@@ -187,23 +188,23 @@ function Block({
 }) {
   return (
     <div>
-      <h3 className="text-xs font-semibold tracking-widest uppercase text-violet-400 mb-3">
+      <h3 className="text-xs font-semibold tracking-widest uppercase text-neutral-500 mb-3">
         {title}
       </h3>
       <ol className="space-y-2">
         {items.map((ex, i) => (
           <li
             key={i}
-            className="rounded-xl bg-[var(--surface-soft)] p-3 text-sm ring-1 ring-violet-800/40"
+            className="rounded-xl bg-[var(--surface-soft)] p-3 text-sm ring-1 ring-[var(--ring)]"
           >
-            <div className="font-medium text-violet-50">{ex.name}</div>
-            <div className="text-violet-400 text-xs mb-1">{ex.equipment}</div>
-            <div className="tabular-nums text-violet-200">
+            <div className="font-medium text-white">{ex.name}</div>
+            <div className="text-neutral-500 text-xs mb-1">{ex.equipment}</div>
+            <div className="tabular-nums text-neutral-200">
               {ex.sets} × {ex.reps}
-              <span className="text-violet-500"> · rest {ex.rest_seconds}s</span>
+              <span className="text-neutral-500"> · rest {ex.rest_seconds}s</span>
             </div>
             {ex.notes && (
-              <div className="text-violet-300/80 mt-1">{ex.notes}</div>
+              <div className="text-neutral-400 mt-1">{ex.notes}</div>
             )}
           </li>
         ))}

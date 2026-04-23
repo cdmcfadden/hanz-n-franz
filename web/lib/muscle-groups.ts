@@ -2,40 +2,24 @@ export type MuscleGroup = {
   id: string;
   label: string;
   muscles: readonly string[];
-  // Tailwind class fragments for chip styling. activeBg/activeText apply when
-  // the chip is selected; ringClass is used for the inactive outline.
-  activeBg: string;
-  activeText: string;
-  dotClass: string;
 };
 
-// Palette tuned for the deep purple "Max" theme. Each group keeps a unique
-// accent so they're scannable, but the hues are pushed cooler/darker so they
-// sit well against an aubergine background.
 export const MUSCLE_GROUPS: readonly MuscleGroup[] = [
-  { id: "chest", label: "Chest", muscles: ["chest", "upper chest", "lower chest"],
-    activeBg: "bg-pink-700", activeText: "text-pink-50", dotClass: "bg-pink-500" },
-  { id: "back", label: "Back", muscles: ["back", "lats", "rhomboids"],
-    activeBg: "bg-sky-800", activeText: "text-sky-50", dotClass: "bg-sky-500" },
-  { id: "shoulders", label: "Shoulders", muscles: ["shoulders", "front delts", "rear delts"],
-    activeBg: "bg-amber-700", activeText: "text-amber-50", dotClass: "bg-amber-500" },
-  { id: "arms", label: "Arms", muscles: ["biceps", "triceps", "brachialis", "grip"],
-    activeBg: "bg-fuchsia-700", activeText: "text-fuchsia-50", dotClass: "bg-fuchsia-500" },
-  { id: "legs", label: "Legs", muscles: ["legs", "quads", "hamstrings", "calves", "glutes", "glute medius", "adductors"],
-    activeBg: "bg-teal-700", activeText: "text-teal-50", dotClass: "bg-teal-500" },
-  { id: "core", label: "Core", muscles: ["abs", "core"],
-    activeBg: "bg-orange-700", activeText: "text-orange-50", dotClass: "bg-orange-500" },
-  { id: "cardio", label: "Cardio", muscles: ["cardio"],
-    activeBg: "bg-rose-700", activeText: "text-rose-50", dotClass: "bg-rose-500" },
-  { id: "fullbody", label: "Full-body", muscles: ["full-body power", "varies"],
-    activeBg: "bg-violet-700", activeText: "text-violet-50", dotClass: "bg-violet-400" },
+  { id: "chest", label: "Chest", muscles: ["chest", "upper chest", "lower chest"] },
+  { id: "back", label: "Back", muscles: ["back", "lats", "rhomboids"] },
+  { id: "shoulders", label: "Shoulders", muscles: ["shoulders", "front delts", "rear delts"] },
+  { id: "arms", label: "Arms", muscles: ["biceps", "triceps", "brachialis", "grip"] },
+  { id: "legs", label: "Legs", muscles: ["legs", "quads", "hamstrings", "calves", "glutes", "glute medius", "adductors"] },
+  { id: "core", label: "Core", muscles: ["abs", "core"] },
+  { id: "cardio", label: "Cardio", muscles: ["cardio"] },
+  { id: "fullbody", label: "Full-body", muscles: ["full-body power", "varies"] },
 ];
+
+export const ALL_GROUP_IDS: string[] = MUSCLE_GROUPS.map((g) => g.id);
 
 export const GROUP_BY_ID: Record<string, MuscleGroup> = Object.fromEntries(
   MUSCLE_GROUPS.map((g) => [g.id, g]),
 );
-
-export const ALL_GROUP_IDS: string[] = MUSCLE_GROUPS.map((g) => g.id);
 
 export function groupsForItem(itemMuscles: string[]): Set<string> {
   const result = new Set<string>();
