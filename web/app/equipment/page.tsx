@@ -32,8 +32,8 @@ export default async function EquipmentPage() {
   }
 
   return (
-    <main className="mx-auto max-w-3xl py-4 sm:py-6 w-full">
-      <div className="px-4 sm:px-6 mb-4">
+    <main className="mx-auto max-w-3xl px-4 sm:px-6 py-4 sm:py-6 w-full">
+      <div className="mb-4">
         <h1 className="text-xl sm:text-2xl font-semibold tracking-tight text-white">
           Your gym
         </h1>
@@ -47,7 +47,7 @@ export default async function EquipmentPage() {
         availableImageIds={availableImageIds}
       />
 
-      <footer className="mt-12 px-4 sm:px-6 flex items-center justify-between gap-4 text-xs text-neutral-600">
+      <footer className="mt-12 flex items-center justify-between gap-4 text-xs text-neutral-600">
         <span>Cataloged {data.cataloged_at} from a video walkthrough.</span>
         <div className="flex items-center gap-4">
           <Link href="/qr" className="hover:text-white">

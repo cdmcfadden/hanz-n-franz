@@ -24,21 +24,21 @@ export function TopNav() {
     <header className="sticky top-0 z-20 px-4 sm:px-6 pt-4 pb-3 bg-[var(--bg)]/95 backdrop-blur-md border-b border-[var(--ring)]">
       <div className="mx-auto max-w-3xl">
         <div className="flex items-center gap-3 mb-3">
-          <Link href="/" className="flex items-center gap-2 shrink-0">
+          <Link href="/" className="flex items-center gap-2.5 shrink-0">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src="/hanz-icon.png"
-              alt="Hanz logo"
-              width={36}
-              height={36}
-              className="w-9 h-9 rounded-lg ring-1 ring-[var(--ring)]"
+              alt="C.A.D.E.T. logo"
+              width={40}
+              height={40}
+              className="w-10 h-10 rounded-lg ring-1 ring-[var(--ring)]"
             />
             <div className="leading-tight">
-              <div className="text-base font-semibold tracking-tight text-white">
-                Max
+              <div className="text-lg font-semibold tracking-tight text-white">
+                C.A.D.E.T.
               </div>
               <div className="text-[10px] uppercase tracking-widest text-neutral-400">
-                by Hanz &amp; Franz
+                Chris &amp; Dave&apos;s Experimental Training
               </div>
             </div>
           </Link>
@@ -48,7 +48,7 @@ export function TopNav() {
           </div>
         </div>
 
-        <nav className="flex items-center gap-1 text-sm">
+        <nav className="flex items-center gap-1.5 text-base">
           {TABS.map((tab) => {
             const isActive = tab.id === active;
             return (
@@ -57,8 +57,8 @@ export function TopNav() {
                 href={tab.href}
                 className={
                   isActive
-                    ? "px-3 py-1.5 rounded-full bg-white text-black font-medium"
-                    : "px-3 py-1.5 rounded-full text-neutral-500 hover:text-white hover:bg-neutral-900 transition-colors"
+                    ? "px-4 py-2 rounded-full bg-white text-black font-semibold"
+                    : "px-4 py-2 rounded-full text-neutral-500 hover:text-white hover:bg-neutral-900 transition-colors font-medium"
                 }
                 aria-current={isActive ? "page" : undefined}
               >

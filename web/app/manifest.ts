@@ -2,8 +2,8 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Max (by Hanz and Franz)",
-    short_name: "Max",
+    name: "C.A.D.E.T. — Chris and Dave's Experimental Training",
+    short_name: "C.A.D.E.T.",
     description:
       "Daily workouts and per-move weight tracking for your gym's equipment.",
     start_url: "/",

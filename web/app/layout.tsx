@@ -16,12 +16,12 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Max (by Hanz and Franz)",
+  title: "C.A.D.E.T. — Chris and Dave's Experimental Training",
   description:
     "Daily workouts and per-move weight tracking for the equipment at your gym.",
   appleWebApp: {
     capable: true,
-    title: "Max",
+    title: "C.A.D.E.T.",
     statusBarStyle: "black-translucent",
   },
   icons: {

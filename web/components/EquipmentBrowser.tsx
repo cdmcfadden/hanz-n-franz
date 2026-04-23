@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo, useState } from "react";
 import { MoveLogger } from "@/components/MoveLogger";
 import { MuscleFilter } from "@/components/MuscleFilter";
@@ -28,9 +29,7 @@ export function EquipmentBrowser({
   itemsByCategory: ItemsByCategory;
   availableImageIds: string[];
 }) {
-  // Default: no chips selected. The user opts in to what they're training.
   const [selected, setSelected] = useState<Set<string>>(() => new Set());
-
   const { lastActivity } = useEntries();
 
   const available = useMemo(
@@ -38,8 +37,6 @@ export function EquipmentBrowser({
     [availableImageIds],
   );
 
-  // Flatten the catalog once and remember each item's catalog index so we
-  // can use it as a stable tiebreaker after the recency sort.
   const catalogOrder = useMemo(() => {
     const order: { item: EquipmentItem; idx: number }[] = [];
     let i = 0;
@@ -79,8 +76,6 @@ export function EquipmentBrowser({
       });
     }
 
-    // Sort: most-recent log date descending; items without any log fall to
-    // the bottom; catalog order breaks ties.
     withOrder.sort((a, b) => {
       if (a.recency !== b.recency) return b.recency.localeCompare(a.recency);
       return a.idx - b.idx;
@@ -100,19 +95,17 @@ export function EquipmentBrowser({
 
   return (
     <>
-      <div className="px-4 sm:px-6">
-        <MuscleFilter
-          selected={selected}
-          onToggle={toggle}
-          onSelectAll={() => setSelected(new Set(ALL_GROUP_IDS))}
-          onClearAll={() => setSelected(new Set())}
-          shown={filteredItems.length}
-          total={total}
-        />
-      </div>
+      <MuscleFilter
+        selected={selected}
+        onToggle={toggle}
+        onSelectAll={() => setSelected(new Set(ALL_GROUP_IDS))}
+        onClearAll={() => setSelected(new Set())}
+        shown={filteredItems.length}
+        total={total}
+      />
 
       {filteredItems.length === 0 && (
-        <div className="px-4 sm:px-6 text-center py-16 text-neutral-500">
+        <div className="text-center py-16 text-neutral-500">
           <p className="text-sm">
             {selected.size === 0
               ? "Tap a muscle group above to see matching equipment."
@@ -122,7 +115,7 @@ export function EquipmentBrowser({
       )}
 
       {filteredItems.length > 0 && (
-        <ul className="space-y-2 pr-3 sm:pr-6">
+        <ul className="space-y-3">
           {filteredItems.map(({ item, visibleMoves }) => (
             <EquipmentRow
               key={item.id}
@@ -150,60 +143,64 @@ function EquipmentRow({
   const hidden = totalMoves - visibleMoves.length;
 
   return (
-    <li className="relative bg-[var(--surface-soft)] ring-1 ring-[var(--ring)] rounded-r-2xl pl-4 pr-3 sm:pl-6 py-3 sm:py-4">
-      <div className="absolute top-3 right-3 sm:top-4 sm:right-4 w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden bg-black ring-1 ring-[var(--ring)] flex items-center justify-center">
-        {hasImage ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={`/equipment/${item.id}.jpg?v=${IMG_VERSION}`}
-            alt={item.name}
-            width={160}
-            height={160}
-            className="w-full h-full object-cover"
-          />
-        ) : (
-          <span className="text-[10px] text-neutral-500 text-center px-1">
-            no photo
-          </span>
-        )}
-      </div>
-
-      <div className="pr-20 sm:pr-24 min-w-0">
-        <div className="flex items-baseline justify-between gap-3 min-w-0">
-          <div className="min-w-0">
-            <h3 className="font-semibold text-white truncate tracking-tight">
-              {item.name}
-            </h3>
-            {item.brand_guess && (
-              <div className="text-xs text-neutral-500">{item.brand_guess}</div>
-            )}
-          </div>
+    <li className="rounded-2xl bg-[var(--surface-soft)] ring-1 ring-[var(--ring)] p-4 sm:p-5">
+      {/* Header: name block on the left, clickable image anchored top-right */}
+      <header className="flex items-start justify-between gap-3 mb-4">
+        <div className="min-w-0 pt-1">
+          <h3 className="font-semibold text-white tracking-tight text-lg sm:text-xl truncate">
+            {item.name}
+          </h3>
+          {item.brand_guess && (
+            <div className="text-xs text-neutral-500 mt-0.5">
+              {item.brand_guess}
+            </div>
+          )}
           {item.count !== undefined && (
-            <span className="text-xs font-medium text-neutral-500 whitespace-nowrap tabular-nums">
-              ×{item.count}
-            </span>
+            <div className="text-[11px] text-neutral-600 mt-0.5 tabular-nums">
+              ×{item.count} in gym
+            </div>
           )}
         </div>
 
-        {visibleMoves.length > 0 && (
-          <div className="mt-3 space-y-1.5">
-            {visibleMoves.map((mv) => (
-              <MoveLogger
-                key={mv.id}
-                equipmentId={item.id}
-                moveId={mv.id}
-                moveName={mv.name}
-              />
-            ))}
-            {hidden > 0 && (
-              <p className="text-[11px] text-neutral-600 italic pl-1">
-                +{hidden} other {hidden === 1 ? "move" : "moves"} hidden by
-                filter
-              </p>
-            )}
-          </div>
-        )}
-      </div>
+        <Link
+          href={`/equipment/${item.id}`}
+          aria-label={`Open ${item.name} details`}
+          className="shrink-0 block rounded-xl overflow-hidden bg-black ring-1 ring-[var(--ring)] hover:ring-[var(--accent)] transition-[box-shadow,ring] w-28 h-28 sm:w-36 sm:h-36"
+        >
+          {hasImage ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={`/equipment/${item.id}.jpg?v=${IMG_VERSION}`}
+              alt={item.name}
+              width={288}
+              height={288}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-[10px] text-neutral-500 text-center px-1">
+              no photo
+            </div>
+          )}
+        </Link>
+      </header>
+
+      {visibleMoves.length > 0 && (
+        <div className="space-y-2">
+          {visibleMoves.map((mv) => (
+            <MoveLogger
+              key={mv.id}
+              equipmentId={item.id}
+              moveId={mv.id}
+              moveName={mv.name}
+            />
+          ))}
+          {hidden > 0 && (
+            <p className="text-[11px] text-neutral-600 italic pl-1">
+              +{hidden} other {hidden === 1 ? "move" : "moves"} hidden by filter
+            </p>
+          )}
+        </div>
+      )}
     </li>
   );
 }

@@ -41,22 +41,23 @@ export default function Home() {
 
   return (
     <main className="mx-auto max-w-2xl px-4 sm:px-6 py-4 sm:py-6 w-full">
-      {/* Hanz hero — fixed dimensions reserve layout space before decode */}
-      <section className="mb-8 rounded-2xl overflow-hidden ring-1 ring-[var(--ring)] bg-black">
+      {/* Hero — the brand photo dominates the fold */}
+      <section className="mb-10 rounded-3xl overflow-hidden ring-1 ring-[var(--ring)] bg-black relative">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src="/hanz.png"
           alt="Hanz and Franz logo"
-          width={600}
-          height={471}
+          width={980}
+          height={492}
           className="w-full h-auto block"
         />
-        <div className="px-4 py-3 border-t border-[var(--ring)]">
-          <h1 className="text-base font-semibold tracking-tight text-white">
-            Daily workout
+        <div className="px-5 py-4 border-t border-[var(--ring)]">
+          <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight text-white">
+            C.A.D.E.T.
           </h1>
-          <p className="text-xs text-neutral-500 mt-0.5">
-            Generated around the equipment at your gym.
+          <p className="text-sm text-neutral-400 mt-1">
+            Chris and Dave&apos;s Experimental Training. Daily workout, built
+            around your gym.
           </p>
         </div>
       </section>
@@ -110,7 +111,7 @@ export default function Home() {
         <button
           onClick={generate}
           disabled={loading}
-          className="w-full bg-[var(--accent)] hover:bg-[var(--accent-strong)] text-white py-2.5 rounded-lg font-medium disabled:opacity-40 transition-colors"
+          className="w-full bg-[var(--accent)] hover:bg-[var(--accent-strong)] text-white py-3 rounded-lg font-semibold text-base disabled:opacity-40 transition-colors"
         >
           {loading ? "Generating…" : "Generate today's workout"}
         </button>
