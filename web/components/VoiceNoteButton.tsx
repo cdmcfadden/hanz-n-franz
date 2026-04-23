@@ -1,38 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
+import { TellMeModal } from "@/components/TellMeModal";
 import { useNotes } from "@/contexts/NotesContext";
-
-// Minimal, browser-typed SpeechRecognition shape. Real definitions live on
-// window.SpeechRecognition (or the webkit-prefixed variant on Safari).
-type SRResult = { transcript: string };
-type SREvent = {
-  resultIndex: number;
-  results: { isFinal: boolean; 0: SRResult }[];
-};
-type SRInstance = {
-  lang: string;
-  continuous: boolean;
-  interimResults: boolean;
-  start: () => void;
-  stop: () => void;
-  abort: () => void;
-  onresult: ((e: SREvent) => void) | null;
-  onerror: ((e: { error?: string }) => void) | null;
-  onend: (() => void) | null;
-};
-type SRCtor = new () => SRInstance;
-
-function getRecognitionCtor(): SRCtor | null {
-  if (typeof window === "undefined") return null;
-  const w = window as unknown as {
-    SpeechRecognition?: SRCtor;
-    webkitSpeechRecognition?: SRCtor;
-  };
-  return w.SpeechRecognition ?? w.webkitSpeechRecognition ?? null;
-}
-
-type Phase = "idle" | "listening" | "saving" | "error";
 
 function MicIcon({ className = "" }: { className?: string }) {
   return (
@@ -53,145 +23,49 @@ function MicIcon({ className = "" }: { className?: string }) {
   );
 }
 
-function StopSquare({ className = "" }: { className?: string }) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      className={className}
-      aria-hidden="true"
-      fill="currentColor"
-    >
-      <rect x="6" y="6" width="12" height="12" rx="1" />
-    </svg>
-  );
-}
-
-export function VoiceNoteButton({ equipmentId }: { equipmentId: string }) {
-  const { getLatest, add } = useNotes();
-  const latest = getLatest(equipmentId);
-
-  const [phase, setPhase] = useState<Phase>("idle");
-  const [interim, setInterim] = useState<string>("");
-  const [err, setErr] = useState<string | null>(null);
-  const [supported, setSupported] = useState<boolean>(true);
-  const recognitionRef = useRef<SRInstance | null>(null);
-  const finalRef = useRef<string>("");
+export function VoiceNoteButton({
+  equipmentId,
+  equipmentName,
+}: {
+  equipmentId: string;
+  equipmentName: string;
+}) {
+  const { getLatest } = useNotes();
+  const captured = !!getLatest(equipmentId);
+  const [open, setOpen] = useState(false);
+  const [supported, setSupported] = useState(true);
 
   useEffect(() => {
-    setSupported(!!getRecognitionCtor());
-  }, []);
-
-  function start() {
-    setErr(null);
-    const Ctor = getRecognitionCtor();
-    if (!Ctor) {
-      setSupported(false);
-      return;
-    }
-    finalRef.current = "";
-    setInterim("");
-    const r = new Ctor();
-    r.lang = "en-US";
-    r.continuous = false;
-    r.interimResults = true;
-    r.onresult = (e) => {
-      let final = "";
-      let running = "";
-      for (let i = e.resultIndex; i < e.results.length; i++) {
-        const res = e.results[i];
-        if (res.isFinal) final += res[0].transcript;
-        else running += res[0].transcript;
-      }
-      if (final) finalRef.current += final;
-      setInterim(running);
-    };
-    r.onerror = (e) => {
-      setErr(e?.error ?? "recognition error");
-      setPhase("error");
-    };
-    r.onend = async () => {
-      const transcript = (finalRef.current || interim).trim();
-      recognitionRef.current = null;
-      if (!transcript) {
-        setPhase("idle");
-        return;
-      }
-      setPhase("saving");
-      try {
-        await add(equipmentId, transcript);
-        setPhase("idle");
-      } catch (e) {
-        setErr(e instanceof Error ? e.message : "save failed");
-        setPhase("error");
-      } finally {
-        setInterim("");
-        finalRef.current = "";
-      }
-    };
-    recognitionRef.current = r;
-    try {
-      r.start();
-      setPhase("listening");
-    } catch (e) {
-      setErr(e instanceof Error ? e.message : "start failed");
-      setPhase("error");
-    }
-  }
-
-  function stop() {
-    recognitionRef.current?.stop();
-  }
-
-  useEffect(() => {
-    return () => recognitionRef.current?.abort();
+    if (typeof window === "undefined") return;
+    const w = window as unknown as Record<string, unknown>;
+    setSupported(!!(w.SpeechRecognition || w.webkitSpeechRecognition));
   }, []);
 
   if (!supported) return null;
 
   return (
-    <div className="mt-1.5 flex items-start gap-2">
+    <>
       <button
-        onClick={phase === "listening" ? stop : start}
-        disabled={phase === "saving"}
+        onClick={() => setOpen(true)}
+        aria-label={`Tell me about ${equipmentName}`}
         className={[
-          "shrink-0 inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-md transition-colors ring-1",
-          phase === "listening"
-            ? "bg-sky-400 text-sky-950 ring-sky-400 animate-pulse"
-            : "bg-sky-300 text-sky-950 ring-sky-300 hover:bg-sky-200 hover:ring-sky-200",
-          phase === "saving" ? "opacity-60" : "",
+          "w-full aspect-square rounded-xl flex flex-col items-center justify-center gap-1.5 text-xs font-semibold transition-colors ring-1",
+          captured
+            ? "bg-emerald-500 text-emerald-950 ring-emerald-500 hover:bg-emerald-400"
+            : "bg-sky-300 text-sky-950 ring-sky-300 hover:bg-sky-200",
         ].join(" ")}
-        aria-label={phase === "listening" ? "Stop recording" : "Record a note"}
       >
-        {phase === "listening" ? (
-          <StopSquare className="w-3.5 h-3.5" />
-        ) : phase === "saving" ? (
-          <span aria-hidden="true">…</span>
-        ) : (
-          <MicIcon className="w-3.5 h-3.5" />
-        )}
-        {phase === "listening"
-          ? "Listening…"
-          : phase === "saving"
-            ? "Summarizing…"
-            : "Tell Me"}
+        <MicIcon className="w-6 h-6" />
+        <span>Tell Me</span>
       </button>
 
-      <div className="min-w-0 flex-1 text-[12px] leading-snug">
-        {phase === "listening" && interim && (
-          <span className="text-neutral-400 italic">{interim}</span>
-        )}
-        {phase !== "listening" && err && (
-          <span className="text-rose-300">{err}</span>
-        )}
-        {phase !== "listening" && !err && latest && (
-          <span className="text-neutral-300">{latest.summary}</span>
-        )}
-        {phase !== "listening" && !err && !latest && (
-          <span className="text-neutral-600 italic">
-            tap to record a note about your workout
-          </span>
-        )}
-      </div>
-    </div>
+      {open && (
+        <TellMeModal
+          equipmentId={equipmentId}
+          equipmentName={equipmentName}
+          onClose={() => setOpen(false)}
+        />
+      )}
+    </>
   );
 }

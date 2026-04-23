@@ -45,12 +45,29 @@ create table if not exists equipment_notes (
 create index if not exists equipment_notes_lookup_idx
   on equipment_notes (user_id, equipment_id, created_at desc);
 
+-- Per-equipment form-check videos. Binary lives in the "form-videos" storage
+-- bucket; this table just indexes the uploaded paths.
+create table if not exists form_videos (
+  id bigserial primary key,
+  user_id text not null references profiles(id) on delete cascade,
+  equipment_id text not null,
+  video_path text not null,
+  mime_type text,
+  duration_ms integer,
+  size_bytes integer,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists form_videos_lookup_idx
+  on form_videos (user_id, equipment_id, created_at desc);
+
 -- RLS: enable, then explicitly allow anon to read/write everything.
 -- This matches the "shared trust" model the user picked. Tighten later
 -- by introducing real auth and constraining policies on auth.uid().
 alter table profiles enable row level security;
 alter table log_entries enable row level security;
 alter table equipment_notes enable row level security;
+alter table form_videos enable row level security;
 
 drop policy if exists "anon read profiles" on profiles;
 create policy "anon read profiles" on profiles
@@ -82,4 +99,16 @@ create policy "anon insert equipment_notes" on equipment_notes
 
 drop policy if exists "anon delete equipment_notes" on equipment_notes;
 create policy "anon delete equipment_notes" on equipment_notes
+  for delete to anon using (true);
+
+drop policy if exists "anon read form_videos" on form_videos;
+create policy "anon read form_videos" on form_videos
+  for select to anon using (true);
+
+drop policy if exists "anon insert form_videos" on form_videos;
+create policy "anon insert form_videos" on form_videos
+  for insert to anon with check (true);
+
+drop policy if exists "anon delete form_videos" on form_videos;
+create policy "anon delete form_videos" on form_videos
   for delete to anon using (true);

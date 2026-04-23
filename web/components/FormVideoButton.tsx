@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useVideos } from "@/contexts/VideosContext";
 
 function CameraIcon({ className = "" }: { className?: string }) {
   return (
@@ -20,9 +21,18 @@ function CameraIcon({ className = "" }: { className?: string }) {
   );
 }
 
-type Phase = "idle" | "opening" | "live" | "recording" | "review" | "error";
+type Phase = "idle" | "opening" | "live" | "recording" | "review" | "saving" | "error";
 
-export function FormVideoButton({ equipmentName }: { equipmentName: string }) {
+export function FormVideoButton({
+  equipmentId,
+  equipmentName,
+}: {
+  equipmentId: string;
+  equipmentName: string;
+}) {
+  const { hasVideo, saveVideo } = useVideos();
+  const captured = hasVideo(equipmentId);
+
   const [open, setOpen] = useState(false);
   const [phase, setPhase] = useState<Phase>("idle");
   const [err, setErr] = useState<string | null>(null);
@@ -33,50 +43,50 @@ export function FormVideoButton({ equipmentName }: { equipmentName: string }) {
   const streamRef = useRef<MediaStream | null>(null);
   const recorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
+  const mimeRef = useRef<string>("video/webm");
   const [playbackUrl, setPlaybackUrl] = useState<string | null>(null);
+  const [recordedBlob, setRecordedBlob] = useState<Blob | null>(null);
   const [elapsed, setElapsed] = useState(0);
   const elapsedTimerRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (typeof navigator === "undefined") return;
-    setSupported(!!navigator.mediaDevices?.getUserMedia);
+    setSupported(
+      !!navigator.mediaDevices?.getUserMedia && typeof MediaRecorder !== "undefined",
+    );
   }, []);
 
   function cleanupStream() {
     streamRef.current?.getTracks().forEach((t) => t.stop());
     streamRef.current = null;
   }
-
   function cleanupAll() {
     cleanupStream();
     if (elapsedTimerRef.current !== null) {
       clearInterval(elapsedTimerRef.current);
       elapsedTimerRef.current = null;
     }
-    if (playbackUrl) {
-      URL.revokeObjectURL(playbackUrl);
-    }
+    if (playbackUrl) URL.revokeObjectURL(playbackUrl);
     setPlaybackUrl(null);
+    setRecordedBlob(null);
     setElapsed(0);
     chunksRef.current = [];
   }
 
-  async function start() {
+  async function openCamera(desired: "environment" | "user" = facing) {
     setOpen(true);
     setErr(null);
     setPhase("opening");
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: facing },
+        video: { facingMode: desired },
         audio: false,
       });
       streamRef.current = stream;
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
         videoRef.current.muted = true;
-        await videoRef.current.play().catch(() => {
-          // autoplay may be blocked; user tap will start it
-        });
+        await videoRef.current.play().catch(() => {});
       }
       setPhase("live");
     } catch (e) {
@@ -89,20 +99,7 @@ export function FormVideoButton({ equipmentName }: { equipmentName: string }) {
     const next = facing === "environment" ? "user" : "environment";
     setFacing(next);
     cleanupStream();
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: next },
-        audio: false,
-      });
-      streamRef.current = stream;
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        await videoRef.current.play().catch(() => {});
-      }
-    } catch (e) {
-      setErr(e instanceof Error ? e.message : "camera error");
-      setPhase("error");
-    }
+    await openCamera(next);
   }
 
   function startRecording() {
@@ -113,15 +110,15 @@ export function FormVideoButton({ equipmentName }: { equipmentName: string }) {
     const rec = mime
       ? new MediaRecorder(streamRef.current, { mimeType: mime })
       : new MediaRecorder(streamRef.current);
+    mimeRef.current = rec.mimeType || mime || "video/webm";
     rec.ondataavailable = (e) => {
       if (e.data.size > 0) chunksRef.current.push(e.data);
     };
     rec.onstop = () => {
-      const blob = new Blob(chunksRef.current, {
-        type: rec.mimeType || "video/webm",
-      });
+      const blob = new Blob(chunksRef.current, { type: mimeRef.current });
       const url = URL.createObjectURL(blob);
       setPlaybackUrl(url);
+      setRecordedBlob(blob);
       cleanupStream();
       if (videoRef.current) {
         videoRef.current.srcObject = null;
@@ -144,20 +141,38 @@ export function FormVideoButton({ equipmentName }: { equipmentName: string }) {
     elapsedTimerRef.current = window.setInterval(() => {
       const secs = Math.floor((Date.now() - started) / 1000);
       setElapsed(secs);
-      // Auto-stop at 60s to keep memory in check
       if (secs >= 60) stopRecording();
     }, 250);
     setPhase("recording");
   }
 
   function stopRecording() {
-    recorderRef.current?.state === "recording" && recorderRef.current.stop();
+    if (recorderRef.current?.state === "recording") recorderRef.current.stop();
+  }
+
+  async function saveClip() {
+    if (!recordedBlob) return;
+    setErr(null);
+    setPhase("saving");
+    try {
+      await saveVideo({
+        equipmentId,
+        blob: recordedBlob,
+        mimeType: mimeRef.current,
+        durationMs: elapsed * 1000,
+      });
+      cleanupAll();
+      setOpen(false);
+      setPhase("idle");
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : "upload failed");
+      setPhase("error");
+    }
   }
 
   function close() {
     try {
-      recorderRef.current?.state === "recording" &&
-        recorderRef.current.stop();
+      if (recorderRef.current?.state === "recording") recorderRef.current.stop();
     } catch {
       /* ignore */
     }
@@ -167,7 +182,14 @@ export function FormVideoButton({ equipmentName }: { equipmentName: string }) {
     setErr(null);
   }
 
-  // cleanup on unmount
+  function rerecord() {
+    if (playbackUrl) URL.revokeObjectURL(playbackUrl);
+    setPlaybackUrl(null);
+    setRecordedBlob(null);
+    setPhase("idle");
+    void openCamera();
+  }
+
   useEffect(() => {
     return () => cleanupAll();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -178,12 +200,17 @@ export function FormVideoButton({ equipmentName }: { equipmentName: string }) {
   return (
     <>
       <button
-        onClick={start}
-        className="mt-1.5 shrink-0 inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-md bg-sky-300 text-sky-950 ring-1 ring-sky-300 hover:bg-sky-200 hover:ring-sky-200 transition-colors"
-        aria-label={`Record form video on ${equipmentName}`}
+        onClick={() => openCamera()}
+        aria-label={`Show me my form on ${equipmentName}`}
+        className={[
+          "w-full aspect-square rounded-xl flex flex-col items-center justify-center gap-1.5 text-xs font-semibold transition-colors ring-1",
+          captured
+            ? "bg-emerald-500 text-emerald-950 ring-emerald-500 hover:bg-emerald-400"
+            : "bg-sky-300 text-sky-950 ring-sky-300 hover:bg-sky-200",
+        ].join(" ")}
       >
-        <CameraIcon className="w-3.5 h-3.5" />
-        Show Me
+        <CameraIcon className="w-6 h-6" />
+        <span>Show Me</span>
       </button>
 
       {open && (
@@ -224,9 +251,12 @@ export function FormVideoButton({ equipmentName }: { equipmentName: string }) {
             )}
 
             {phase === "opening" && (
-              <p className="absolute text-neutral-500 text-sm">
-                Opening camera…
-              </p>
+              <p className="absolute text-neutral-500 text-sm">Opening camera…</p>
+            )}
+            {phase === "saving" && (
+              <div className="absolute inset-0 bg-black/70 flex items-center justify-center">
+                <p className="text-white text-sm">Uploading…</p>
+              </div>
             )}
           </div>
 
@@ -261,25 +291,29 @@ export function FormVideoButton({ equipmentName }: { equipmentName: string }) {
             {phase === "review" && (
               <>
                 <button
-                  onClick={() => {
-                    // Re-record: revoke playback URL and go back to live
-                    if (playbackUrl) URL.revokeObjectURL(playbackUrl);
-                    setPlaybackUrl(null);
-                    setPhase("idle");
-                    start();
-                  }}
+                  onClick={rerecord}
                   className="text-xs text-neutral-300 hover:text-white px-3 py-2"
                 >
                   Re-record
                 </button>
-                <button
-                  onClick={close}
-                  className="bg-white text-black text-sm font-semibold px-4 py-2.5 rounded-lg"
-                >
-                  Done
-                </button>
-                <span className="w-24" />
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={close}
+                    className="text-sm text-neutral-300 hover:text-white px-3 py-2"
+                  >
+                    Discard
+                  </button>
+                  <button
+                    onClick={saveClip}
+                    className="bg-emerald-500 hover:bg-emerald-400 text-emerald-950 text-sm font-semibold px-4 py-2.5 rounded-lg"
+                  >
+                    Save
+                  </button>
+                </div>
               </>
+            )}
+            {phase === "saving" && (
+              <div className="mx-auto text-xs text-neutral-400">Uploading…</div>
             )}
             {phase === "opening" && (
               <div className="mx-auto text-xs text-neutral-500">

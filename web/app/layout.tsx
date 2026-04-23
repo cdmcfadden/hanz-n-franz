@@ -4,6 +4,7 @@ import { TopNav } from "@/components/TopNav";
 import { EntriesProvider } from "@/contexts/EntriesContext";
 import { NotesProvider } from "@/contexts/NotesContext";
 import { UserProvider } from "@/contexts/UserContext";
+import { VideosProvider } from "@/contexts/VideosContext";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -52,8 +53,10 @@ export default function RootLayout({
         <UserProvider>
           <EntriesProvider>
             <NotesProvider>
-              <TopNav />
-              {children}
+              <VideosProvider>
+                <TopNav />
+                {children}
+              </VideosProvider>
             </NotesProvider>
           </EntriesProvider>
         </UserProvider>

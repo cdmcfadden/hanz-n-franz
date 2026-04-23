@@ -148,12 +148,20 @@ function EquipmentRow({
     <li className="rounded-2xl bg-[var(--surface-soft)] ring-1 ring-[var(--ring)] p-4 sm:p-5">
       {/* Header: name + voice-note row on the left, clickable image top-right */}
       <header className="flex items-start justify-between gap-3 mb-4">
-        <div className="min-w-0 pt-1">
+        <div className="min-w-0 pt-1 flex-1">
           <h3 className="font-semibold text-white tracking-tight text-lg sm:text-xl truncate">
             {item.name}
           </h3>
-          <VoiceNoteButton equipmentId={item.id} />
-          <FormVideoButton equipmentName={item.name} />
+          <div className="mt-2 grid grid-cols-2 gap-2 max-w-[14rem]">
+            <VoiceNoteButton
+              equipmentId={item.id}
+              equipmentName={item.name}
+            />
+            <FormVideoButton
+              equipmentId={item.id}
+              equipmentName={item.name}
+            />
+          </div>
         </div>
 
         <Link
