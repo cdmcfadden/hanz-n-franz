@@ -1,0 +1,21 @@
+# Source video — too large for GitHub (>100MB)
+*.mov
+*.mp4
+*.MOV
+
+# Iteration artifact (frame thumbnails superseded by Wikipedia images)
+web/public/equipment/frames_backup/
+
+# OS / editor noise
+.DS_Store
+*.swp
+*~
+
+# env files (the web/.gitignore already covers .env*, this catches any
+# stray copies in subdirs)
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
