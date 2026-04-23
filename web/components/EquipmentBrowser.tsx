@@ -151,16 +151,6 @@ function EquipmentRow({
           <h3 className="font-semibold text-white tracking-tight text-lg sm:text-xl truncate">
             {item.name}
           </h3>
-          {item.brand_guess && (
-            <div className="text-xs text-neutral-500 mt-0.5">
-              {item.brand_guess}
-            </div>
-          )}
-          {item.count !== undefined && (
-            <div className="text-[11px] text-neutral-600 mt-0.5 tabular-nums">
-              ×{item.count} in gym
-            </div>
-          )}
           <VoiceNoteButton equipmentId={item.id} />
         </div>
 

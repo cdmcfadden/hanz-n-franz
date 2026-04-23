@@ -127,8 +127,8 @@ export function VoiceNoteButton({ equipmentId }: { equipmentId: string }) {
         className={[
           "shrink-0 inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-md transition-colors ring-1",
           phase === "listening"
-            ? "bg-[var(--accent)] text-white ring-[var(--accent)] animate-pulse"
-            : "bg-black text-neutral-300 ring-[var(--ring)] hover:text-white hover:ring-[var(--ring-strong)]",
+            ? "bg-sky-400 text-sky-950 ring-sky-400 animate-pulse"
+            : "bg-sky-300 text-sky-950 ring-sky-300 hover:bg-sky-200 hover:ring-sky-200",
           phase === "saving" ? "opacity-60" : "",
         ].join(" ")}
         aria-label={phase === "listening" ? "Stop recording" : "Record a note"}
@@ -140,7 +140,7 @@ export function VoiceNoteButton({ equipmentId }: { equipmentId: string }) {
           ? "Listening…"
           : phase === "saving"
             ? "Summarizing…"
-            : "Speak"}
+            : "Tell Me"}
       </button>
 
       <div className="min-w-0 flex-1 text-[12px] leading-snug">
@@ -155,7 +155,7 @@ export function VoiceNoteButton({ equipmentId }: { equipmentId: string }) {
         )}
         {phase !== "listening" && !err && !latest && (
           <span className="text-neutral-600 italic">
-            Tap to record a note about this machine.
+            tap to record a note about your workout
           </span>
         )}
       </div>
