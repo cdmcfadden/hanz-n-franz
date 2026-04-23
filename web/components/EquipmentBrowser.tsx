@@ -152,7 +152,7 @@ function EquipmentRow({
           <h3 className="font-semibold text-white tracking-tight text-lg sm:text-xl truncate">
             {item.name}
           </h3>
-          <div className="mt-2 grid grid-cols-2 gap-2 max-w-[14rem]">
+          <div className="mt-2 grid grid-cols-2 gap-1.5 max-w-[7rem]">
             <VoiceNoteButton
               equipmentId={item.id}
               equipmentName={item.name}

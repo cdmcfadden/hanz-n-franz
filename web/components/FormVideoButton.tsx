@@ -21,6 +21,23 @@ function CameraIcon({ className = "" }: { className?: string }) {
   );
 }
 
+function CheckIcon({ className = "" }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="3"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden="true"
+    >
+      <polyline points="4 12 10 18 20 6" />
+    </svg>
+  );
+}
+
 type Phase = "idle" | "opening" | "live" | "recording" | "review" | "saving" | "error";
 
 export function FormVideoButton({
@@ -201,15 +218,19 @@ export function FormVideoButton({
     <>
       <button
         onClick={() => openCamera()}
-        aria-label={`Show me my form on ${equipmentName}`}
+        aria-label={`Show me my form on ${equipmentName}${captured ? " (captured)" : ""}`}
         className={[
-          "w-full aspect-square rounded-xl flex flex-col items-center justify-center gap-1.5 text-xs font-semibold transition-colors ring-1",
+          "w-full aspect-square rounded-lg flex flex-col items-center justify-center gap-0.5 text-[10px] font-semibold transition-colors ring-1",
           captured
-            ? "bg-emerald-500 text-emerald-950 ring-emerald-500 hover:bg-emerald-400"
+            ? "bg-emerald-700 text-emerald-50 ring-emerald-700 hover:bg-emerald-600"
             : "bg-sky-300 text-sky-950 ring-sky-300 hover:bg-sky-200",
         ].join(" ")}
       >
-        <CameraIcon className="w-6 h-6" />
+        {captured ? (
+          <CheckIcon className="w-4 h-4" />
+        ) : (
+          <CameraIcon className="w-4 h-4" />
+        )}
         <span>Show Me</span>
       </button>
 
