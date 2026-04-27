@@ -34,7 +34,7 @@ export function NotesProvider({ children }: { children: ReactNode }) {
   const reqId = useRef(0);
 
   useEffect(() => {
-    if (!userHydrated) return;
+    if (!userHydrated || !currentUser) return;
     const myReq = ++reqId.current;
     setLoading(true);
     fetchLatestNotesForUser(currentUser.id)
@@ -47,7 +47,7 @@ export function NotesProvider({ children }: { children: ReactNode }) {
       .catch(() => {
         if (reqId.current === myReq) setLoading(false);
       });
-  }, [currentUser.id, userHydrated]);
+  }, [currentUser?.id, userHydrated]);
 
   const getLatest = useCallback(
     (equipmentId: string): Note | null => {
@@ -66,7 +66,7 @@ export function NotesProvider({ children }: { children: ReactNode }) {
 
   const add = useCallback(
     async (equipmentId: string, transcript: string): Promise<Note> => {
-      const saved = await saveNote(currentUser.id, equipmentId, transcript);
+      const saved = await saveNote(equipmentId, transcript);
       setNotes((prev) => {
         const next = new Map(prev);
         next.set(equipmentId, saved);
@@ -74,7 +74,7 @@ export function NotesProvider({ children }: { children: ReactNode }) {
       });
       return saved;
     },
-    [currentUser.id],
+    [],
   );
 
   const value = useMemo(

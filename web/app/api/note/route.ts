@@ -1,12 +1,11 @@
 import { NextResponse } from "next/server";
 import { generateText } from "ai";
-import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
+import { getServerSupabase } from "@/lib/supabase-server";
 
 export const runtime = "nodejs";
 
 const bodySchema = z.object({
-  userId: z.string().min(1),
   equipmentId: z.string().min(1),
   transcript: z.string().min(1).max(4000),
 });
@@ -21,22 +20,21 @@ card. Rules:
 - If the transcript is empty or unintelligible, reply with exactly:
   (no usable detail in the recording)`;
 
-function getServerSupabase() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  if (!url || !key) {
-    throw new Error("Supabase env vars missing");
-  }
-  return createClient(url, key, { auth: { persistSession: false } });
-}
-
 export async function POST(req: Request) {
+  const sb = await getServerSupabase();
+  const {
+    data: { user },
+  } = await sb.auth.getUser();
+  if (!user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const raw = await req.json().catch(() => ({}));
   const parsed = bodySchema.safeParse(raw);
   if (!parsed.success) {
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
   }
-  const { userId, equipmentId, transcript } = parsed.data;
+  const { equipmentId, transcript } = parsed.data;
 
   // Summarize via AI Gateway → Claude Haiku (cheap, fast, good at terse text).
   const { text } = await generateText({
@@ -47,11 +45,10 @@ export async function POST(req: Request) {
   });
   const summary = text.trim().slice(0, 200);
 
-  const sb = getServerSupabase();
   const { data, error } = await sb
     .from("equipment_notes")
     .insert({
-      user_id: userId,
+      user_id: user.id,
       equipment_id: equipmentId,
       transcript,
       summary,

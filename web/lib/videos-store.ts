@@ -1,6 +1,6 @@
 "use client";
 
-import { getSupabase } from "@/lib/supabase";
+import { getBrowserSupabase as getSupabase } from "@/lib/supabase-browser";
 
 export type VideoMeta = {
   id: number;

@@ -55,7 +55,7 @@ export function EntriesProvider({ children }: { children: ReactNode }) {
   const reqId = useRef(0);
 
   useEffect(() => {
-    if (!userHydrated) return;
+    if (!userHydrated || !currentUser) return;
     const myReq = ++reqId.current;
     setLoading(true);
     setError(null);
@@ -72,7 +72,7 @@ export function EntriesProvider({ children }: { children: ReactNode }) {
           setLoading(false);
         }
       });
-  }, [currentUser.id, userHydrated]);
+  }, [currentUser?.id, userHydrated]);
 
   const getEntries = useCallback(
     (equipmentId: string, moveId: string): LogEntry[] => {
@@ -109,6 +109,7 @@ export function EntriesProvider({ children }: { children: ReactNode }) {
       date: string,
       weight: number,
     ) => {
+      if (!currentUser) return;
       const created = await dbAdd(
         currentUser.id,
         equipmentId,
@@ -127,7 +128,7 @@ export function EntriesProvider({ children }: { children: ReactNode }) {
         return next;
       });
     },
-    [currentUser.id],
+    [currentUser],
   );
 
   const remove = useCallback(

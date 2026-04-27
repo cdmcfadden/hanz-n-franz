@@ -7,56 +7,82 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { DEFAULT_USER_ID, USERS, type User } from "@/lib/users";
+import { getBrowserSupabase } from "@/lib/supabase-browser";
+
+export type AuthUser = {
+  id: string;
+  name: string;
+  shortName: string;
+  avatar: string | null;
+  email: string;
+};
+
+type Profile = {
+  display_name: string;
+  short_name: string;
+  avatar_url: string | null;
+};
 
 type UserContextValue = {
-  currentUser: User;
-  setCurrentUserId: (id: string) => void;
+  currentUser: AuthUser | null;
+  signOut: () => Promise<void>;
   hydrated: boolean;
 };
 
-const STORAGE_KEY = "h360:user";
-
 const UserContext = createContext<UserContextValue | null>(null);
 
-function resolveUser(id: string): User {
-  return USERS.find((u) => u.id === id) ?? USERS[0];
-}
-
 export function UserProvider({ children }: { children: ReactNode }) {
-  const [currentUserId, setCurrentUserIdState] =
-    useState<string>(DEFAULT_USER_ID);
+  const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
-    try {
-      const stored = window.localStorage.getItem(STORAGE_KEY);
-      if (stored && USERS.some((u) => u.id === stored)) {
-        setCurrentUserIdState(stored);
-      }
-    } catch {
-      // ignore
+    const sb = getBrowserSupabase();
+
+    async function loadUser(userId: string, email: string) {
+      const { data } = await sb
+        .from("profiles")
+        .select("display_name, short_name, avatar_url")
+        .eq("id", userId)
+        .single();
+      const profile = data as Profile | null;
+      setCurrentUser({
+        id: userId,
+        name: profile?.display_name ?? email,
+        shortName: profile?.short_name ?? email.split("@")[0],
+        avatar: profile?.avatar_url ?? null,
+        email,
+      });
     }
-    setHydrated(true);
+
+    sb.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        loadUser(session.user.id, session.user.email ?? "").finally(() =>
+          setHydrated(true),
+        );
+      } else {
+        setHydrated(true);
+      }
+    });
+
+    const {
+      data: { subscription },
+    } = sb.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        loadUser(session.user.id, session.user.email ?? "");
+      } else {
+        setCurrentUser(null);
+      }
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
-  function setCurrentUserId(id: string) {
-    setCurrentUserIdState(id);
-    try {
-      window.localStorage.setItem(STORAGE_KEY, id);
-    } catch {
-      // ignore
-    }
+  async function signOut() {
+    await getBrowserSupabase().auth.signOut();
   }
 
   return (
-    <UserContext.Provider
-      value={{
-        currentUser: resolveUser(currentUserId),
-        setCurrentUserId,
-        hydrated,
-      }}
-    >
+    <UserContext.Provider value={{ currentUser, signOut, hydrated }}>
       {children}
     </UserContext.Provider>
   );

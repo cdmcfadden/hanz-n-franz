@@ -39,7 +39,7 @@ export function VideosProvider({ children }: { children: ReactNode }) {
   const reqId = useRef(0);
 
   useEffect(() => {
-    if (!userHydrated) return;
+    if (!userHydrated || !currentUser) return;
     const myReq = ++reqId.current;
     setLoading(true);
     fetchLatestVideoMap(currentUser.id)
@@ -52,7 +52,7 @@ export function VideosProvider({ children }: { children: ReactNode }) {
       .catch(() => {
         if (reqId.current === myReq) setLoading(false);
       });
-  }, [currentUser.id, userHydrated]);
+  }, [currentUser?.id, userHydrated]);
 
   const getLatest = useCallback(
     (equipmentId: string): VideoMeta | null =>
@@ -75,6 +75,7 @@ export function VideosProvider({ children }: { children: ReactNode }) {
       mimeType?: string;
       durationMs?: number;
     }) => {
+      if (!currentUser) throw new Error("Not authenticated");
       const saved = await uploadAndRecordVideo({
         userId: currentUser.id,
         ...args,
@@ -86,7 +87,7 @@ export function VideosProvider({ children }: { children: ReactNode }) {
       });
       return saved;
     },
-    [currentUser.id],
+    [currentUser],
   );
 
   const value = useMemo(

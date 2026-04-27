@@ -1,6 +1,6 @@
 "use client";
 
-import { getSupabase } from "@/lib/supabase";
+import { getBrowserSupabase as getSupabase } from "@/lib/supabase-browser";
 
 export type Note = {
   id: number;
@@ -53,14 +53,13 @@ export async function fetchLatestNotesForUser(
 // Posts to /api/note so the server-side LLM + insert happens with the
 // AI Gateway key, not the client's anon key.
 export async function saveNote(
-  userId: string,
   equipmentId: string,
   transcript: string,
 ): Promise<Note> {
   const res = await fetch("/api/note", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ userId, equipmentId, transcript }),
+    body: JSON.stringify({ equipmentId, transcript }),
   });
   if (!res.ok) {
     const text = await res.text().catch(() => "");
