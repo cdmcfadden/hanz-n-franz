@@ -101,6 +101,8 @@ export const MOVE_GROUPS: Record<string, string[]> = {
   cable_lateral_raise: ["shoulders"],
   cable_fly: ["chest"],
   cable_crossover: ["chest"],
+  standing_lateral_raise: ["shoulders"],
+  standing_chest_fly: ["chest"],
 
   // Dumbbell free-weight moves
   flat_chest_press: ["chest", "shoulders", "arms"],

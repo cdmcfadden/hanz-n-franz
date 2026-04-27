@@ -138,6 +138,10 @@
     { "id": "cable_crossover", "name": "Cable crossover (stand-up)", "count": 1, "confidence": "medium", "muscles": ["chest", "rear delts", "triceps"], "moves": [
       { "id": "cable_fly", "name": "Cable fly" },
       { "id": "cable_crossover", "name": "Cable crossover" }
+    ] },
+    { "id": "standing_lateral_fly", "name": "Standing lateral raise & fly", "brand_guess": "MaxPlus", "count": 1, "confidence": "high", "muscles": ["shoulders", "rear delts", "chest"], "moves": [
+      { "id": "standing_lateral_raise", "name": "Standing lateral raise" },
+      { "id": "standing_chest_fly", "name": "Standing chest fly" }
     ] }
   ],
   "cardio": [

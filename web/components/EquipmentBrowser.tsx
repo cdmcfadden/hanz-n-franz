@@ -15,7 +15,7 @@ import {
 } from "@/lib/equipment";
 import { ALL_GROUP_IDS, groupsForItem, groupsForMove } from "@/lib/muscle-groups";
 
-const IMG_VERSION = "4";
+const IMG_VERSION = "5";
 
 export type ItemsByCategory = Partial<Record<EquipmentCategory, EquipmentItem[]>>;
 
