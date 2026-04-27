@@ -66,6 +66,9 @@
     { "id": "incline_chest_press_pl", "name": "Plate-loaded incline chest press", "count": 1, "confidence": "high", "muscles": ["upper chest", "front delts", "triceps"], "moves": [
       { "id": "incline_chest_press", "name": "Incline chest press" }
     ] },
+    { "id": "decline_chest_press_pl", "name": "Plate-loaded decline chest press", "count": 1, "confidence": "high", "muscles": ["lower chest", "front delts", "triceps"], "moves": [
+      { "id": "decline_chest_press", "name": "Decline chest press" }
+    ] },
     { "id": "iso_row_pl", "name": "Iso-lateral row", "count": 1, "confidence": "high", "muscles": ["lats", "rhomboids", "rear delts", "biceps"], "moves": [
       { "id": "iso_row", "name": "Iso row" }
     ] },

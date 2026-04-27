@@ -66,6 +66,7 @@ export const MOVE_GROUPS: Record<string, string[]> = {
   hack_squat: ["legs"],
   reverse_hack_squat: ["legs"],
   incline_chest_press: ["chest", "shoulders", "arms"],
+  decline_chest_press: ["chest", "shoulders", "arms"],
   iso_row: ["back", "arms"],
   iso_shoulder_press: ["shoulders", "arms"],
   iso_high_row: ["back"],
