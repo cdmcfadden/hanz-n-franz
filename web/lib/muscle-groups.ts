@@ -52,9 +52,8 @@ export const MOVE_GROUPS: Record<string, string[]> = {
   smith_shoulder_press: ["shoulders", "arms"],
   smith_row: ["back", "arms"],
 
-  // Benches (with dumbbells)
-  db_bench_press: ["chest", "shoulders", "arms"],
-  db_fly: ["chest"],
+  // Benches
+  barbell_bench_press: ["chest", "shoulders", "arms"],
   incline_db_press: ["chest", "shoulders", "arms"],
   incline_db_curl: ["arms"],
   seal_row: ["back", "arms"],
@@ -83,7 +82,6 @@ export const MOVE_GROUPS: Record<string, string[]> = {
   seated_row: ["back", "arms"],
   pec_fly: ["chest"],
   reverse_fly: ["shoulders", "back"],
-  machine_chest_press: ["chest", "shoulders", "arms"],
   machine_shoulder_press: ["shoulders", "arms"],
   leg_extension: ["legs"],
   leg_curl: ["legs"],

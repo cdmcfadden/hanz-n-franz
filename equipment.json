@@ -40,8 +40,7 @@
   ],
   "benches": [
     { "id": "bench_flat", "name": "Flat bench", "count": "2+", "confidence": "high", "muscles": ["chest", "triceps", "front delts"], "moves": [
-      { "id": "db_bench_press", "name": "Dumbbell bench press" },
-      { "id": "db_fly", "name": "Dumbbell fly" }
+      { "id": "barbell_bench_press", "name": "Barbell bench press" }
     ] },
     { "id": "bench_adjustable", "name": "Adjustable FID bench", "count": "3+", "confidence": "high", "muscles": ["chest", "shoulders", "triceps", "biceps"], "moves": [
       { "id": "incline_db_press", "name": "Incline DB press" },
@@ -66,7 +65,7 @@
     { "id": "incline_chest_press_pl", "name": "Plate-loaded incline chest press", "count": 1, "confidence": "high", "muscles": ["upper chest", "front delts", "triceps"], "moves": [
       { "id": "incline_chest_press", "name": "Incline chest press" }
     ] },
-    { "id": "decline_chest_press_pl", "name": "Plate-loaded decline chest press", "count": 1, "confidence": "high", "muscles": ["lower chest", "front delts", "triceps"], "moves": [
+    { "id": "decline_chest_press_pl", "name": "Decline chest press", "count": 1, "confidence": "high", "muscles": ["lower chest", "front delts", "triceps"], "moves": [
       { "id": "decline_chest_press", "name": "Decline chest press" }
     ] },
     { "id": "iso_row_pl", "name": "Iso-lateral row", "count": 1, "confidence": "high", "muscles": ["lats", "rhomboids", "rear delts", "biceps"], "moves": [
@@ -102,9 +101,6 @@
     { "id": "pec_deck", "name": "Pec deck / rear delt fly", "count": 1, "confidence": "high", "muscles": ["chest", "rear delts"], "moves": [
       { "id": "pec_fly", "name": "Pec fly" },
       { "id": "reverse_fly", "name": "Reverse fly" }
-    ] },
-    { "id": "chest_press_selector", "name": "Selectorized chest press", "count": 1, "confidence": "medium", "muscles": ["chest", "front delts", "triceps"], "moves": [
-      { "id": "machine_chest_press", "name": "Machine chest press" }
     ] },
     { "id": "shoulder_press_selector", "name": "Selectorized shoulder press", "count": 1, "confidence": "medium", "muscles": ["shoulders", "triceps"], "moves": [
       { "id": "machine_shoulder_press", "name": "Machine shoulder press" }

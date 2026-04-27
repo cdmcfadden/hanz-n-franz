@@ -27,6 +27,12 @@ html,
 body {
   background: var(--bg);
   color: var(--text);
+  /* Lock horizontal scrolling so a too-wide child can never push the page
+     sideways on mobile. `overflow-x: clip` doesn't create a new scroll
+     container, so the sticky TopNav still anchors to the viewport. */
+  overflow-x: clip;
+  /* iOS Safari < 16 fallback (clip is unsupported there) */
+  max-width: 100%;
 }
 
 body {
