@@ -25,7 +25,7 @@ export default async function TrendsPage() {
         <p className="text-sm text-neutral-500 mt-1 flex items-center gap-3 flex-wrap">
           <span className="inline-flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-blue-400" />
-            David
+            Dave
           </span>
           <span className="inline-flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-[var(--accent)]" />

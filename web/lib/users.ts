@@ -8,8 +8,8 @@ export type User = {
 export const USERS: User[] = [
   {
     id: "david",
-    name: "David (Hasselhoff)",
-    shortName: "David",
+    name: "Dave (Hasselhoff)",
+    shortName: "Dave",
     avatar: "/users/david.jpg",
   },
   {
