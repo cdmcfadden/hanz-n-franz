@@ -82,11 +82,23 @@ export function TrendChart({
   );
 }
 
+const dateFmt = new Intl.DateTimeFormat("en-US", {
+  month: "short",
+  day: "numeric",
+});
+
+function formatDate(iso: string): string {
+  return dateFmt.format(new Date(iso + "T00:00:00"));
+}
+
 function Chart({ series }: { series: Record<string, LogEntry[]> }) {
+  // Inner SVG coordinate space — stretched to container width via
+  // preserveAspectRatio="none". The HTML labels around it stay in real
+  // CSS pixels so text never gets distorted.
   const w = 320;
   const h = 60;
-  const padX = 4;
-  const padY = 6;
+  const padX = 2;
+  const padY = 4;
 
   const all = Object.values(series).flat();
   const dates = all.map((e) => e.date).sort();
@@ -110,45 +122,79 @@ function Chart({ series }: { series: Record<string, LogEntry[]> }) {
     return h - padY - ((weight - wMin) / wRange) * (h - padY * 2);
   }
 
+  const sameDate = minDate === maxDate;
+  const sameWeight = wMin === wMax;
+
   return (
-    <svg
-      width="100%"
-      viewBox={`0 0 ${w} ${h}`}
-      className="block"
-      preserveAspectRatio="none"
-      role="img"
-      aria-label="weight progression chart"
-    >
-      {Object.entries(series).map(([uid, entries]) => {
-        if (entries.length === 0) return null;
-        const sorted = [...entries].sort((a, b) =>
-          a.date.localeCompare(b.date),
-        );
-        const points = sorted
-          .map((e) => `${x(e.date).toFixed(1)},${y(e.weight).toFixed(1)}`)
-          .join(" ");
-        const color = COLORS[uid] ?? "#6b7280";
-        return (
-          <g key={uid}>
-            <polyline
-              fill="none"
-              stroke={color}
-              strokeWidth="2"
-              strokeLinejoin="round"
-              points={points}
-            />
-            {sorted.map((e, i) => (
-              <circle
-                key={i}
-                cx={x(e.date)}
-                cy={y(e.weight)}
-                r="2"
-                fill={color}
-              />
-            ))}
-          </g>
-        );
-      })}
-    </svg>
+    <div className="flex">
+      {/* Y-axis: weight labels stacked top→bottom (max on top) */}
+      <div className="flex flex-col justify-between text-[10px] text-neutral-500 pr-2 py-0.5 tabular-nums shrink-0">
+        {sameWeight ? (
+          <span className="my-auto">{wMax} lb</span>
+        ) : (
+          <>
+            <span>{wMax} lb</span>
+            <span>{wMin} lb</span>
+          </>
+        )}
+      </div>
+
+      {/* Chart + x-axis labels stack */}
+      <div className="flex-1 min-w-0">
+        <svg
+          width="100%"
+          viewBox={`0 0 ${w} ${h}`}
+          className="block h-[60px]"
+          preserveAspectRatio="none"
+          role="img"
+          aria-label={`Weight progression from ${formatDate(minDate)} to ${formatDate(maxDate)}, ${wMin} to ${wMax} lb`}
+        >
+          {Object.entries(series).map(([uid, entries]) => {
+            if (entries.length === 0) return null;
+            const sorted = [...entries].sort((a, b) =>
+              a.date.localeCompare(b.date),
+            );
+            const points = sorted
+              .map((e) => `${x(e.date).toFixed(1)},${y(e.weight).toFixed(1)}`)
+              .join(" ");
+            const color = COLORS[uid] ?? "#6b7280";
+            return (
+              <g key={uid}>
+                <polyline
+                  fill="none"
+                  stroke={color}
+                  strokeWidth="2"
+                  strokeLinejoin="round"
+                  vectorEffect="non-scaling-stroke"
+                  points={points}
+                />
+                {sorted.map((e, i) => (
+                  <circle
+                    key={i}
+                    cx={x(e.date)}
+                    cy={y(e.weight)}
+                    r="2"
+                    fill={color}
+                    vectorEffect="non-scaling-stroke"
+                  />
+                ))}
+              </g>
+            );
+          })}
+        </svg>
+
+        {/* X-axis: earliest date on the left, latest on the right */}
+        <div className="flex justify-between text-[10px] text-neutral-500 mt-1 tabular-nums">
+          {sameDate ? (
+            <span className="mx-auto">{formatDate(minDate)}</span>
+          ) : (
+            <>
+              <span>{formatDate(minDate)}</span>
+              <span>{formatDate(maxDate)}</span>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
   );
 }
