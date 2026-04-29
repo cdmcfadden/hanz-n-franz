@@ -1,26 +1,23 @@
 "use client";
 
 import { type EntryMap, type LogEntry, keys } from "@/lib/log-store";
-import { USERS } from "@/lib/users";
-
-const COLORS: Record<string, string> = {
-  david: "#60a5fa",
-  chris: "#ef4444",
-};
+import { type BuddyUser } from "@/lib/buddy";
 
 export function TrendChart({
   equipmentId,
   moveId,
   moveName,
   allEntries,
+  users,
 }: {
   equipmentId: string;
   moveId: string;
   moveName: string;
   allEntries: EntryMap;
+  users: BuddyUser[];
 }) {
   const series: Record<string, LogEntry[]> = {};
-  for (const u of USERS) {
+  for (const u of users) {
     series[u.id] =
       allEntries.get(keys.userMoveKey(u.id, equipmentId, moveId)) ?? [];
   }
@@ -31,7 +28,7 @@ export function TrendChart({
       <div className="flex items-baseline justify-between gap-2 mb-2 flex-wrap">
         <h3 className="text-sm font-medium text-white truncate">{moveName}</h3>
         <div className="flex gap-3 text-[11px] tabular-nums shrink-0">
-          {USERS.map((u) => {
+          {users.map((u) => {
             const entries = series[u.id] ?? [];
             const latest = entries[entries.length - 1];
             const first = entries[0];
@@ -41,11 +38,9 @@ export function TrendChart({
               <span key={u.id} className="flex items-center gap-1">
                 <span
                   className="inline-block w-2 h-2 rounded-full"
-                  style={{ background: COLORS[u.id] }}
+                  style={{ background: u.color }}
                 />
-                <span className="text-neutral-500">
-                  {u.name.split(" ")[0]}:
-                </span>
+                <span className="text-neutral-500">{u.shortName}:</span>
                 {latest ? (
                   <>
                     <span className="font-medium text-white">
@@ -72,7 +67,7 @@ export function TrendChart({
       </div>
 
       {hasAny ? (
-        <Chart series={series} />
+        <Chart series={series} users={users} />
       ) : (
         <p className="text-xs text-neutral-600 italic py-3 text-center">
           no entries yet
@@ -91,10 +86,15 @@ function formatDate(iso: string): string {
   return dateFmt.format(new Date(iso + "T00:00:00"));
 }
 
-function Chart({ series }: { series: Record<string, LogEntry[]> }) {
-  // Inner SVG coordinate space — stretched to container width via
-  // preserveAspectRatio="none". The HTML labels around it stay in real
-  // CSS pixels so text never gets distorted.
+function Chart({
+  series,
+  users,
+}: {
+  series: Record<string, LogEntry[]>;
+  users: BuddyUser[];
+}) {
+  const colorMap = Object.fromEntries(users.map((u) => [u.id, u.color]));
+
   const w = 320;
   const h = 60;
   const padX = 2;
@@ -127,7 +127,6 @@ function Chart({ series }: { series: Record<string, LogEntry[]> }) {
 
   return (
     <div className="flex">
-      {/* Y-axis: weight labels stacked top→bottom (max on top) */}
       <div className="flex flex-col justify-between text-[10px] text-neutral-500 pr-2 py-0.5 tabular-nums shrink-0">
         {sameWeight ? (
           <span className="my-auto">{wMax} lb</span>
@@ -139,7 +138,6 @@ function Chart({ series }: { series: Record<string, LogEntry[]> }) {
         )}
       </div>
 
-      {/* Chart + x-axis labels stack */}
       <div className="flex-1 min-w-0">
         <svg
           width="100%"
@@ -157,7 +155,7 @@ function Chart({ series }: { series: Record<string, LogEntry[]> }) {
             const points = sorted
               .map((e) => `${x(e.date).toFixed(1)},${y(e.weight).toFixed(1)}`)
               .join(" ");
-            const color = COLORS[uid] ?? "#6b7280";
+            const color = colorMap[uid] ?? "#6b7280";
             return (
               <g key={uid}>
                 <polyline
@@ -183,7 +181,6 @@ function Chart({ series }: { series: Record<string, LogEntry[]> }) {
           })}
         </svg>
 
-        {/* X-axis: earliest date on the left, latest on the right */}
         <div className="flex justify-between text-[10px] text-neutral-500 mt-1 tabular-nums">
           {sameDate ? (
             <span className="mx-auto">{formatDate(minDate)}</span>

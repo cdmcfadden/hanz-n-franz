@@ -8,8 +8,16 @@ import {
   type EquipmentCategory,
   type EquipmentItem,
 } from "@/lib/equipment";
-import { fetchAllEntries, keys, type EntryMap } from "@/lib/log-store";
-import { USERS } from "@/lib/users";
+import { type EntryMap, type LogEntry, keys } from "@/lib/log-store";
+import { type BuddyUser } from "@/lib/buddy";
+
+type Row = {
+  userId: string;
+  equipmentId: string;
+  moveId: string;
+  date: string;
+  weight: number;
+};
 
 export function TrendsView({
   itemsByCategory,
@@ -17,13 +25,27 @@ export function TrendsView({
   itemsByCategory: Partial<Record<EquipmentCategory, EquipmentItem[]>>;
 }) {
   const [allEntries, setAllEntries] = useState<EntryMap>(() => new Map());
+  const [users, setUsers] = useState<BuddyUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchAllEntries()
-      .then((m) => {
-        setAllEntries(m);
+    fetch("/api/buddy/entries")
+      .then(async (res) => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = (await res.json()) as { rows: Row[]; users: BuddyUser[] };
+        setUsers(data.users ?? []);
+        const map = new Map<string, LogEntry[]>();
+        for (const row of data.rows ?? []) {
+          const k = keys.userMoveKey(row.userId, row.equipmentId, row.moveId);
+          const list = map.get(k) ?? [];
+          list.push({ id: 0, date: row.date, weight: row.weight });
+          map.set(k, list);
+        }
+        for (const list of map.values()) {
+          list.sort((a, b) => a.date.localeCompare(b.date));
+        }
+        setAllEntries(map);
         setLoading(false);
       })
       .catch((e: unknown) => {
@@ -48,7 +70,7 @@ export function TrendsView({
   }
 
   function moveHasEntries(equipmentId: string, moveId: string): boolean {
-    for (const u of USERS) {
+    for (const u of users) {
       const list = allEntries.get(keys.userMoveKey(u.id, equipmentId, moveId));
       if (list && list.length > 0) return true;
     }
@@ -79,6 +101,7 @@ export function TrendsView({
               moveId={mv.id}
               moveName={`${mv.name} — ${item.name}`}
               allEntries={allEntries}
+              users={users}
             />
           ))}
         </div>

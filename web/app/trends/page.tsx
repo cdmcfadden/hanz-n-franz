@@ -6,8 +6,6 @@ import {
 } from "@/lib/equipment";
 import { loadEquipmentData } from "@/lib/equipment-server";
 
-export const dynamic = "force-static";
-
 export default async function TrendsPage() {
   const data = await loadEquipmentData();
   const itemsByCategory: Partial<Record<EquipmentCategory, EquipmentItem[]>> =
@@ -22,16 +20,8 @@ export default async function TrendsPage() {
         <h1 className="text-xl sm:text-2xl font-semibold tracking-tight text-white">
           Trends
         </h1>
-        <p className="text-sm text-neutral-500 mt-1 flex items-center gap-3 flex-wrap">
-          <span className="inline-flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-blue-400" />
-            Dave
-          </span>
-          <span className="inline-flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-[var(--accent)]" />
-            Chris
-          </span>
-          <span className="text-neutral-600">— overlaid per move</span>
+        <p className="text-sm text-neutral-500 mt-1">
+          Overlaid per move — buddy group members shown together.
         </p>
       </div>
 

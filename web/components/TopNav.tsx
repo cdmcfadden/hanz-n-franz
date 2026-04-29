@@ -8,11 +8,13 @@ const TABS = [
   { id: "workout", label: "Workout", href: "/" },
   { id: "equipment", label: "Equipment", href: "/equipment" },
   { id: "trends", label: "Trends", href: "/trends" },
+  { id: "account", label: "Account", href: "/account" },
 ] as const;
 
 function activeTab(pathname: string): string {
   if (pathname.startsWith("/equipment")) return "equipment";
   if (pathname.startsWith("/trends")) return "trends";
+  if (pathname.startsWith("/account") || pathname.startsWith("/buddy")) return "account";
   return "workout";
 }
 

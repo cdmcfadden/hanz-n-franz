@@ -55,6 +55,13 @@ export function UserSwitcher() {
               {currentUser.email}
             </p>
           </div>
+          <a
+            href="/account"
+            onClick={() => setOpen(false)}
+            className="block w-full px-4 py-3 text-sm text-white hover:bg-neutral-800 transition-colors border-b border-[var(--ring)]"
+          >
+            Account
+          </a>
           <button
             onClick={() => {
               setOpen(false);

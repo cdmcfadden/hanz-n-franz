@@ -5,11 +5,13 @@ import { getBrowserSupabase } from "@/lib/supabase-browser";
 export function GoogleSignInButton() {
   async function handleSignIn() {
     const sb = getBrowserSupabase();
+    const returnTo = new URLSearchParams(window.location.search).get("returnTo") ?? "";
+    const callbackUrl = returnTo
+      ? `${window.location.origin}/auth/callback?next=${encodeURIComponent(returnTo)}`
+      : `${window.location.origin}/auth/callback`;
     await sb.auth.signInWithOAuth({
       provider: "google",
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
-      },
+      options: { redirectTo: callbackUrl },
     });
   }
 
