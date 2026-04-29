@@ -29,8 +29,8 @@ ALTER TABLE equipment_notes ADD COLUMN new_user_id uuid;
 ALTER TABLE form_videos ADD COLUMN new_user_id uuid;
 
 -- 2. Set the UUIDs (replace placeholder values with real UUIDs)
-UPDATE profiles SET new_id = '<dave-google-uuid>'::uuid  WHERE id = 'david';
-UPDATE profiles SET new_id = '<chris-google-uuid>'::uuid WHERE id = 'chris';
+UPDATE profiles SET new_id = '4291b0b5-41d7-4a04-b138-90a578193e71'::uuid  WHERE id = 'david';
+UPDATE profiles SET new_id = '67772697-6da4-49fd-93f0-87af75befc99'::uuid WHERE id = 'chris';
 
 -- 3. Backfill child table FK columns
 UPDATE log_entries      SET new_user_id = p.new_id FROM profiles p WHERE log_entries.user_id      = p.id;
