@@ -161,19 +161,22 @@ export function WeightPickerModal({
                   onClick={() => tapPlate(p.weight)}
                   className="flex flex-col items-center w-full h-full"
                 >
-                  {/* count badge pinned to top of cell; invisible when zero to hold space */}
+                  {/* Expanded hit area: pb-5/-mb-5 extends tap zone 20px below the visual
+                      badge without adding layout height. w-full catches off-center taps. */}
                   <span
                     onClick={count > 0 ? (e) => removePlate(e, p.weight) : undefined}
-                    className={`min-w-[22px] h-[22px] rounded-full text-[10px] font-bold flex items-center justify-center px-1 leading-none transition-colors ${
-                      count > 0
-                        ? "bg-white text-black cursor-pointer hover:bg-red-300"
-                        : "invisible pointer-events-none"
+                    className={`w-full flex justify-center pb-5 -mb-5 ${
+                      count > 0 ? "cursor-pointer" : "invisible pointer-events-none"
                     }`}
                   >
-                    {count}
+                    <span className={`min-w-[22px] h-[22px] rounded-full text-[10px] font-bold flex items-center justify-center px-1 leading-none transition-colors ${
+                      count > 0 ? "bg-white text-black hover:bg-red-300" : ""
+                    }`}>
+                      {count}
+                    </span>
                   </span>
-                  {/* spacer pushes plate to bottom of cell; min-h ensures gap even for largest plate */}
-                  <div className="flex-1 min-h-[12px]" />
+                  {/* spacer pushes plate to bottom of cell */}
+                  <div className="flex-1" />
                   {/* plate circle */}
                   <div
                     className="rounded-full flex items-center justify-center transition-transform active:scale-95"
