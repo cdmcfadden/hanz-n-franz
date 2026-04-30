@@ -55,6 +55,14 @@ export function WeightPickerModal({
     setRawWeight(total > 0 ? String(total) : "");
   }
 
+  function removePlate(e: React.MouseEvent, weight: PlateWeight) {
+    e.stopPropagation();
+    const next = { ...plateCounts, [weight]: Math.max(0, plateCounts[weight] - 1) };
+    setPlateCounts(next);
+    const total = calcTotal(barbellOn, next);
+    setRawWeight(total > 0 ? String(total) : "");
+  }
+
   function clear() {
     setBarbellOn(false);
     setPlateCounts(INIT_COUNTS);
@@ -144,7 +152,7 @@ export function WeightPickerModal({
           <div className="text-xs uppercase tracking-widest text-neutral-500 mb-3">
             Plates
           </div>
-          <div className="flex items-end gap-3 flex-wrap">
+          <div className="flex items-end gap-2">
             {PLATES.map((p) => {
               const count = plateCounts[p.weight];
               return (
@@ -174,9 +182,12 @@ export function WeightPickerModal({
                         }}
                       />
                     </div>
-                    {/* count badge */}
+                    {/* count badge — tap to remove one */}
                     {count > 0 && (
-                      <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] rounded-full bg-white text-black text-[10px] font-bold flex items-center justify-center px-1 leading-none">
+                      <span
+                        onClick={(e) => removePlate(e, p.weight)}
+                        className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] rounded-full bg-white text-black text-[10px] font-bold flex items-center justify-center px-1 leading-none cursor-pointer hover:bg-red-300"
+                      >
                         {count}
                       </span>
                     )}
