@@ -26,6 +26,7 @@ type Profile = {
 type UserContextValue = {
   currentUser: AuthUser | null;
   signOut: () => Promise<void>;
+  refreshUser: () => Promise<void>;
   hydrated: boolean;
 };
 
@@ -35,25 +36,25 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
   const [hydrated, setHydrated] = useState(false);
 
+  const sb = getBrowserSupabase();
+
+  async function loadUser(userId: string, email: string) {
+    const { data } = await sb
+      .from("profiles")
+      .select("display_name, short_name, avatar_url")
+      .eq("id", userId)
+      .single();
+    const profile = data as Profile | null;
+    setCurrentUser({
+      id: userId,
+      name: profile?.display_name ?? email,
+      shortName: profile?.short_name ?? email.split("@")[0],
+      avatar: profile?.avatar_url ?? null,
+      email,
+    });
+  }
+
   useEffect(() => {
-    const sb = getBrowserSupabase();
-
-    async function loadUser(userId: string, email: string) {
-      const { data } = await sb
-        .from("profiles")
-        .select("display_name, short_name, avatar_url")
-        .eq("id", userId)
-        .single();
-      const profile = data as Profile | null;
-      setCurrentUser({
-        id: userId,
-        name: profile?.display_name ?? email,
-        shortName: profile?.short_name ?? email.split("@")[0],
-        avatar: profile?.avatar_url ?? null,
-        email,
-      });
-    }
-
     sb.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
         loadUser(session.user.id, session.user.email ?? "").finally(() =>
@@ -75,14 +76,22 @@ export function UserProvider({ children }: { children: ReactNode }) {
     });
 
     return () => subscription.unsubscribe();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function signOut() {
-    await getBrowserSupabase().auth.signOut();
+    await sb.auth.signOut();
+  }
+
+  async function refreshUser() {
+    const { data: { session } } = await sb.auth.getSession();
+    if (session?.user) {
+      await loadUser(session.user.id, session.user.email ?? "");
+    }
   }
 
   return (
-    <UserContext.Provider value={{ currentUser, signOut, hydrated }}>
+    <UserContext.Provider value={{ currentUser, signOut, refreshUser, hydrated }}>
       {children}
     </UserContext.Provider>
   );
