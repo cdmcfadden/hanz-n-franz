@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useEntries } from "@/contexts/EntriesContext";
 import { todayISO } from "@/lib/log-store";
+import { WeightPickerModal } from "@/components/WeightPickerModal";
 
 export function MoveLogger({
   equipmentId,
@@ -22,14 +23,16 @@ export function MoveLogger({
   const [expanded, setExpanded] = useState(false);
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+  const [showPicker, setShowPicker] = useState(false);
 
-  async function save() {
-    const w = parseFloat(weight);
-    if (!w || Number.isNaN(w) || w <= 0) return;
+  async function save(w?: number, d?: string) {
+    const weightVal = w ?? parseFloat(weight);
+    const dateVal = d ?? date;
+    if (!weightVal || Number.isNaN(weightVal) || weightVal <= 0) return;
     setSaving(true);
     setErr(null);
     try {
-      await add(equipmentId, moveId, date, w);
+      await add(equipmentId, moveId, dateVal, weightVal);
       setWeight("");
       setDate(todayISO());
     } catch (e) {
@@ -73,8 +76,9 @@ export function MoveLogger({
           value={weight}
           onChange={(e) => setWeight(e.target.value)}
           onKeyDown={handleKey}
+          onClick={() => setShowPicker(true)}
           placeholder="lb"
-          className={`${inputClass} w-full`}
+          className={`${inputClass} w-full cursor-pointer`}
         />
         <input
           type="date"
@@ -83,7 +87,7 @@ export function MoveLogger({
           className={`${inputClass} w-full min-w-0`}
         />
         <button
-          onClick={save}
+          onClick={() => save()}
           disabled={!weight || saving}
           className="text-sm font-medium px-3 py-1.5 rounded-md bg-[var(--accent)] text-white hover:bg-[var(--accent-strong)] disabled:opacity-30 disabled:hover:bg-[var(--accent)] transition-colors"
         >
@@ -117,6 +121,20 @@ export function MoveLogger({
             </li>
           ))}
         </ul>
+      )}
+
+      {showPicker && (
+        <WeightPickerModal
+          moveName={moveName}
+          initialDate={date}
+          onClose={() => setShowPicker(false)}
+          onLog={(w, d) => {
+            setWeight(String(w));
+            setDate(d);
+            setShowPicker(false);
+            save(w, d);
+          }}
+        />
       )}
     </div>
   );
