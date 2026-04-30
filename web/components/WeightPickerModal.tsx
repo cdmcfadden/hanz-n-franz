@@ -159,39 +159,40 @@ export function WeightPickerModal({
                 <button
                   key={p.weight}
                   onClick={() => tapPlate(p.weight)}
-                  className="flex flex-col items-center gap-1 w-full group"
+                  className="flex flex-col items-center w-full h-full"
                 >
-                  <div className="relative">
-                    {/* plate circle */}
+                  {/* count badge pinned to top of cell; invisible when zero to hold space */}
+                  <span
+                    onClick={count > 0 ? (e) => removePlate(e, p.weight) : undefined}
+                    className={`min-w-[22px] h-[22px] rounded-full text-[10px] font-bold flex items-center justify-center px-1 leading-none transition-colors ${
+                      count > 0
+                        ? "bg-white text-black cursor-pointer hover:bg-red-300"
+                        : "invisible pointer-events-none"
+                    }`}
+                  >
+                    {count}
+                  </span>
+                  {/* spacer pushes plate to bottom of cell */}
+                  <div className="flex-1" />
+                  {/* plate circle */}
+                  <div
+                    className="rounded-full flex items-center justify-center transition-transform active:scale-95"
+                    style={{
+                      width: p.size,
+                      height: p.size,
+                      background: p.color,
+                      boxShadow: count > 0 ? `0 0 0 2px white` : undefined,
+                    }}
+                  >
                     <div
-                      className="rounded-full flex items-center justify-center transition-transform active:scale-95"
+                      className="rounded-full bg-[var(--bg-elev)]"
                       style={{
-                        width: p.size,
-                        height: p.size,
-                        background: p.color,
-                        boxShadow: count > 0 ? `0 0 0 2px white` : undefined,
+                        width: Math.max(p.size * 0.22, 6),
+                        height: Math.max(p.size * 0.22, 6),
                       }}
-                    >
-                      {/* center hole */}
-                      <div
-                        className="rounded-full bg-[var(--bg-elev)]"
-                        style={{
-                          width: Math.max(p.size * 0.22, 6),
-                          height: Math.max(p.size * 0.22, 6),
-                        }}
-                      />
-                    </div>
-                    {/* count badge — tap to remove one */}
-                    {count > 0 && (
-                      <span
-                        onClick={(e) => removePlate(e, p.weight)}
-                        className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] rounded-full bg-white text-black text-[10px] font-bold flex items-center justify-center px-1 leading-none cursor-pointer hover:bg-red-300"
-                      >
-                        {count}
-                      </span>
-                    )}
+                    />
                   </div>
-                  <span className="text-[10px] text-neutral-400 tabular-nums">
+                  <span className="mt-1 text-[10px] text-neutral-400 tabular-nums">
                     {p.weight} lb
                   </span>
                 </button>
