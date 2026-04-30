@@ -172,8 +172,8 @@ export function WeightPickerModal({
                   >
                     {count}
                   </span>
-                  {/* spacer pushes plate to bottom of cell */}
-                  <div className="flex-1" />
+                  {/* spacer pushes plate to bottom of cell; min-h ensures gap even for largest plate */}
+                  <div className="flex-1 min-h-[12px]" />
                   {/* plate circle */}
                   <div
                     className="rounded-full flex items-center justify-center transition-transform active:scale-95"
