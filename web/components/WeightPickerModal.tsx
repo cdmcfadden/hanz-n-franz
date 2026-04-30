@@ -3,12 +3,12 @@
 import { useState } from "react";
 
 const PLATES = [
-  { weight: 45, size: 72, color: "#c0392b" },
-  { weight: 35, size: 62, color: "#b8860b" },
-  { weight: 25, size: 54, color: "#2e7d32" },
-  { weight: 10, size: 42, color: "#37474f" },
-  { weight: 5, size: 32, color: "#555" },
-  { weight: 2.5, size: 24, color: "#333" },
+  { weight: 45, size: 80, color: "#c0392b" },
+  { weight: 35, size: 70, color: "#b8860b" },
+  { weight: 25, size: 60, color: "#2e7d32" },
+  { weight: 10, size: 52, color: "#37474f" },
+  { weight: 5, size: 44, color: "#555" },
+  { weight: 2.5, size: 36, color: "#333" },
 ] as const;
 
 type PlateWeight = (typeof PLATES)[number]["weight"];
@@ -152,15 +152,14 @@ export function WeightPickerModal({
           <div className="text-xs uppercase tracking-widest text-neutral-500 mb-3">
             Plates
           </div>
-          <div className="flex items-end gap-2">
+          <div className="grid grid-cols-3 gap-4">
             {PLATES.map((p) => {
               const count = plateCounts[p.weight];
               return (
                 <button
                   key={p.weight}
                   onClick={() => tapPlate(p.weight)}
-                  className="flex flex-col items-center gap-1 group"
-                  style={{ minWidth: p.size }}
+                  className="flex flex-col items-center gap-1 w-full group"
                 >
                   <div className="relative">
                     {/* plate circle */}
