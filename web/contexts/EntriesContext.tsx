@@ -31,6 +31,8 @@ type EntriesContextValue = {
    * by recency.
    */
   lastActivity: (equipmentId: string) => string | null;
+  /** Most recent log_date for a specific move, or null if never logged. */
+  lastMoveActivity: (equipmentId: string, moveId: string) => string | null;
   add: (
     equipmentId: string,
     moveId: string,
@@ -102,6 +104,22 @@ export function EntriesProvider({ children }: { children: ReactNode }) {
     [lastActivityMap],
   );
 
+  const lastMoveActivityMap = useMemo(() => {
+    const m = new Map<string, string>();
+    for (const [key, list] of entries) {
+      if (list.length === 0) continue;
+      m.set(key, list[list.length - 1].date);
+    }
+    return m;
+  }, [entries]);
+
+  const lastMoveActivity = useCallback(
+    (equipmentId: string, moveId: string): string | null => {
+      return lastMoveActivityMap.get(`${equipmentId}:${moveId}`) ?? null;
+    },
+    [lastMoveActivityMap],
+  );
+
   const add = useCallback(
     async (
       equipmentId: string,
@@ -151,8 +169,8 @@ export function EntriesProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const value = useMemo(
-    () => ({ loading, error, getEntries, lastActivity, add, remove, deleteAll }),
-    [loading, error, getEntries, lastActivity, add, remove, deleteAll],
+    () => ({ loading, error, getEntries, lastActivity, lastMoveActivity, add, remove, deleteAll }),
+    [loading, error, getEntries, lastActivity, lastMoveActivity, add, remove, deleteAll],
   );
 
   return (

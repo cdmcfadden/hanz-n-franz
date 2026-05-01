@@ -32,7 +32,7 @@ export function EquipmentBrowser({
   availableImageIds: string[];
 }) {
   const [selected, setSelected] = useState<Set<string>>(() => new Set());
-  const { lastActivity } = useEntries();
+  const { lastActivity, lastMoveActivity } = useEntries();
 
   const available = useMemo(
     () => new Set(availableImageIds),
@@ -59,11 +59,20 @@ export function EquipmentBrowser({
     for (const { item, idx } of catalogOrder) {
       let visibleMoves: Move[] = [];
       if (item.moves && item.moves.length > 0) {
-        visibleMoves = item.moves.filter((mv) => {
-          const groups = groupsForMove(mv.id, item.muscles ?? []);
-          for (const g of groups) if (selected.has(g)) return true;
-          return false;
-        });
+        visibleMoves = item.moves
+          .map((mv, catalogIdx) => ({ mv, catalogIdx }))
+          .filter(({ mv }) => {
+            const groups = groupsForMove(mv.id, item.muscles ?? []);
+            for (const g of groups) if (selected.has(g)) return true;
+            return false;
+          })
+          .sort((a, b) => {
+            const ra = lastMoveActivity(item.id, a.mv.id) ?? "";
+            const rb = lastMoveActivity(item.id, b.mv.id) ?? "";
+            if (ra !== rb) return rb.localeCompare(ra);
+            return a.catalogIdx - b.catalogIdx;
+          })
+          .map(({ mv }) => mv);
         if (visibleMoves.length === 0) continue;
       } else {
         const groups = groupsForItem(item.muscles ?? []);
@@ -84,7 +93,7 @@ export function EquipmentBrowser({
     });
 
     return withOrder.map((x) => x.f);
-  }, [catalogOrder, selected, lastActivity]);
+  }, [catalogOrder, selected, lastActivity, lastMoveActivity]);
 
   function toggle(id: string) {
     setSelected((prev) => {
