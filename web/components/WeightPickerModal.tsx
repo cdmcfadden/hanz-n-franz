@@ -36,7 +36,7 @@ export function WeightPickerModal({
   function calcTotal(barbell: boolean, counts: Record<PlateWeight, number>) {
     let total = barbell ? 45 : 0;
     for (const p of PLATES) {
-      total += counts[p.weight] * p.weight;
+      total += counts[p.weight] * p.weight * 2; // each count = one pair (both sides)
     }
     return total;
   }

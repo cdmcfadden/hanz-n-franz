@@ -10,7 +10,7 @@ const PLATES = [
 ] as const;
 
 type PlateWeight = (typeof PLATES)[number]["weight"];
-type Breakdown = { barbell: boolean; counts: Partial<Record<PlateWeight, number>> };
+type Breakdown = { barbell: boolean; perSide: Partial<Record<PlateWeight, number>> };
 
 function calcBreakdown(target: number): Breakdown | null {
   // Work in half-pound units to avoid floating-point errors with 2.5 lb plates.
@@ -18,17 +18,19 @@ function calcBreakdown(target: number): Breakdown | null {
   for (const useBarbell of [true, false]) {
     const bw = useBarbell ? 90 : 0; // 45 lb * 2
     if (t < bw) continue;
-    let rem = t - bw;
+    const rem = t - bw;
+    if (rem % 2 !== 0) continue; // plates load in pairs — remainder must split evenly
+    let perSide = rem / 2;
     const counts: Partial<Record<PlateWeight, number>> = {};
     for (const { weight } of PLATES) {
       const wu = Math.round(weight * 2);
-      const n = Math.floor(rem / wu);
+      const n = Math.floor(perSide / wu);
       if (n > 0) {
         counts[weight] = n;
-        rem -= n * wu;
+        perSide -= n * wu;
       }
     }
-    if (rem === 0) return { barbell: useBarbell, counts };
+    if (perSide === 0) return { barbell: useBarbell, perSide: counts };
   }
   return null;
 }
@@ -44,7 +46,7 @@ export function PlateBreakdownModal({
 }) {
   const result = calcBreakdown(weight);
   const usedPlates = result
-    ? PLATES.filter((p) => (result.counts[p.weight] ?? 0) > 0)
+    ? PLATES.filter((p) => (result.perSide[p.weight] ?? 0) > 0)
     : [];
 
   function onBackdrop(e: React.MouseEvent) {
@@ -79,8 +81,13 @@ export function PlateBreakdownModal({
                 <span className="text-sm text-neutral-400 tabular-nums">45 lb</span>
               </div>
             )}
+            {usedPlates.length > 0 && (
+              <div className="text-xs uppercase tracking-widest text-neutral-500">
+                Per side
+              </div>
+            )}
             {usedPlates.map((p) => {
-              const count = result.counts[p.weight]!;
+              const count = result.perSide[p.weight]!;
               return (
                 <div key={p.weight} className="flex items-center gap-3">
                   <div
