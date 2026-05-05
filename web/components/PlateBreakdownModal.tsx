@@ -12,10 +12,10 @@ const PLATES = [
 type PlateWeight = (typeof PLATES)[number]["weight"];
 type Breakdown = { barbell: boolean; perSide: Partial<Record<PlateWeight, number>> };
 
-function calcBreakdown(target: number): Breakdown | null {
+function calcBreakdown(target: number, allowBarbell: boolean): Breakdown | null {
   // Work in half-pound units to avoid floating-point errors with 2.5 lb plates.
   const t = Math.round(target * 2);
-  for (const useBarbell of [true, false]) {
+  for (const useBarbell of (allowBarbell ? [true, false] : [false])) {
     const bw = useBarbell ? 90 : 0; // 45 lb * 2
     if (t < bw) continue;
     const rem = t - bw;
@@ -38,13 +38,15 @@ function calcBreakdown(target: number): Breakdown | null {
 export function PlateBreakdownModal({
   weight,
   moveName,
+  allowBarbell = true,
   onClose,
 }: {
   weight: number;
   moveName: string;
+  allowBarbell?: boolean;
   onClose: () => void;
 }) {
-  const result = calcBreakdown(weight);
+  const result = calcBreakdown(weight, allowBarbell);
   const usedPlates = result
     ? PLATES.filter((p) => (result.perSide[p.weight] ?? 0) > 0)
     : [];

@@ -5,15 +5,18 @@ import { useEntries } from "@/contexts/EntriesContext";
 import { todayISO } from "@/lib/log-store";
 import { WeightPickerModal } from "@/components/WeightPickerModal";
 import { PlateBreakdownModal } from "@/components/PlateBreakdownModal";
+import type { WeightType } from "@/lib/equipment";
 
 export function MoveLogger({
   equipmentId,
   moveId,
   moveName,
+  weightType,
 }: {
   equipmentId: string;
   moveId: string;
   moveName: string;
+  weightType?: WeightType;
 }) {
   const { getEntries, add, remove, loading } = useEntries();
   const entries = getEntries(equipmentId, moveId);
@@ -28,7 +31,8 @@ export function MoveLogger({
   const [breakdownWeight, setBreakdownWeight] = useState<number | null>(null);
 
   async function save(w?: number, d?: string) {
-    const weightVal = w ?? parseFloat(weight);
+    const entered = w ?? parseFloat(weight);
+    const weightVal = weightType === "dumbbell_pair" ? entered * 2 : entered;
     const dateVal = d ?? date;
     if (!weightVal || Number.isNaN(weightVal) || weightVal <= 0) return;
     setSaving(true);
@@ -51,6 +55,14 @@ export function MoveLogger({
   const inputClass =
     "text-sm rounded-md border-0 bg-black ring-1 ring-[var(--ring)] text-white placeholder:text-neutral-600 px-2.5 py-1.5 focus:ring-2 focus:ring-[var(--accent)] focus:outline-none";
 
+  const usesPicker = weightType === "barbell" || weightType === "plates";
+  const hasBreakdown = weightType === "barbell" || weightType === "plates";
+  const isPair = weightType === "dumbbell_pair";
+
+  function displayWeight(stored: number) {
+    return isPair ? `${stored / 2} lb ea.` : `${stored} lb`;
+  }
+
   return (
     <div className="rounded-lg bg-black/40 px-3 py-2.5 ring-1 ring-[var(--ring)]">
       {/* Name line: move name + latest log. Always full width. */}
@@ -63,12 +75,16 @@ export function MoveLogger({
             "loading…"
           ) : latest ? (
             <>
-              <button
-                onClick={() => setBreakdownWeight(latest.weight)}
-                className="text-white hover:text-[var(--accent)] transition-colors"
-              >
-                {latest.weight} lb
-              </button>
+              {hasBreakdown ? (
+                <button
+                  onClick={() => setBreakdownWeight(latest.weight)}
+                  className="text-white hover:text-[var(--accent)] transition-colors"
+                >
+                  {displayWeight(latest.weight)}
+                </button>
+              ) : (
+                <span className="text-white">{displayWeight(latest.weight)}</span>
+              )}
               {" · "}
               {latest.date}
             </>
@@ -89,9 +105,9 @@ export function MoveLogger({
           value={weight}
           onChange={(e) => setWeight(e.target.value)}
           onKeyDown={handleKey}
-          onClick={() => setShowPicker(true)}
-          placeholder="lb"
-          className={`${inputClass} w-full cursor-pointer`}
+          onClick={usesPicker ? () => setShowPicker(true) : undefined}
+          placeholder={isPair ? "lb ea." : "lb"}
+          className={`${inputClass} w-full${usesPicker ? " cursor-pointer" : ""}`}
         />
         <input
           type="date"
@@ -123,12 +139,16 @@ export function MoveLogger({
           {[...entries].reverse().map((e) => (
             <li key={e.id} className="flex items-center gap-2">
               <span className="text-neutral-500 w-20">{e.date}</span>
-              <button
-                onClick={() => setBreakdownWeight(e.weight)}
-                className="font-medium text-white hover:text-[var(--accent)] transition-colors"
-              >
-                {e.weight} lb
-              </button>
+              {hasBreakdown ? (
+                <button
+                  onClick={() => setBreakdownWeight(e.weight)}
+                  className="font-medium text-white hover:text-[var(--accent)] transition-colors"
+                >
+                  {displayWeight(e.weight)}
+                </button>
+              ) : (
+                <span className="font-medium text-white">{displayWeight(e.weight)}</span>
+              )}
               <button
                 onClick={() => remove(equipmentId, moveId, e.id)}
                 className="ml-auto text-neutral-600 hover:text-[var(--accent-strong)]"
@@ -145,6 +165,7 @@ export function MoveLogger({
         <PlateBreakdownModal
           weight={breakdownWeight}
           moveName={moveName}
+          allowBarbell={weightType === "barbell"}
           onClose={() => setBreakdownWeight(null)}
         />
       )}
@@ -153,6 +174,7 @@ export function MoveLogger({
         <WeightPickerModal
           moveName={moveName}
           initialDate={date}
+          showBarbell={weightType === "barbell"}
           onClose={() => setShowPicker(false)}
           onLog={(w, d) => {
             setWeight(String(w));

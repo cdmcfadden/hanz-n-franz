@@ -4,26 +4,26 @@
   "extraction_method": "37 keyframes @ 1 fps/3s, Claude vision pass",
   "gym_character": "Full commercial strength gym. Mixed Hammer Strength plate-loaded line, Life Fitness selectorized line, free-weight area with dumbbells/kettlebells/barbells, small cardio bank. Purple walls, rubber floor, mirrors along perimeter.",
   "free_weights": [
-    { "id": "dumbbells", "name": "Dumbbell set", "range_lb": [5, 100], "style": "rubber hex + chrome", "confidence": "medium (range estimated from rack length)", "muscles": ["chest", "back", "shoulders", "biceps", "triceps", "legs", "core"], "moves": [
+    { "id": "dumbbells", "name": "Dumbbell set", "range_lb": [5, 100], "style": "rubber hex + chrome", "confidence": "medium (range estimated from rack length)", "weight_type": "dumbbell_pair", "muscles": ["chest", "back", "shoulders", "biceps", "triceps", "legs", "core"], "moves": [
       { "id": "flat_chest_press", "name": "Flat chest press" },
       { "id": "inclined_chest_press", "name": "Inclined chest press" },
-      { "id": "bent_over_rows", "name": "Bent-over rows" },
-      { "id": "bicep_curls", "name": "Bicep curls" },
-      { "id": "wide_bicep_curls", "name": "Wide bicep curls" },
-      { "id": "tricep_kickbacks", "name": "Tricep kickbacks" },
+      { "id": "bent_over_rows", "name": "Bent-over rows", "weight_type": "dumbbell_single" },
+      { "id": "bicep_curls", "name": "Bicep curls", "weight_type": "dumbbell_single" },
+      { "id": "wide_bicep_curls", "name": "Wide bicep curls", "weight_type": "dumbbell_single" },
+      { "id": "tricep_kickbacks", "name": "Tricep kickbacks", "weight_type": "dumbbell_single" },
       { "id": "farmers_carry", "name": "Farmer's carry" },
       { "id": "romanian_deadlifts", "name": "Romanian deadlifts" }
     ] },
-    { "id": "barbells_olympic", "name": "Olympic barbells", "count": "4+", "stored_in": "power rack uprights", "confidence": "high", "muscles": ["legs", "glutes", "back", "chest", "shoulders", "core"], "moves": [
+    { "id": "barbells_olympic", "name": "Olympic barbells", "count": "4+", "stored_in": "power rack uprights", "confidence": "high", "weight_type": "barbell", "muscles": ["legs", "glutes", "back", "chest", "shoulders", "core"], "moves": [
       { "id": "barbell_row", "name": "Barbell row" },
       { "id": "deadlift", "name": "Deadlift" }
     ] },
-    { "id": "kettlebells", "name": "Kettlebell rack", "range_lb": [10, 80], "style": "cast iron competition", "confidence": "medium", "muscles": ["glutes", "hamstrings", "shoulders", "grip", "core", "cardio"], "moves": [
+    { "id": "kettlebells", "name": "Kettlebell rack", "range_lb": [10, 80], "style": "cast iron competition", "confidence": "medium", "weight_type": "dumbbell_single", "muscles": ["glutes", "hamstrings", "shoulders", "grip", "core", "cardio"], "moves": [
       { "id": "kb_romanian_deadlift", "name": "Romanian deadlift" }
     ] }
   ],
   "racks_and_rigs": [
-    { "id": "power_rack", "name": "Power rack with integrated plate storage", "count": 2, "confidence": "high", "muscles": ["quads", "glutes", "hamstrings", "chest", "back", "shoulders", "core"], "moves": [
+    { "id": "power_rack", "name": "Power rack with integrated plate storage", "count": 2, "confidence": "high", "weight_type": "barbell", "muscles": ["quads", "glutes", "hamstrings", "chest", "back", "shoulders", "core"], "moves": [
       { "id": "back_squat", "name": "Back squat" },
       { "id": "front_squat", "name": "Front squat" },
       { "id": "deadlift", "name": "Deadlift" },
@@ -31,7 +31,7 @@
       { "id": "overhead_press", "name": "Overhead press" },
       { "id": "barbell_row", "name": "Barbell row" }
     ] },
-    { "id": "smith_machine", "name": "Smith machine", "count": 1, "confidence": "medium", "muscles": ["quads", "glutes", "chest", "shoulders"], "moves": [
+    { "id": "smith_machine", "name": "Smith machine", "count": 1, "confidence": "medium", "weight_type": "barbell", "muscles": ["quads", "glutes", "chest", "shoulders"], "moves": [
       { "id": "smith_squat", "name": "Smith squat" },
       { "id": "smith_bench", "name": "Smith bench press" },
       { "id": "smith_shoulder_press", "name": "Smith shoulder press" },
@@ -39,103 +39,103 @@
     ] }
   ],
   "benches": [
-    { "id": "bench_flat", "name": "Flat bench", "count": "2+", "confidence": "high", "muscles": ["chest", "triceps", "front delts"], "moves": [
+    { "id": "bench_flat", "name": "Flat bench", "count": "2+", "confidence": "high", "weight_type": "barbell", "muscles": ["chest", "triceps", "front delts"], "moves": [
       { "id": "barbell_bench_press", "name": "Barbell bench press" }
     ] },
-    { "id": "bench_adjustable", "name": "Adjustable FID bench", "count": "3+", "confidence": "high", "muscles": ["chest", "shoulders", "triceps", "biceps"], "moves": [
+    { "id": "bench_adjustable", "name": "Adjustable FID bench", "count": "3+", "confidence": "high", "weight_type": "dumbbell_pair", "muscles": ["chest", "shoulders", "triceps", "biceps"], "moves": [
       { "id": "incline_db_press", "name": "Incline DB press" },
-      { "id": "incline_db_curl", "name": "Incline DB curl" },
-      { "id": "seal_row", "name": "Seal row" }
+      { "id": "incline_db_curl", "name": "Incline DB curl", "weight_type": "dumbbell_single" },
+      { "id": "seal_row", "name": "Seal row", "weight_type": "dumbbell_single" }
     ] },
-    { "id": "bench_decline", "name": "Decline bench", "count": 1, "confidence": "medium", "muscles": ["lower chest", "triceps", "abs"], "moves": [
+    { "id": "bench_decline", "name": "Decline bench", "count": 1, "confidence": "medium", "weight_type": "dumbbell_pair", "muscles": ["lower chest", "triceps", "abs"], "moves": [
       { "id": "decline_db_press", "name": "Decline DB press" }
     ] },
-    { "id": "bench_preacher", "name": "Preacher curl bench", "count": 1, "confidence": "low", "muscles": ["biceps", "brachialis"], "moves": [
+    { "id": "bench_preacher", "name": "Preacher curl bench", "count": 1, "confidence": "low", "weight_type": "dumbbell_single", "muscles": ["biceps", "brachialis"], "moves": [
       { "id": "preacher_curl", "name": "Preacher curl" }
     ] }
   ],
   "plate_loaded_machines": [
-    { "id": "leg_press_45", "name": "45° Leg press", "brand_guess": "Hammer Strength", "count": 1, "confidence": "high", "muscles": ["quads", "glutes", "hamstrings"], "moves": [
+    { "id": "leg_press_45", "name": "45° Leg press", "brand_guess": "Hammer Strength", "count": 1, "confidence": "high", "weight_type": "plates", "muscles": ["quads", "glutes", "hamstrings"], "moves": [
       { "id": "leg_press", "name": "Leg press" }
     ] },
-    { "id": "hack_squat", "name": "Hack squat", "count": 1, "confidence": "medium", "muscles": ["quads", "glutes"], "moves": [
+    { "id": "hack_squat", "name": "Hack squat", "count": 1, "confidence": "medium", "weight_type": "plates", "muscles": ["quads", "glutes"], "moves": [
       { "id": "hack_squat", "name": "Hack squat" },
       { "id": "reverse_hack_squat", "name": "Reverse hack squat" }
     ] },
-    { "id": "incline_chest_press_pl", "name": "Plate-loaded incline chest press", "count": 1, "confidence": "high", "muscles": ["upper chest", "front delts", "triceps"], "moves": [
+    { "id": "incline_chest_press_pl", "name": "Plate-loaded incline chest press", "count": 1, "confidence": "high", "weight_type": "plates", "muscles": ["upper chest", "front delts", "triceps"], "moves": [
       { "id": "incline_chest_press", "name": "Incline chest press" }
     ] },
-    { "id": "decline_chest_press_pl", "name": "Decline chest press", "count": 1, "confidence": "high", "muscles": ["lower chest", "front delts", "triceps"], "moves": [
+    { "id": "decline_chest_press_pl", "name": "Decline chest press", "count": 1, "confidence": "high", "weight_type": "plates", "muscles": ["lower chest", "front delts", "triceps"], "moves": [
       { "id": "decline_chest_press", "name": "Decline chest press" }
     ] },
-    { "id": "iso_row_pl", "name": "Iso-lateral row", "count": 1, "confidence": "high", "muscles": ["lats", "rhomboids", "rear delts", "biceps"], "moves": [
+    { "id": "iso_row_pl", "name": "Iso-lateral row", "count": 1, "confidence": "high", "weight_type": "plates", "muscles": ["lats", "rhomboids", "rear delts", "biceps"], "moves": [
       { "id": "iso_row", "name": "Iso row" }
     ] },
-    { "id": "iso_shoulder_press_pl", "name": "Iso-lateral shoulder press", "count": 1, "confidence": "high", "muscles": ["shoulders", "triceps"], "moves": [
+    { "id": "iso_shoulder_press_pl", "name": "Iso-lateral shoulder press", "count": 1, "confidence": "high", "weight_type": "plates", "muscles": ["shoulders", "triceps"], "moves": [
       { "id": "iso_shoulder_press", "name": "Iso shoulder press" }
     ] },
-    { "id": "iso_high_row_pl", "name": "Iso-lateral high row / pulldown (plate-loaded)", "count": 1, "confidence": "medium", "muscles": ["lats", "rear delts", "rhomboids"], "moves": [
+    { "id": "iso_high_row_pl", "name": "Iso-lateral high row / pulldown (plate-loaded)", "count": 1, "confidence": "medium", "weight_type": "plates", "muscles": ["lats", "rear delts", "rhomboids"], "moves": [
       { "id": "iso_high_row", "name": "Iso high row" },
       { "id": "iso_pulldown", "name": "Iso pulldown" }
     ] },
-    { "id": "squat_sled_pl", "name": "Plate-loaded squat / belt-squat sled", "count": 1, "confidence": "low", "muscles": ["quads", "glutes"], "moves": [
+    { "id": "squat_sled_pl", "name": "Plate-loaded squat / belt-squat sled", "count": 1, "confidence": "low", "weight_type": "plates", "muscles": ["quads", "glutes"], "moves": [
       { "id": "belt_squat", "name": "Belt squat" },
       { "id": "machine_squat", "name": "Machine squat" }
     ] },
-    { "id": "lat_pullover", "name": "Lat pullover machine", "count": 1, "confidence": "high", "muscles": ["lats", "back"], "moves": [
+    { "id": "lat_pullover", "name": "Lat pullover machine", "count": 1, "confidence": "high", "weight_type": "plates", "muscles": ["lats", "back"], "moves": [
       { "id": "lat_pullover", "name": "Lat pullover" }
     ] },
-    { "id": "booty_builder", "name": "Booty Builder Platinum", "brand_guess": "Booty Builder", "count": 1, "confidence": "high", "muscles": ["glutes", "hamstrings"], "moves": [
+    { "id": "booty_builder", "name": "Booty Builder Platinum", "brand_guess": "Booty Builder", "count": 1, "confidence": "high", "weight_type": "plates", "muscles": ["glutes", "hamstrings"], "moves": [
       { "id": "hip_thrust", "name": "Hip thrust" },
       { "id": "glute_bridge", "name": "Glute bridge" }
     ] }
   ],
   "selectorized_machines": [
-    { "id": "lat_pulldown", "name": "Lat pulldown", "brand_guess": "Life Fitness", "count": 1, "confidence": "high", "muscles": ["lats", "biceps", "rear delts"], "moves": [
+    { "id": "lat_pulldown", "name": "Lat pulldown", "brand_guess": "Life Fitness", "count": 1, "confidence": "high", "weight_type": "selector", "muscles": ["lats", "biceps", "rear delts"], "moves": [
       { "id": "lat_pulldown", "name": "Lat pulldown" },
       { "id": "close_grip_pulldown", "name": "Close-grip pulldown" }
     ] },
-    { "id": "seated_row", "name": "Seated row", "count": 1, "confidence": "high", "muscles": ["lats", "rhomboids", "biceps", "rear delts"], "moves": [
+    { "id": "seated_row", "name": "Seated row", "count": 1, "confidence": "high", "weight_type": "selector", "muscles": ["lats", "rhomboids", "biceps", "rear delts"], "moves": [
       { "id": "seated_row", "name": "Seated row" }
     ] },
-    { "id": "pec_deck", "name": "Pec deck / rear delt fly", "count": 1, "confidence": "high", "muscles": ["chest", "rear delts"], "moves": [
+    { "id": "pec_deck", "name": "Pec deck / rear delt fly", "count": 1, "confidence": "high", "weight_type": "selector", "muscles": ["chest", "rear delts"], "moves": [
       { "id": "pec_fly", "name": "Pec fly" },
       { "id": "reverse_fly", "name": "Reverse fly" }
     ] },
-    { "id": "shoulder_press_selector", "name": "Selectorized shoulder press", "count": 1, "confidence": "medium", "muscles": ["shoulders", "triceps"], "moves": [
+    { "id": "shoulder_press_selector", "name": "Selectorized shoulder press", "count": 1, "confidence": "medium", "weight_type": "selector", "muscles": ["shoulders", "triceps"], "moves": [
       { "id": "machine_shoulder_press", "name": "Machine shoulder press" }
     ] },
-    { "id": "leg_extension", "name": "Leg extension", "brand_guess": "Life Fitness", "count": 1, "confidence": "high", "muscles": ["quads"], "moves": [
+    { "id": "leg_extension", "name": "Leg extension", "brand_guess": "Life Fitness", "count": 1, "confidence": "high", "weight_type": "selector", "muscles": ["quads"], "moves": [
       { "id": "leg_extension", "name": "Leg extension" }
     ] },
-    { "id": "leg_curl", "name": "Seated leg curl", "count": 1, "confidence": "medium", "muscles": ["hamstrings"], "moves": [
+    { "id": "leg_curl", "name": "Seated leg curl", "count": 1, "confidence": "medium", "weight_type": "selector", "muscles": ["hamstrings"], "moves": [
       { "id": "leg_curl", "name": "Leg curl" }
     ] },
-    { "id": "hip_abduction", "name": "Hip abduction/adduction", "count": 1, "confidence": "high", "muscles": ["glute medius", "adductors"], "moves": [
+    { "id": "hip_abduction", "name": "Hip abduction/adduction", "count": 1, "confidence": "high", "weight_type": "selector", "muscles": ["glute medius", "adductors"], "moves": [
       { "id": "hip_abduction", "name": "Hip abduction" },
       { "id": "hip_adduction", "name": "Hip adduction" }
     ] },
-    { "id": "ab_crunch", "name": "Ab crunch machine", "count": 1, "confidence": "medium", "muscles": ["abs"], "moves": [
+    { "id": "ab_crunch", "name": "Ab crunch machine", "count": 1, "confidence": "medium", "weight_type": "selector", "muscles": ["abs"], "moves": [
       { "id": "machine_crunch", "name": "Machine crunch" }
     ] },
-    { "id": "assisted_pullup_dip", "name": "Assisted pull-up / dip", "count": 1, "confidence": "low", "muscles": ["lats", "biceps", "chest", "triceps"], "moves": [
+    { "id": "assisted_pullup_dip", "name": "Assisted pull-up / dip", "count": 1, "confidence": "low", "weight_type": "selector", "muscles": ["lats", "biceps", "chest", "triceps"], "moves": [
       { "id": "assisted_pullup", "name": "Assisted pull-up" },
       { "id": "assisted_dip", "name": "Assisted dip" }
     ] }
   ],
   "cables": [
-    { "id": "functional_trainer", "name": "Dual adjustable pulley / functional trainer", "count": 1, "confidence": "high", "muscles": ["chest", "back", "shoulders", "biceps", "triceps", "core"], "moves": [
+    { "id": "functional_trainer", "name": "Dual adjustable pulley / functional trainer", "count": 1, "confidence": "high", "weight_type": "selector", "muscles": ["chest", "back", "shoulders", "biceps", "triceps", "core"], "moves": [
       { "id": "cable_row", "name": "Cable row" },
       { "id": "tricep_pushdown", "name": "Tricep pushdown" },
       { "id": "face_pull", "name": "Face pull" },
       { "id": "cable_curl", "name": "Cable curl" },
       { "id": "cable_lateral_raise", "name": "Cable lateral raise" }
     ] },
-    { "id": "cable_crossover", "name": "Cable crossover (stand-up)", "count": 1, "confidence": "medium", "muscles": ["chest", "rear delts", "triceps"], "moves": [
+    { "id": "cable_crossover", "name": "Cable crossover (stand-up)", "count": 1, "confidence": "medium", "weight_type": "selector", "muscles": ["chest", "rear delts", "triceps"], "moves": [
       { "id": "cable_fly", "name": "Cable fly" },
       { "id": "cable_crossover", "name": "Cable crossover" }
     ] },
-    { "id": "standing_lateral_fly", "name": "Standing lateral raise & fly", "brand_guess": "MaxPlus", "count": 1, "confidence": "high", "muscles": ["shoulders", "rear delts", "chest"], "moves": [
+    { "id": "standing_lateral_fly", "name": "Standing lateral raise & fly", "brand_guess": "MaxPlus", "count": 1, "confidence": "high", "weight_type": "selector", "muscles": ["shoulders", "rear delts", "chest"], "moves": [
       { "id": "standing_lateral_raise", "name": "Standing lateral raise" },
       { "id": "standing_chest_fly", "name": "Standing chest fly" }
     ] }

@@ -1,9 +1,17 @@
 // Pure types + constants. Safe to import from client and server components.
 // Server-only loaders live in lib/equipment-server.ts.
 
+export type WeightType =
+  | "barbell"        // 45 lb bar + plates (bench press, squat, deadlift)
+  | "dumbbell_single" // one dumbbell (curls, kickbacks, one-arm rows)
+  | "dumbbell_pair"  // two dumbbells — user enters per-dumbbell weight, stored as total
+  | "plates"         // plate-loaded machine, no barbell (leg press, hack squat)
+  | "selector";      // weight-stack machine (lat pulldown, cables)
+
 export type Move = {
   id: string;
   name: string;
+  weight_type?: WeightType; // overrides equipment-level weight_type
 };
 
 export type EquipmentItem = {
@@ -19,6 +27,7 @@ export type EquipmentItem = {
   colors?: string[];
   sizes?: string[];
   stored_in?: string;
+  weight_type?: WeightType; // default for all moves on this equipment
 };
 
 export const CATEGORIES = [

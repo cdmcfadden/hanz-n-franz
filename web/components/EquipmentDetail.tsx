@@ -70,6 +70,7 @@ export function EquipmentDetail({
               equipmentId={item.id}
               moveId={mv.id}
               moveName={mv.name}
+              weightType={mv.weight_type ?? item.weight_type}
             />
           ))}
         </div>

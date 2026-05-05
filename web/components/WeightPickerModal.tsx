@@ -20,11 +20,13 @@ const INIT_COUNTS = Object.fromEntries(
 export function WeightPickerModal({
   moveName,
   initialDate,
+  showBarbell = true,
   onLog,
   onClose,
 }: {
   moveName: string;
   initialDate: string;
+  showBarbell?: boolean;
   onLog: (weight: number, date: string) => void;
   onClose: () => void;
 }) {
@@ -104,7 +106,7 @@ export function WeightPickerModal({
         </header>
 
         {/* Barbell */}
-        <div className="mb-4">
+        {showBarbell && <div className="mb-4">
           <div className="text-xs uppercase tracking-widest text-neutral-500 mb-2">
             Barbell
           </div>
@@ -145,7 +147,7 @@ export function WeightPickerModal({
             </span>
             45 lb barbell
           </button>
-        </div>
+        </div>}
 
         {/* Plates */}
         <div className="mb-5">
