@@ -90,7 +90,8 @@ export function EntriesProvider({ children }: { children: ReactNode }) {
     for (const [key, list] of entries) {
       if (list.length === 0) continue;
       const equipmentId = key.split(":")[0];
-      const latest = list[list.length - 1].date; // list is sorted ascending
+      const last = list[list.length - 1]; // list is sorted ascending by date
+      const latest = `${last.date}|${last.createdAt}`;
       const prev = m.get(equipmentId);
       if (!prev || latest > prev) m.set(equipmentId, latest);
     }
@@ -108,7 +109,8 @@ export function EntriesProvider({ children }: { children: ReactNode }) {
     const m = new Map<string, string>();
     for (const [key, list] of entries) {
       if (list.length === 0) continue;
-      m.set(key, list[list.length - 1].date);
+      const last = list[list.length - 1];
+      m.set(key, `${last.date}|${last.createdAt}`);
     }
     return m;
   }, [entries]);

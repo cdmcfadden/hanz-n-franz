@@ -39,7 +39,7 @@ export function TrendsView({
         for (const row of data.rows ?? []) {
           const k = keys.userMoveKey(row.userId, row.equipmentId, row.moveId);
           const list = map.get(k) ?? [];
-          list.push({ id: 0, date: row.date, weight: row.weight });
+          list.push({ id: 0, date: row.date, createdAt: "", weight: row.weight });
           map.set(k, list);
         }
         for (const list of map.values()) {

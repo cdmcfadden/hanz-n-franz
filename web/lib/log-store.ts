@@ -5,6 +5,7 @@ import { getBrowserSupabase as getSupabase } from "@/lib/supabase-browser";
 export type LogEntry = {
   id: number;
   date: string;
+  createdAt: string;
   weight: number;
 };
 
@@ -18,6 +19,7 @@ type Row = {
   equipment_id: string;
   move_id: string;
   log_date: string;
+  created_at: string;
   weight: number;
 };
 
@@ -37,7 +39,7 @@ function rowsByMove(rows: Row[]): EntryMap {
   for (const r of rows) {
     const k = moveKey(r.equipment_id, r.move_id);
     const list = m.get(k) ?? [];
-    list.push({ id: r.id, date: r.log_date, weight: Number(r.weight) });
+    list.push({ id: r.id, date: r.log_date, createdAt: r.created_at, weight: Number(r.weight) });
     m.set(k, list);
   }
   for (const list of m.values()) {
@@ -51,7 +53,7 @@ function rowsByUserMove(rows: Row[]): EntryMap {
   for (const r of rows) {
     const k = userMoveKey(r.user_id, r.equipment_id, r.move_id);
     const list = m.get(k) ?? [];
-    list.push({ id: r.id, date: r.log_date, weight: Number(r.weight) });
+    list.push({ id: r.id, date: r.log_date, createdAt: r.created_at, weight: Number(r.weight) });
     m.set(k, list);
   }
   for (const list of m.values()) {
@@ -66,7 +68,7 @@ export async function fetchEntriesForUser(
   const sb = getSupabase();
   const { data, error } = await sb
     .from("log_entries")
-    .select("id, user_id, equipment_id, move_id, log_date, weight")
+    .select("id, user_id, equipment_id, move_id, log_date, created_at, weight")
     .eq("user_id", userId)
     .order("log_date", { ascending: true });
   if (error) throw error;
@@ -77,7 +79,7 @@ export async function fetchAllEntries(): Promise<EntryMap> {
   const sb = getSupabase();
   const { data, error } = await sb
     .from("log_entries")
-    .select("id, user_id, equipment_id, move_id, log_date, weight")
+    .select("id, user_id, equipment_id, move_id, log_date, created_at, weight")
     .order("log_date", { ascending: true });
   if (error) throw error;
   return rowsByUserMove((data ?? []) as Row[]);
@@ -105,10 +107,10 @@ export async function addEntry(
       },
       { onConflict: "user_id,equipment_id,move_id,log_date" },
     )
-    .select("id, log_date, weight")
+    .select("id, log_date, created_at, weight")
     .single();
   if (error) throw error;
-  return { id: data.id, date: data.log_date, weight: Number(data.weight) };
+  return { id: data.id, date: data.log_date, createdAt: data.created_at, weight: Number(data.weight) };
 }
 
 export async function removeEntry(entryId: number): Promise<void> {
