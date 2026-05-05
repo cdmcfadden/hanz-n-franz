@@ -58,6 +58,7 @@ export function MoveLogger({
   const usesPicker = weightType === "barbell" || weightType === "plates";
   const hasBreakdown = weightType === "barbell" || weightType === "plates";
   const isPair = weightType === "dumbbell_pair";
+  const isDumbbell = weightType === "dumbbell_single" || isPair;
 
   function displayWeight(stored: number) {
     return isPair ? `${stored / 2} lb ea.` : `${stored} lb`;
@@ -96,7 +97,7 @@ export function MoveLogger({
 
       {/* Input row — grid gives every card the same column sizes, so stacked
           rows line up perfectly regardless of the move name above. */}
-      <div className="grid grid-cols-[4rem_1fr_auto_auto] gap-1.5 items-center">
+      <div className={`grid gap-1.5 items-center ${isDumbbell ? "grid-cols-[8rem_1fr_auto_auto]" : "grid-cols-[4rem_1fr_auto_auto]"}`}>
         <input
           type="number"
           step="0.5"
@@ -106,7 +107,7 @@ export function MoveLogger({
           onChange={(e) => setWeight(e.target.value)}
           onKeyDown={handleKey}
           onClick={usesPicker ? () => setShowPicker(true) : undefined}
-          placeholder={isPair ? "lb ea." : "lb"}
+          placeholder={isDumbbell ? "lb per dumbbell" : "lb"}
           className={`${inputClass} w-full${usesPicker ? " cursor-pointer" : ""}`}
         />
         <input
