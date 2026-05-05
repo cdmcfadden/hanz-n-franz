@@ -172,7 +172,7 @@ export function WeightPickerModal({
                     <span className={`min-w-[22px] h-[22px] rounded-full text-[10px] font-bold flex items-center justify-center px-1 leading-none transition-colors ${
                       count > 0 ? "bg-white text-black hover:bg-red-300" : ""
                     }`}>
-                      {count}
+                      {count * 2}
                     </span>
                   </span>
                   {/* spacer pushes plate to bottom of cell */}

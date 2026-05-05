@@ -81,13 +81,8 @@ export function PlateBreakdownModal({
                 <span className="text-sm text-neutral-400 tabular-nums">45 lb</span>
               </div>
             )}
-            {usedPlates.length > 0 && (
-              <div className="text-xs uppercase tracking-widest text-neutral-500">
-                Per side
-              </div>
-            )}
             {usedPlates.map((p) => {
-              const count = result.perSide[p.weight]!;
+              const totalPlates = result.perSide[p.weight]! * 2;
               return (
                 <div key={p.weight} className="flex items-center gap-3">
                   <div
@@ -103,10 +98,10 @@ export function PlateBreakdownModal({
                     />
                   </div>
                   <span className="text-sm text-white flex-1">
-                    {count} × {p.weight} lb
+                    {totalPlates} × {p.weight} lb
                   </span>
                   <span className="text-sm text-neutral-400 tabular-nums">
-                    {count * p.weight} lb
+                    {totalPlates * p.weight} lb
                   </span>
                 </div>
               );
