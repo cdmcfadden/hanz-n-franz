@@ -214,6 +214,7 @@ export function WeightPickerModal({
             step="0.5"
             min="0"
             inputMode="decimal"
+            autoFocus
             value={rawWeight}
             onChange={(e) => setRawWeight(e.target.value)}
             placeholder="lb"
