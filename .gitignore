@@ -19,3 +19,7 @@ web/public/equipment/frames_backup/
 
 # Logs
 *.log
+
+# AI agent instructions (local only)
+CLAUDE.md
+web/CLAUDE.md
