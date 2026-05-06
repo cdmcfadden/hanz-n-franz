@@ -97,7 +97,7 @@ export function MoveLogger({
 
       {/* Input row — grid gives every card the same column sizes, so stacked
           rows line up perfectly regardless of the move name above. */}
-      <div className={`grid gap-1.5 items-center ${isDumbbell ? "grid-cols-[8rem_1fr_auto_auto]" : "grid-cols-[4rem_1fr_auto_auto]"}`}>
+      <div className={`grid gap-1.5 items-center ${isDumbbell ? "grid-cols-[11rem_1fr_auto_auto]" : "grid-cols-[4rem_1fr_auto_auto]"}`}>
         <input
           type="number"
           step="0.5"
