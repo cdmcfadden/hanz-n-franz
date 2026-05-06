@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { getServerSupabase } from "@/lib/supabase-server";
 import { isAdmin } from "@/lib/admin";
 import { loadEquipmentData, saveEquipmentData } from "@/lib/equipment-server";
@@ -42,5 +43,8 @@ export async function PUT(req: Request) {
   }
 
   await saveEquipmentData(body as EquipmentData, user!.id);
+  revalidatePath("/equipment", "layout");
+  revalidatePath("/trends", "layout");
+  revalidatePath("/qr", "layout");
   return NextResponse.json({ ok: true });
 }
