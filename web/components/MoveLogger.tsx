@@ -61,7 +61,7 @@ export function MoveLogger({
   const isDumbbell = weightType === "dumbbell_single" || isPair;
 
   function displayWeight(stored: number) {
-    return isPair ? `${stored / 2} lb ea.` : `${stored} lb`;
+    return isPair ? `${stored / 2} lb ea, ${stored} lb total` : `${stored} lb`;
   }
 
   return (
