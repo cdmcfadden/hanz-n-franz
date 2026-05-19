@@ -2,9 +2,9 @@
 
 const PLATES = [
   { weight: 45, size: 48, color: "#c0392b" },
-  { weight: 35, size: 42, color: "#b8860b" },
-  { weight: 25, size: 36, color: "#2e7d32" },
-  { weight: 10, size: 30, color: "#37474f" },
+  { weight: 35, size: 42, color: "#1c1c1c" },
+  { weight: 25, size: 36, color: "#e8b800" },
+  { weight: 10, size: 30, color: "#2e7d32" },
   { weight: 5, size: 26, color: "#555" },
   { weight: 2.5, size: 22, color: "#333" },
 ] as const;
