@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { TrendChart } from "@/components/TrendChart";
+import { MuscleFilter } from "@/components/MuscleFilter";
 import {
   CATEGORIES,
   categoryLabels,
@@ -10,6 +11,7 @@ import {
 } from "@/lib/equipment";
 import { type EntryMap, type LogEntry, keys } from "@/lib/log-store";
 import { type BuddyUser } from "@/lib/buddy";
+import { ALL_GROUP_IDS, groupsForMove } from "@/lib/muscle-groups";
 
 type Row = {
   userId: string;
@@ -28,13 +30,21 @@ export function TrendsView({
   const [users, setUsers] = useState<BuddyUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedUsers, setSelectedUsers] = useState<Set<string>>(
+    () => new Set(),
+  );
+  const [selectedGroups, setSelectedGroups] = useState<Set<string>>(
+    () => new Set(),
+  );
 
   useEffect(() => {
     fetch("/api/buddy/entries")
       .then(async (res) => {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = (await res.json()) as { rows: Row[]; users: BuddyUser[] };
-        setUsers(data.users ?? []);
+        const fetchedUsers = data.users ?? [];
+        setUsers(fetchedUsers);
+        setSelectedUsers(new Set(fetchedUsers.map((u) => u.id)));
         const map = new Map<string, LogEntry[]>();
         for (const row of data.rows ?? []) {
           const k = keys.userMoveKey(row.userId, row.equipmentId, row.moveId);
@@ -54,10 +64,93 @@ export function TrendsView({
       });
   }, []);
 
+  const visibleUsers = useMemo(
+    () => users.filter((u) => selectedUsers.has(u.id)),
+    [users, selectedUsers],
+  );
+
+  function toggleUser(id: string) {
+    setSelectedUsers((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
+  function toggleGroup(id: string) {
+    setSelectedGroups((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
+  const totalMoves = useMemo(() => {
+    let count = 0;
+    for (const cat of CATEGORIES) {
+      for (const item of itemsByCategory[cat] ?? []) {
+        count += item.moves?.length ?? 0;
+      }
+    }
+    return count;
+  }, [itemsByCategory]);
+
+  const totalVisible = useMemo(() => {
+    if (selectedGroups.size === 0) return totalMoves;
+    let count = 0;
+    for (const cat of CATEGORIES) {
+      for (const item of itemsByCategory[cat] ?? []) {
+        for (const mv of item.moves ?? []) {
+          const groups = groupsForMove(mv.id, item.muscles ?? []);
+          for (const g of groups) {
+            if (selectedGroups.has(g)) {
+              count++;
+              break;
+            }
+          }
+        }
+      }
+    }
+    return count;
+  }, [itemsByCategory, selectedGroups, totalMoves]);
+
+  const sections = useMemo(() => {
+    return CATEGORIES.map((cat) => {
+      const items = itemsByCategory[cat] ?? [];
+      const moves = items.flatMap((item) =>
+        (item.moves ?? [])
+          .filter((mv) => {
+            const hasEntry = visibleUsers.some((u) => {
+              const list = allEntries.get(
+                keys.userMoveKey(u.id, item.id, mv.id),
+              );
+              return list && list.length > 0;
+            });
+            if (!hasEntry) return false;
+            if (selectedGroups.size === 0) return true;
+            const groups = groupsForMove(mv.id, item.muscles ?? []);
+            for (const g of groups) if (selectedGroups.has(g)) return true;
+            return false;
+          })
+          .map((mv) => ({ item, mv })),
+      );
+      if (moves.length === 0) return null;
+      return { cat, moves };
+    });
+  }, [itemsByCategory, allEntries, visibleUsers, selectedGroups]);
+
+  const totalRendered = useMemo(
+    () =>
+      sections.reduce((acc, s) => acc + (s ? s.moves.length : 0), 0),
+    [sections],
+  );
+
   if (loading) {
     return (
       <p className="text-sm text-neutral-500 text-center py-12">
-        Loading entries…
+        Loading entries...
       </p>
     );
   }
@@ -69,57 +162,101 @@ export function TrendsView({
     );
   }
 
-  function moveHasEntries(equipmentId: string, moveId: string): boolean {
-    for (const u of users) {
-      const list = allEntries.get(keys.userMoveKey(u.id, equipmentId, moveId));
-      if (list && list.length > 0) return true;
-    }
-    return false;
-  }
-
-  let totalRendered = 0;
-
-  const sections = CATEGORIES.map((cat) => {
-    const items = itemsByCategory[cat] ?? [];
-    const moves = items.flatMap((item) =>
-      (item.moves ?? [])
-        .filter((mv) => moveHasEntries(item.id, mv.id))
-        .map((mv) => ({ item, mv })),
-    );
-    if (moves.length === 0) return null;
-    totalRendered += moves.length;
-    return (
-      <section key={cat}>
-        <h2 className="text-xs font-semibold tracking-widest uppercase text-neutral-500 mb-3">
-          {categoryLabels[cat]}
-        </h2>
-        <div className="space-y-2">
-          {moves.map(({ item, mv }) => (
-            <TrendChart
-              key={`${item.id}:${mv.id}`}
-              equipmentId={item.id}
-              moveId={mv.id}
-              moveName={`${mv.name} — ${item.name}`}
-              allEntries={allEntries}
-              users={users}
-            />
-          ))}
+  return (
+    <div className="space-y-6">
+      {users.length >= 2 && (
+        <div className="rounded-xl bg-[var(--surface-soft)] ring-1 ring-[var(--ring)] p-3">
+          <div className="flex flex-wrap gap-2 mb-3">
+            {users.map((u) => {
+              const active = selectedUsers.has(u.id);
+              return (
+                <button
+                  key={u.id}
+                  onClick={() => toggleUser(u.id)}
+                  aria-pressed={active}
+                  className={[
+                    "flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium ring-1 transition-colors",
+                    active
+                      ? "bg-black text-white ring-black"
+                      : "bg-neutral-900 text-neutral-500 ring-neutral-800 hover:text-neutral-300",
+                  ].join(" ")}
+                >
+                  <span
+                    className="inline-block w-2 h-2 rounded-full shrink-0"
+                    style={{ background: u.color }}
+                  />
+                  {u.shortName}
+                </button>
+              );
+            })}
+          </div>
+          <div className="flex items-center gap-4 text-xs">
+            <button
+              onClick={() => setSelectedUsers(new Set(users.map((u) => u.id)))}
+              className="text-neutral-400 hover:text-white hover:underline"
+            >
+              Select all
+            </button>
+            <button
+              onClick={() => setSelectedUsers(new Set())}
+              className="text-neutral-400 hover:text-white hover:underline"
+            >
+              Clear all
+            </button>
+          </div>
         </div>
-      </section>
-    );
-  });
+      )}
 
-  if (totalRendered === 0) {
-    return (
-      <p className="text-sm text-neutral-500 text-center py-12">
-        No logged entries yet. Head to{" "}
-        <a href="/equipment" className="underline hover:text-white">
-          Equipment
-        </a>{" "}
-        and log a few weights to see trends here.
-      </p>
-    );
-  }
+      <MuscleFilter
+        selected={selectedGroups}
+        onToggle={toggleGroup}
+        onSelectAll={() => setSelectedGroups(new Set(ALL_GROUP_IDS))}
+        onClearAll={() => setSelectedGroups(new Set())}
+        shown={totalVisible}
+        total={totalMoves}
+      />
 
-  return <div className="space-y-10">{sections}</div>;
+      {totalRendered === 0 ? (
+        <p className="text-sm text-neutral-500 text-center py-12">
+          {selectedUsers.size === 0 ? (
+            "Select at least one user above to see trends."
+          ) : selectedGroups.size > 0 ? (
+            "No logged entries match the selected filters."
+          ) : (
+            <>
+              No logged entries yet. Head to{" "}
+              <a href="/equipment" className="underline hover:text-white">
+                Equipment
+              </a>{" "}
+              and log a few weights to see trends here.
+            </>
+          )}
+        </p>
+      ) : (
+        <div className="space-y-10">
+          {sections.map((s) =>
+            s ? (
+              <section key={s.cat}>
+                <h2 className="text-xs font-semibold tracking-widest uppercase text-neutral-500 mb-3">
+                  {categoryLabels[s.cat]}
+                </h2>
+                <div className="space-y-2">
+                  {s.moves.map(({ item, mv }) => (
+                    <TrendChart
+                      key={`${item.id}:${mv.id}`}
+                      equipmentId={item.id}
+                      moveId={mv.id}
+                      moveName={`${mv.name} — ${item.name}`}
+                      allEntries={allEntries}
+                      users={visibleUsers}
+                    />
+                  ))}
+                </div>
+              </section>
+            ) : null,
+          )}
+        </div>
+      )}
+    </div>
+  );
 }
