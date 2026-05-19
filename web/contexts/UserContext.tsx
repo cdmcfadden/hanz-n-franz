@@ -2,8 +2,10 @@
 
 import {
   createContext,
+  useCallback,
   useContext,
   useEffect,
+  useMemo,
   useState,
   type ReactNode,
 } from "react";
@@ -79,19 +81,25 @@ export function UserProvider({ children }: { children: ReactNode }) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  async function signOut() {
+  const signOut = useCallback(async () => {
     await sb.auth.signOut();
-  }
+  }, [sb]);
 
-  async function refreshUser() {
+  const refreshUser = useCallback(async () => {
     const { data: { session } } = await sb.auth.getSession();
     if (session?.user) {
       await loadUser(session.user.id, session.user.email ?? "");
     }
-  }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sb]);
+
+  const value = useMemo(
+    () => ({ currentUser, signOut, refreshUser, hydrated }),
+    [currentUser, signOut, refreshUser, hydrated],
+  );
 
   return (
-    <UserContext.Provider value={{ currentUser, signOut, refreshUser, hydrated }}>
+    <UserContext.Provider value={value}>
       {children}
     </UserContext.Provider>
   );

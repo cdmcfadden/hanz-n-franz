@@ -66,10 +66,14 @@ export async function fetchEntriesForUser(
   userId: string,
 ): Promise<EntryMap> {
   const sb = getSupabase();
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - 90);
+  const cutoffStr = cutoff.toISOString().slice(0, 10);
   const { data, error } = await sb
     .from("log_entries")
     .select("id, user_id, equipment_id, move_id, log_date, created_at, weight")
     .eq("user_id", userId)
+    .gte("log_date", cutoffStr)
     .order("log_date", { ascending: true });
   if (error) throw error;
   return rowsByMove((data ?? []) as Row[]);
