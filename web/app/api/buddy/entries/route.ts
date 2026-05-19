@@ -47,10 +47,15 @@ export async function GET() {
 
   const userIds = sorted.map((p) => p.id);
 
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - 90);
+  const cutoffStr = cutoff.toISOString().slice(0, 10);
+
   const { data: rows, error } = await admin
     .from("log_entries")
     .select("user_id, equipment_id, move_id, log_date, weight")
     .in("user_id", userIds)
+    .gte("log_date", cutoffStr)
     .order("log_date", { ascending: true });
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
