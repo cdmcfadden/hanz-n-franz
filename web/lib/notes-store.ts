@@ -8,6 +8,8 @@ export type Note = {
   transcript: string;
   summary: string;
   createdAt: string;
+  extractedWeight?: number | null;
+  extractedMoveId?: string | null;
 };
 
 type Row = {
@@ -55,15 +57,25 @@ export async function fetchLatestNotesForUser(
 export async function saveNote(
   equipmentId: string,
   transcript: string,
+  moves?: { id: string; name: string }[],
 ): Promise<Note> {
   const res = await fetch("/api/note", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ equipmentId, transcript }),
+    body: JSON.stringify({ equipmentId, transcript, moves }),
   });
   if (!res.ok) {
     const text = await res.text().catch(() => "");
     throw new Error(`Save failed (${res.status}): ${text}`);
   }
-  return (await res.json()) as Note;
+  const json = await res.json();
+  return {
+    id: json.id,
+    equipmentId: json.equipmentId,
+    transcript: json.transcript,
+    summary: json.summary,
+    createdAt: json.createdAt,
+    extractedWeight: json.extractedWeight ?? null,
+    extractedMoveId: json.extractedMoveId ?? null,
+  } as Note;
 }
