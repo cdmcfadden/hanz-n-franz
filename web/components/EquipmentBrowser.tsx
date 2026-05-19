@@ -9,6 +9,7 @@ import { VoiceNoteButton } from "@/components/VoiceNoteButton";
 import { useEntries } from "@/contexts/EntriesContext";
 import {
   CATEGORIES,
+  categoryLabels,
   type EquipmentCategory,
   type EquipmentItem,
   type Move,
@@ -40,11 +41,11 @@ export function EquipmentBrowser({
   );
 
   const catalogOrder = useMemo(() => {
-    const order: { item: EquipmentItem; idx: number }[] = [];
+    const order: { item: EquipmentItem; idx: number; category: EquipmentCategory }[] = [];
     let i = 0;
     for (const cat of CATEGORIES) {
       for (const item of itemsByCategory[cat] ?? []) {
-        order.push({ item, idx: i++ });
+        order.push({ item, idx: i++, category: cat });
       }
     }
     return order;
@@ -52,11 +53,14 @@ export function EquipmentBrowser({
 
   const total = catalogOrder.length;
 
-  const filteredItems: FilteredItem[] = useMemo(() => {
+  type FilteredCategory = { category: EquipmentCategory; items: FilteredItem[] };
+
+  const filteredByCategory: FilteredCategory[] = useMemo(() => {
     if (selected.size === 0) return [];
 
-    const withOrder: { f: FilteredItem; idx: number; recency: string }[] = [];
-    for (const { item, idx } of catalogOrder) {
+    const byCat = new Map<EquipmentCategory, { f: FilteredItem; idx: number; recency: string }[]>();
+
+    for (const { item, idx, category } of catalogOrder) {
       let visibleMoves: Move[] = [];
       if (item.moves && item.moves.length > 0) {
         visibleMoves = item.moves
@@ -80,20 +84,32 @@ export function EquipmentBrowser({
         for (const g of groups) if (selected.has(g)) { any = true; break; }
         if (!any) continue;
       }
-      withOrder.push({
+
+      if (!byCat.has(category)) byCat.set(category, []);
+      byCat.get(category)!.push({
         f: { item, visibleMoves },
         idx,
         recency: lastActivity(item.id) ?? "",
       });
     }
 
-    withOrder.sort((a, b) => {
-      if (a.recency !== b.recency) return b.recency.localeCompare(a.recency);
-      return a.idx - b.idx;
-    });
-
-    return withOrder.map((x) => x.f);
+    const result: FilteredCategory[] = [];
+    for (const cat of CATEGORIES) {
+      const catItems = byCat.get(cat);
+      if (!catItems || catItems.length === 0) continue;
+      catItems.sort((a, b) => {
+        if (a.recency !== b.recency) return b.recency.localeCompare(a.recency);
+        return a.idx - b.idx;
+      });
+      result.push({ category: cat, items: catItems.map((x) => x.f) });
+    }
+    return result;
   }, [catalogOrder, selected, lastActivity, lastMoveActivity]);
+
+  const shownCount = useMemo(
+    () => filteredByCategory.reduce((sum, c) => sum + c.items.length, 0),
+    [filteredByCategory],
+  );
 
   function toggle(id: string) {
     setSelected((prev) => {
@@ -111,11 +127,11 @@ export function EquipmentBrowser({
         onToggle={toggle}
         onSelectAll={() => setSelected(new Set(ALL_GROUP_IDS))}
         onClearAll={() => setSelected(new Set())}
-        shown={filteredItems.length}
+        shown={shownCount}
         total={total}
       />
 
-      {filteredItems.length === 0 && (
+      {shownCount === 0 && (
         <div className="text-center py-16 text-neutral-500">
           <p className="text-sm">
             {selected.size === 0
@@ -125,17 +141,26 @@ export function EquipmentBrowser({
         </div>
       )}
 
-      {filteredItems.length > 0 && (
-        <ul className="space-y-3">
-          {filteredItems.map(({ item, visibleMoves }) => (
-            <EquipmentRow
-              key={item.id}
-              item={item}
-              visibleMoves={visibleMoves}
-              hasImage={available.has(item.id)}
-            />
+      {shownCount > 0 && (
+        <div className="space-y-8">
+          {filteredByCategory.map(({ category, items }) => (
+            <section key={category}>
+              <h2 className="text-xs font-semibold tracking-widest uppercase text-neutral-500 mb-3">
+                {categoryLabels[category]}
+              </h2>
+              <ul className="space-y-3">
+                {items.map(({ item, visibleMoves }) => (
+                  <EquipmentRow
+                    key={item.id}
+                    item={item}
+                    visibleMoves={visibleMoves}
+                    hasImage={available.has(item.id)}
+                  />
+                ))}
+              </ul>
+            </section>
           ))}
-        </ul>
+        </div>
       )}
     </>
   );

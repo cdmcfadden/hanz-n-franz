@@ -1,7 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import { useMemo } from "react";
 import { MoveLogger } from "@/components/MoveLogger";
+import { useEntries } from "@/contexts/EntriesContext";
 import type { EquipmentItem } from "@/lib/equipment";
 
 const IMG_VERSION = "5";
@@ -13,6 +15,21 @@ export function EquipmentDetail({
   item: EquipmentItem;
   hasImage: boolean;
 }) {
+  const { lastMoveActivity } = useEntries();
+
+  const sortedMoves = useMemo(() => {
+    if (!item.moves || item.moves.length === 0) return [];
+    return [...item.moves]
+      .map((mv, catalogIdx) => ({ mv, catalogIdx }))
+      .sort((a, b) => {
+        const ra = lastMoveActivity(item.id, a.mv.id) ?? "";
+        const rb = lastMoveActivity(item.id, b.mv.id) ?? "";
+        if (ra !== rb) return rb.localeCompare(ra);
+        return a.catalogIdx - b.catalogIdx;
+      })
+      .map(({ mv }) => mv);
+  }, [item.id, item.moves, lastMoveActivity]);
+
   return (
     <div className="space-y-6">
       <Link
@@ -59,12 +76,12 @@ export function EquipmentDetail({
         </div>
       </div>
 
-      {item.moves && item.moves.length > 0 ? (
+      {sortedMoves.length > 0 ? (
         <div className="space-y-2">
           <h2 className="text-xs font-semibold tracking-widest uppercase text-neutral-500">
             Moves
           </h2>
-          {item.moves.map((mv) => (
+          {sortedMoves.map((mv) => (
             <MoveLogger
               key={mv.id}
               equipmentId={item.id}
