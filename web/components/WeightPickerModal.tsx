@@ -4,9 +4,9 @@ import { useState } from "react";
 
 const PLATES = [
   { weight: 45, size: 80, color: "#c0392b" },
-  { weight: 35, size: 70, color: "#b8860b" },
-  { weight: 25, size: 60, color: "#2e7d32" },
-  { weight: 10, size: 52, color: "#37474f" },
+  { weight: 35, size: 70, color: "#1c1c1c" },
+  { weight: 25, size: 60, color: "#e8b800" },
+  { weight: 10, size: 52, color: "#2e7d32" },
   { weight: 5, size: 44, color: "#555" },
   { weight: 2.5, size: 36, color: "#333" },
 ] as const;
