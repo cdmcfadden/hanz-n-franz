@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { TellMeModal } from "@/components/TellMeModal";
 import { useNotes } from "@/contexts/NotesContext";
+import type { WeightType } from "@/lib/equipment";
 
 function MicIcon({ className = "" }: { className?: string }) {
   return (
@@ -43,9 +44,11 @@ function CheckIcon({ className = "" }: { className?: string }) {
 export function VoiceNoteButton({
   equipmentId,
   equipmentName,
+  moves,
 }: {
   equipmentId: string;
   equipmentName: string;
+  moves?: { id: string; name: string; weight_type?: WeightType }[];
 }) {
   const { hasNoteToday } = useNotes();
   const captured = hasNoteToday(equipmentId);
@@ -84,6 +87,7 @@ export function VoiceNoteButton({
         <TellMeModal
           equipmentId={equipmentId}
           equipmentName={equipmentName}
+          moves={moves}
           onClose={() => setOpen(false)}
         />
       )}

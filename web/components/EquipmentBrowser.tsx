@@ -165,6 +165,11 @@ function EquipmentRow({
             <VoiceNoteButton
               equipmentId={item.id}
               equipmentName={item.name}
+              moves={item.moves?.map((mv) => ({
+                id: mv.id,
+                name: mv.name,
+                weight_type: mv.weight_type ?? item.weight_type,
+              }))}
             />
             <FormVideoButton
               equipmentId={item.id}

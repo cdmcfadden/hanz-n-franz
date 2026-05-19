@@ -2,7 +2,9 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useNotes } from "@/contexts/NotesContext";
-import { isTodayLocal } from "@/lib/log-store";
+import { useEntries } from "@/contexts/EntriesContext";
+import { isTodayLocal, todayISO } from "@/lib/log-store";
+import type { WeightType } from "@/lib/equipment";
 
 type SRResult = { transcript: string };
 type SREvent = {
@@ -33,21 +35,28 @@ function getRecognitionCtor(): SRCtor | null {
 
 type Phase = "ready" | "listening" | "saving" | "review" | "error";
 
+type MoveOption = {
+  id: string;
+  name: string;
+  weight_type?: WeightType;
+};
+
 export function TellMeModal({
   equipmentId,
   equipmentName,
+  moves,
   onClose,
 }: {
   equipmentId: string;
   equipmentName: string;
+  moves?: MoveOption[];
   onClose: () => void;
 }) {
   const { getLatest, add } = useNotes();
+  const { add: addEntry } = useEntries();
   const existing = getLatest(equipmentId);
   const existingIsToday = !!existing && isTodayLocal(existing.createdAt);
 
-  // Only open in "review" shortcut if the latest note is from today.
-  // Otherwise start fresh, but we still surface the prior summary as context.
   const [phase, setPhase] = useState<Phase>(existingIsToday ? "review" : "ready");
   const [interim, setInterim] = useState("");
   const [savedSummary, setSavedSummary] = useState<string | null>(
@@ -56,10 +65,18 @@ export function TellMeModal({
   const [priorSummary] = useState<string | null>(
     !existingIsToday && existing ? existing.summary : null,
   );
+  const [extractedWeight, setExtractedWeight] = useState<number | null>(null);
+  const [extractedMoveId, setExtractedMoveId] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
 
   const recognitionRef = useRef<SRInstance | null>(null);
   const finalRef = useRef("");
+
+  // Determine which move to log to: single move → use it; multi-move → match by extracted ID.
+  const resolvedMove =
+    moves && moves.length === 1
+      ? moves[0]
+      : moves?.find((m) => m.id === extractedMoveId) ?? null;
 
   function start() {
     setErr(null);
@@ -99,8 +116,11 @@ export function TellMeModal({
       }
       setPhase("saving");
       try {
-        const saved = await add(equipmentId, transcript);
+        const moveInputs = moves?.map((m) => ({ id: m.id, name: m.name }));
+        const saved = await add(equipmentId, transcript, moveInputs);
         setSavedSummary(saved.summary);
+        setExtractedWeight(saved.extractedWeight ?? null);
+        setExtractedMoveId(saved.extractedMoveId ?? null);
         setPhase("review");
       } catch (e) {
         setErr(e instanceof Error ? e.message : "save failed");
@@ -124,14 +144,30 @@ export function TellMeModal({
     recognitionRef.current?.stop();
   }
 
+  async function handleApprove() {
+    if (extractedWeight != null && resolvedMove) {
+      const weightVal =
+        resolvedMove.weight_type === "dumbbell_pair"
+          ? extractedWeight * 2
+          : extractedWeight;
+      try {
+        await addEntry(equipmentId, resolvedMove.id, todayISO(), weightVal);
+      } catch {
+        // Note is already saved; non-fatal if weight log fails.
+      }
+    }
+    onClose();
+  }
+
   useEffect(() => {
     return () => recognitionRef.current?.abort();
   }, []);
 
-  // Stop propagation so clicks inside the card don't close via backdrop.
   function onBackdrop(e: React.MouseEvent) {
     if (e.target === e.currentTarget) onClose();
   }
+
+  const willLog = extractedWeight != null && resolvedMove != null;
 
   return (
     <div
@@ -191,6 +227,11 @@ export function TellMeModal({
                 Summary
               </div>
               <p className="text-sm text-white leading-snug">{savedSummary}</p>
+              {willLog && (
+                <p className="text-xs text-emerald-400 mt-2">
+                  Will log {extractedWeight} lb for {resolvedMove!.name}
+                </p>
+              )}
             </div>
           )}
           {phase === "error" && (
@@ -234,7 +275,7 @@ export function TellMeModal({
             )}
             {phase === "review" && (
               <button
-                onClick={onClose}
+                onClick={handleApprove}
                 className="bg-emerald-500 text-emerald-950 text-sm font-semibold px-4 py-2 rounded-lg hover:bg-emerald-400"
               >
                 Approve

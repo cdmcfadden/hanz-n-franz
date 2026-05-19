@@ -22,7 +22,7 @@ type NotesContextValue = {
   loading: boolean;
   getLatest: (equipmentId: string) => Note | null;
   hasNoteToday: (equipmentId: string) => boolean;
-  add: (equipmentId: string, transcript: string) => Promise<Note>;
+  add: (equipmentId: string, transcript: string, moves?: { id: string; name: string }[]) => Promise<Note>;
 };
 
 const NotesContext = createContext<NotesContextValue | null>(null);
@@ -65,8 +65,8 @@ export function NotesProvider({ children }: { children: ReactNode }) {
   );
 
   const add = useCallback(
-    async (equipmentId: string, transcript: string): Promise<Note> => {
-      const saved = await saveNote(equipmentId, transcript);
+    async (equipmentId: string, transcript: string, moves?: { id: string; name: string }[]): Promise<Note> => {
+      const saved = await saveNote(equipmentId, transcript, moves);
       setNotes((prev) => {
         const next = new Map(prev);
         next.set(equipmentId, saved);
