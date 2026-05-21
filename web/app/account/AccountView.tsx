@@ -155,11 +155,11 @@ export function AccountView() {
         </p>
         {qrSvg ? (
           <div
-            className="w-48 h-48 rounded-2xl overflow-hidden bg-white p-2"
+            className="w-56 h-56 rounded-2xl overflow-hidden bg-white p-2"
             dangerouslySetInnerHTML={{ __html: qrSvg }}
           />
         ) : (
-          <div className="w-48 h-48 rounded-2xl bg-neutral-900 animate-pulse ring-1 ring-[var(--ring)]" />
+          <div className="w-56 h-56 rounded-2xl bg-neutral-900 animate-pulse ring-1 ring-[var(--ring)]" />
         )}
         <button
           onClick={handleCopy}
