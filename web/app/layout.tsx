@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { TopNav } from "@/components/TopNav";
+import { FirstVisitRedirect } from "@/components/FirstVisitRedirect";
 import { EntriesProvider } from "@/contexts/EntriesContext";
 import { NotesProvider } from "@/contexts/NotesContext";
 import { UserProvider } from "@/contexts/UserContext";
@@ -55,6 +56,7 @@ export default function RootLayout({
             <NotesProvider>
               <VideosProvider>
                 <TopNav />
+                <FirstVisitRedirect />
                 {children}
               </VideosProvider>
             </NotesProvider>

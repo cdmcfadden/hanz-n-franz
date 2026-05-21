@@ -181,7 +181,7 @@ function Block({
   items,
 }: {
   title: string;
-  items: Workout["main"];
+  items: Workout["warmup"];
 }) {
   return (
     <div>

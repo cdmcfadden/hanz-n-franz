@@ -57,6 +57,13 @@ export function UserSwitcher() {
             </p>
           </div>
           <a
+            href="/about"
+            onClick={() => setOpen(false)}
+            className="block w-full px-4 py-3 text-sm text-white hover:bg-neutral-800 transition-colors border-b border-[var(--ring)]"
+          >
+            About
+          </a>
+          <a
             href="/account"
             onClick={() => setOpen(false)}
             className="block w-full px-4 py-3 text-sm text-white hover:bg-neutral-800 transition-colors border-b border-[var(--ring)]"
