@@ -37,13 +37,37 @@ export async function GET() {
   cutoff.setDate(cutoff.getDate() - 14);
   const cutoffStr = cutoff.toISOString().split("T")[0];
 
-  const candidates: Array<{ equipmentId: string; moveId: string }> = [];
+  // Build a flat lookup of all resolvable (equipmentId::moveId) → names from catalog
+  const equipment = await loadEquipmentData();
+  const catalogLookup = new Map<string, { equipmentName: string; moveName: string }>();
+  for (const cat of CATEGORIES) {
+    for (const item of equipment[cat]) {
+      for (const move of item.moves ?? []) {
+        catalogLookup.set(`${item.id}::${move.id}`, {
+          equipmentName: item.name,
+          moveName: move.name,
+        });
+      }
+    }
+  }
+
+  // Candidates: PR was set ≥ 14 days ago AND both equipment and move exist in catalog
+  const candidates: Array<{
+    equipmentId: string;
+    moveId: string;
+    equipmentName: string;
+    moveName: string;
+  }> = [];
+
   for (const [key, { maxDate }] of prMap) {
     if (maxDate <= cutoffStr) {
+      const names = catalogLookup.get(key);
+      if (!names) continue;
       const sep = key.indexOf("::");
       candidates.push({
         equipmentId: key.slice(0, sep),
         moveId: key.slice(sep + 2),
+        ...names,
       });
     }
   }
@@ -53,31 +77,5 @@ export async function GET() {
   }
 
   const picked = candidates[Math.floor(Math.random() * candidates.length)];
-
-  const equipment = await loadEquipmentData();
-  let equipmentName = "";
-  let moveName = "";
-
-  for (const cat of CATEGORIES) {
-    const item = equipment[cat].find((e) => e.id === picked.equipmentId);
-    if (item) {
-      equipmentName = item.name;
-      const move = item.moves?.find((m) => m.id === picked.moveId);
-      moveName = move?.name ?? picked.moveId;
-      break;
-    }
-  }
-
-  if (!equipmentName) {
-    return NextResponse.json({ candidate: null });
-  }
-
-  return NextResponse.json({
-    candidate: {
-      equipmentId: picked.equipmentId,
-      moveId: picked.moveId,
-      moveName,
-      equipmentName,
-    },
-  });
+  return NextResponse.json({ candidate: picked });
 }

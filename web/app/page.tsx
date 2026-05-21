@@ -103,7 +103,8 @@ export default function Home() {
             href={`/equipment/${prOfDay.equipmentId}`}
             className="font-medium text-white hover:text-[var(--accent)] transition-colors"
           >
-            {prOfDay.moveName}
+            {prOfDay.equipmentName}
+            <span className="text-neutral-400 font-normal"> · {prOfDay.moveName}</span>
           </Link>
         </div>
       )}
