@@ -4,7 +4,6 @@ import { useState, useEffect, startTransition } from "react";
 import Link from "next/link";
 import type { Workout } from "@/lib/schema";
 
-type Fatigue = "fresh" | "moderate" | "tired";
 type Focus = "push" | "pull" | "legs" | "chest" | "back" | "shoulders/arms" | "core" | "";
 
 function todayKey() {
@@ -13,7 +12,6 @@ function todayKey() {
 
 export default function Home() {
   const [minutes, setMinutes] = useState(60);
-  const [fatigue, setFatigue] = useState<Fatigue>("moderate");
   const [focusHint, setFocusHint] = useState<Focus>("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -38,7 +36,6 @@ export default function Home() {
         body: JSON.stringify({
           goal: "strength",
           minutes,
-          fatigue,
           focus_hint: focusHint || undefined,
         }),
       });
@@ -63,17 +60,6 @@ export default function Home() {
       {!workout && (
         <div className="rounded-2xl bg-[var(--surface-soft)] p-5 ring-1 ring-[var(--ring)]">
           <div className="grid grid-cols-2 gap-3 mb-4">
-            <Field label="Current Fatigue Level">
-              <select
-                className="form-control"
-                value={fatigue}
-                onChange={(e) => setFatigue(e.target.value as Fatigue)}
-              >
-                <option value="fresh">Fresh</option>
-                <option value="moderate">Moderate</option>
-                <option value="tired">Tired</option>
-              </select>
-            </Field>
             <Field label="Minutes">
               <input
                 type="number"
@@ -84,7 +70,7 @@ export default function Home() {
                 onChange={(e) => setMinutes(parseInt(e.target.value) || 60)}
               />
             </Field>
-            <Field label="Focus" className="col-span-2">
+            <Field label="Focus">
               <select
                 className="form-control"
                 value={focusHint}

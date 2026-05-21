@@ -20,14 +20,12 @@ Return ONLY the structured workout object.`;
 export function buildUserPrompt(args: {
   goal: string;
   minutes: number;
-  fatigue: string;
   focus_hint?: string;
   avoid?: string[];
 }): string {
   const parts = [
     `Goal: ${args.goal}`,
     `Time budget: ${args.minutes} minutes`,
-    `Fatigue: ${args.fatigue}`,
   ];
   if (args.focus_hint) parts.push(`Focus hint: ${args.focus_hint}`);
   if (args.avoid && args.avoid.length) parts.push(`Avoid: ${args.avoid.join(", ")}`);

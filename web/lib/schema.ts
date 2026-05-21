@@ -29,7 +29,6 @@ export type Workout = z.infer<typeof workoutSchema>;
 export const requestSchema = z.object({
   goal: z.enum(["strength", "hypertrophy", "conditioning", "general"]).default("general"),
   minutes: z.number().int().min(20).max(120).default(60),
-  fatigue: z.enum(["fresh", "moderate", "tired"]).default("moderate"),
   focus_hint: z.string().optional().describe("optional user hint like 'legs' or 'upper body'"),
   avoid: z.array(z.string()).optional().describe("movements or equipment to skip"),
 });
