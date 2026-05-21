@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, startTransition } from "react";
+import Link from "next/link";
 import type { Workout } from "@/lib/schema";
 
 type Fatigue = "fresh" | "moderate" | "tired";
@@ -59,27 +60,6 @@ export default function Home() {
 
   return (
     <main className="mx-auto max-w-2xl px-4 sm:px-6 py-4 sm:py-6 w-full">
-      {/* Hero — the brand photo dominates the fold */}
-      <section className="mb-10 rounded-3xl overflow-hidden ring-1 ring-[var(--ring)] bg-black relative">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src="/cadet.png"
-          alt="C.A.D.E.T. logo"
-          width={704}
-          height={564}
-          className="w-full h-auto block"
-        />
-        <div className="px-5 py-4 border-t border-[var(--ring)]">
-          <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight text-white">
-            C.A.D.E.T.
-          </h1>
-          <p className="text-sm text-neutral-400 mt-1">
-            Chris and Dave&apos;s Experimental Training. Daily workout, built
-            around your gym.
-          </p>
-        </div>
-      </section>
-
       {!workout && (
         <div className="rounded-2xl bg-[var(--surface-soft)] p-5 ring-1 ring-[var(--ring)]">
           <div className="grid grid-cols-2 gap-3 mb-4">
@@ -228,15 +208,16 @@ function Block({
             key={i}
             className="rounded-xl bg-[var(--surface-soft)] p-3 text-sm ring-1 ring-[var(--ring)]"
           >
-            <div className="font-medium text-white">{ex.name}</div>
-            <div className="text-neutral-500 text-xs mb-1">{ex.equipment}</div>
-            <div className="tabular-nums text-neutral-200">
+            <Link
+              href={`/equipment/${ex.equipment}`}
+              className="font-medium text-white hover:text-[var(--accent)] transition-colors"
+            >
+              {ex.name}
+            </Link>
+            <div className="tabular-nums text-neutral-200 mt-1">
               {ex.sets} × {ex.reps}
               <span className="text-neutral-500"> · rest {ex.rest_seconds}s</span>
             </div>
-            {ex.notes && (
-              <div className="text-neutral-400 mt-1">{ex.notes}</div>
-            )}
           </li>
         ))}
       </ol>

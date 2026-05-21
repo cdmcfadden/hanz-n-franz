@@ -9,12 +9,17 @@ export const exerciseSchema = z.object({
   notes: z.string().optional(),
 });
 
+export const mainExerciseSchema = exerciseSchema.extend({
+  sets: z.literal(5),
+  reps: z.string().describe("4-8 reps, e.g. '5', '4-6', '6-8'"),
+});
+
 export const workoutSchema = z.object({
   title: z.string(),
   focus: z.string().describe("e.g. 'upper push', 'full body', 'lower + conditioning'"),
   estimated_minutes: z.number().int().min(10).max(180),
   warmup: z.array(exerciseSchema).min(1).max(5),
-  main: z.array(exerciseSchema).min(3).max(10),
+  main: z.array(mainExerciseSchema).min(3).max(10),
   finisher: z.array(exerciseSchema).max(3).optional(),
   coach_note: z.string().describe("one short paragraph: why this workout today"),
 });
