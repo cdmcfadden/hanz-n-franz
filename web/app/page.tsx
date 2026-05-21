@@ -1,42 +1,60 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, startTransition } from "react";
 import type { Workout } from "@/lib/schema";
 
-type Goal = "strength" | "hypertrophy" | "conditioning" | "general";
 type Fatigue = "fresh" | "moderate" | "tired";
+type Focus = "push" | "pull" | "legs" | "chest" | "back" | "shoulders/arms" | "core" | "";
+
+function todayKey() {
+  return `cadet:workout:${new Date().toISOString().slice(0, 10)}`;
+}
 
 export default function Home() {
-  const [goal, setGoal] = useState<Goal>("general");
   const [minutes, setMinutes] = useState(60);
   const [fatigue, setFatigue] = useState<Fatigue>("moderate");
-  const [focusHint, setFocusHint] = useState("");
+  const [focusHint, setFocusHint] = useState<Focus>("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [workout, setWorkout] = useState<Workout | null>(null);
 
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(todayKey());
+      if (stored) startTransition(() => setWorkout(JSON.parse(stored)));
+    } catch {
+      // ignore corrupt storage
+    }
+  }, []);
+
   async function generate() {
     setLoading(true);
     setError(null);
-    setWorkout(null);
     try {
       const res = await fetch("/api/workout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          goal,
+          goal: "strength",
           minutes,
           fatigue,
           focus_hint: focusHint || undefined,
         }),
       });
       if (!res.ok) throw new Error(`Request failed (${res.status})`);
-      setWorkout(await res.json());
+      const data: Workout = await res.json();
+      localStorage.setItem(todayKey(), JSON.stringify(data));
+      setWorkout(data);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Unknown error");
     } finally {
       setLoading(false);
     }
+  }
+
+  function clearWorkout() {
+    localStorage.removeItem(todayKey());
+    setWorkout(null);
   }
 
   return (
@@ -62,69 +80,66 @@ export default function Home() {
         </div>
       </section>
 
-      <div className="rounded-2xl bg-[var(--surface-soft)] p-5 ring-1 ring-[var(--ring)]">
-        <div className="grid grid-cols-2 gap-3 mb-4">
-          <Field label="Goal">
-            <select
-              className="form-control"
-              value={goal}
-              onChange={(e) => setGoal(e.target.value as Goal)}
-            >
-              <option value="general">General</option>
-              <option value="strength">Strength</option>
-              <option value="hypertrophy">Hypertrophy</option>
-              <option value="conditioning">Conditioning</option>
-            </select>
-          </Field>
-          <Field label="Fatigue">
-            <select
-              className="form-control"
-              value={fatigue}
-              onChange={(e) => setFatigue(e.target.value as Fatigue)}
-            >
-              <option value="fresh">Fresh</option>
-              <option value="moderate">Moderate</option>
-              <option value="tired">Tired</option>
-            </select>
-          </Field>
-          <Field label="Minutes">
-            <input
-              type="number"
-              min={20}
-              max={120}
-              className="form-control"
-              value={minutes}
-              onChange={(e) => setMinutes(parseInt(e.target.value) || 60)}
-            />
-          </Field>
-          <Field label="Focus hint">
-            <input
-              type="text"
-              placeholder="legs, upper push…"
-              className="form-control"
-              value={focusHint}
-              onChange={(e) => setFocusHint(e.target.value)}
-            />
-          </Field>
+      {!workout && (
+        <div className="rounded-2xl bg-[var(--surface-soft)] p-5 ring-1 ring-[var(--ring)]">
+          <div className="grid grid-cols-2 gap-3 mb-4">
+            <Field label="Current Fatigue Level">
+              <select
+                className="form-control"
+                value={fatigue}
+                onChange={(e) => setFatigue(e.target.value as Fatigue)}
+              >
+                <option value="fresh">Fresh</option>
+                <option value="moderate">Moderate</option>
+                <option value="tired">Tired</option>
+              </select>
+            </Field>
+            <Field label="Minutes">
+              <input
+                type="number"
+                min={20}
+                max={120}
+                className="form-control"
+                value={minutes}
+                onChange={(e) => setMinutes(parseInt(e.target.value) || 60)}
+              />
+            </Field>
+            <Field label="Focus" className="col-span-2">
+              <select
+                className="form-control"
+                value={focusHint}
+                onChange={(e) => setFocusHint(e.target.value as Focus)}
+              >
+                <option value="">No preference</option>
+                <option value="push">Push</option>
+                <option value="pull">Pull</option>
+                <option value="legs">Legs</option>
+                <option value="chest">Chest</option>
+                <option value="back">Back</option>
+                <option value="shoulders/arms">Shoulders / Arms</option>
+                <option value="core">Core</option>
+              </select>
+            </Field>
+          </div>
+
+          <button
+            onClick={generate}
+            disabled={loading}
+            className="w-full bg-[var(--accent)] hover:bg-[var(--accent-strong)] text-white py-3 rounded-lg font-semibold text-base disabled:opacity-40 transition-colors"
+          >
+            {loading ? "Generating…" : "Generate today's workout"}
+          </button>
+
+          {error && (
+            <p className="mt-4 text-sm text-[var(--accent-strong)]">
+              Error: {error}
+            </p>
+          )}
         </div>
-
-        <button
-          onClick={generate}
-          disabled={loading}
-          className="w-full bg-[var(--accent)] hover:bg-[var(--accent-strong)] text-white py-3 rounded-lg font-semibold text-base disabled:opacity-40 transition-colors"
-        >
-          {loading ? "Generating…" : "Generate today's workout"}
-        </button>
-
-        {error && (
-          <p className="mt-4 text-sm text-[var(--accent-strong)]">
-            Error: {error}
-          </p>
-        )}
-      </div>
+      )}
 
       {workout && (
-        <section className="mt-10 space-y-6">
+        <section className="mt-0 space-y-6">
           <header>
             <h2 className="text-2xl font-semibold tracking-tight text-white">
               {workout.title}
@@ -143,6 +158,13 @@ export default function Home() {
           <p className="text-sm italic text-neutral-400 border-l-2 border-[var(--accent)] pl-3">
             {workout.coach_note}
           </p>
+
+          <button
+            onClick={clearWorkout}
+            className="w-full py-3 rounded-lg text-sm font-medium text-neutral-500 ring-1 ring-[var(--ring)] hover:text-[var(--accent-strong)] hover:ring-[var(--accent-strong)] transition-colors"
+          >
+            Clear today&apos;s workout
+          </button>
         </section>
       )}
 
@@ -169,9 +191,17 @@ export default function Home() {
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({
+  label,
+  children,
+  className,
+}: {
+  label: string;
+  children: React.ReactNode;
+  className?: string;
+}) {
   return (
-    <label className="text-sm">
+    <label className={`text-sm${className ? ` ${className}` : ""}`}>
       <span className="block text-xs font-medium text-neutral-500 mb-1 uppercase tracking-wider">
         {label}
       </span>
