@@ -6,7 +6,6 @@ import { TrendChart } from "@/components/TrendChart";
 import { MuscleFilter } from "@/components/MuscleFilter";
 import {
   CATEGORIES,
-  categoryLabels,
   type EquipmentCategory,
   type EquipmentItem,
 } from "@/lib/equipment";
@@ -131,7 +130,7 @@ export function TrendsView({
     return count;
   }, [itemsByCategory, selectedGroups, totalMoves]);
 
-  const sections = useMemo(() => {
+  const equipmentGroups = useMemo(() => {
     const latestMoveDate = (item: EquipmentItem, mvId: string) => {
       let best = "";
       for (const u of visibleUsers) {
@@ -143,9 +142,8 @@ export function TrendsView({
       }
       return best;
     };
-    return CATEGORIES.map((cat) => {
-      const rawItems = itemsByCategory[cat] ?? [];
-      const equipmentGroups = rawItems.flatMap((item) => {
+    const groups = CATEGORIES.flatMap((cat) =>
+      (itemsByCategory[cat] ?? []).flatMap((item) => {
         const moves = (item.moves ?? [])
           .map((mv, catalogIdx) => ({ mv, catalogIdx }))
           .filter(({ mv }) => {
@@ -174,21 +172,15 @@ export function TrendsView({
           return d > best ? d : best;
         }, "");
         return [{ item, moves, itemLatest }];
-      });
-      equipmentGroups.sort((a, b) => b.itemLatest.localeCompare(a.itemLatest));
-      if (equipmentGroups.length === 0) return null;
-      return { cat, equipmentGroups };
-    });
+      }),
+    );
+    groups.sort((a, b) => b.itemLatest.localeCompare(a.itemLatest));
+    return groups;
   }, [itemsByCategory, allEntries, visibleUsers, selectedGroups]);
 
   const totalRendered = useMemo(
-    () =>
-      sections.reduce(
-        (acc, s) =>
-          acc + (s ? s.equipmentGroups.reduce((a, g) => a + g.moves.length, 0) : 0),
-        0,
-      ),
-    [sections],
+    () => equipmentGroups.reduce((acc, g) => acc + g.moves.length, 0),
+    [equipmentGroups],
   );
 
   if (loading) {
@@ -277,40 +269,29 @@ export function TrendsView({
           )}
         </p>
       ) : (
-        <div className="space-y-10">
-          {sections.map((s) =>
-            s ? (
-              <section key={s.cat}>
-                <h2 className="text-xs font-semibold tracking-widest uppercase text-neutral-500 mb-4">
-                  {categoryLabels[s.cat]}
-                </h2>
-                <div className="space-y-6">
-                  {s.equipmentGroups.map(({ item, moves }) => (
-                    <div key={item.id}>
-                      <h3 className="text-sm font-semibold text-neutral-300 mb-2">
-                        <Link href={`/equipment?eq=${item.id}`} className="hover:text-white hover:underline">
-                          {item.name}
-                        </Link>
-                      </h3>
-                      <div className="space-y-2">
-                        {moves.map((mv) => (
-                          <TrendChart
-                            key={`${item.id}:${mv.id}`}
-                            equipmentId={item.id}
-                            moveId={mv.id}
-                            moveName={mv.name}
-                            equipmentName={item.name}
-                            allEntries={allEntries}
-                            users={visibleUsers}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </section>
-            ) : null,
-          )}
+        <div className="space-y-6">
+          {equipmentGroups.map(({ item, moves }) => (
+            <div key={item.id}>
+              <h3 className="text-sm font-semibold text-neutral-300 mb-2">
+                <Link href={`/equipment?eq=${item.id}`} className="hover:text-white hover:underline">
+                  {item.name}
+                </Link>
+              </h3>
+              <div className="space-y-2">
+                {moves.map((mv) => (
+                  <TrendChart
+                    key={`${item.id}:${mv.id}`}
+                    equipmentId={item.id}
+                    moveId={mv.id}
+                    moveName={mv.name}
+                    equipmentName={item.name}
+                    allEntries={allEntries}
+                    users={visibleUsers}
+                  />
+                ))}
+              </div>
+            </div>
+          ))}
         </div>
       )}
     </div>
