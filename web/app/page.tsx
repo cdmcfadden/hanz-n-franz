@@ -43,8 +43,12 @@ export default function Home() {
     try {
       const cached = localStorage.getItem(key);
       if (cached !== null) {
-        setPrOfDay(cached === "null" ? null : JSON.parse(cached));
-        return;
+        const parsed = JSON.parse(cached);
+        // v:1 marks values cached after catalog-filter fix; discard older entries
+        if (parsed?.v === 1) {
+          setPrOfDay(parsed.data);
+          return;
+        }
       }
     } catch {
       // ignore corrupt storage
@@ -54,7 +58,7 @@ export default function Home() {
       .then((data) => {
         const val: PrOfDay = data.candidate ?? null;
         try {
-          localStorage.setItem(key, JSON.stringify(val));
+          localStorage.setItem(key, JSON.stringify({ v: 1, data: val }));
         } catch {
           // ignore storage errors
         }
