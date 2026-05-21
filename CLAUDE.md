@@ -6,6 +6,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 C.A.D.E.T. (Chris and Dave's Experimental Training) — a fitness companion app that generates AI-powered daily workouts, tracks per-exercise weight logs, and catalogs gym equipment with voice notes and form-check videos. Supports a buddy system so multiple Google-authenticated users can share a group and compare trends.
 
+## Git Workflow
+
+After making any file change, immediately stage, commit, and push to `main` — do not wait to be asked. No feature branches, no PRs. Before pushing, run `git status` to catch any other uncommitted files that belong in the same commit, and `git fetch origin` to check for upstream changes (rebase if needed).
+
 ## Commands
 
 All commands run from `web/`:
