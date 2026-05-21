@@ -6,8 +6,19 @@ import type { Workout } from "@/lib/schema";
 
 type Focus = "push" | "pull" | "legs" | "chest" | "back" | "shoulders/arms" | "core" | "";
 
+type PrOfDay = {
+  equipmentId: string;
+  moveId: string;
+  moveName: string;
+  equipmentName: string;
+} | null;
+
 function todayKey() {
   return `cadet:workout:${new Date().toISOString().slice(0, 10)}`;
+}
+
+function prKey() {
+  return `cadet:pr-of-day:${new Date().toISOString().slice(0, 10)}`;
 }
 
 export default function Home() {
@@ -16,6 +27,7 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [workout, setWorkout] = useState<Workout | null>(null);
+  const [prOfDay, setPrOfDay] = useState<PrOfDay | undefined>(undefined);
 
   useEffect(() => {
     try {
@@ -24,6 +36,31 @@ export default function Home() {
     } catch {
       // ignore corrupt storage
     }
+  }, []);
+
+  useEffect(() => {
+    const key = prKey();
+    try {
+      const cached = localStorage.getItem(key);
+      if (cached !== null) {
+        setPrOfDay(cached === "null" ? null : JSON.parse(cached));
+        return;
+      }
+    } catch {
+      // ignore corrupt storage
+    }
+    fetch("/api/pr-of-day")
+      .then((r) => r.json())
+      .then((data) => {
+        const val: PrOfDay = data.candidate ?? null;
+        try {
+          localStorage.setItem(key, JSON.stringify(val));
+        } catch {
+          // ignore storage errors
+        }
+        setPrOfDay(val);
+      })
+      .catch(() => setPrOfDay(null));
   }, []);
 
   async function generate() {
@@ -57,6 +94,20 @@ export default function Home() {
 
   return (
     <main className="mx-auto max-w-2xl px-4 sm:px-6 py-4 sm:py-6 w-full">
+      {prOfDay && (
+        <div className="mb-4 rounded-xl bg-[var(--surface-soft)] ring-1 ring-[var(--accent)] p-4 flex items-center gap-3">
+          <span className="text-xs font-bold uppercase tracking-wider text-[var(--accent)] shrink-0">
+            PR of the Day!
+          </span>
+          <Link
+            href={`/equipment/${prOfDay.equipmentId}`}
+            className="font-medium text-white hover:text-[var(--accent)] transition-colors"
+          >
+            {prOfDay.moveName}
+          </Link>
+        </div>
+      )}
+
       {!workout && (
         <div className="rounded-2xl bg-[var(--surface-soft)] p-5 ring-1 ring-[var(--ring)]">
           <div className="grid grid-cols-2 gap-3 mb-4">
