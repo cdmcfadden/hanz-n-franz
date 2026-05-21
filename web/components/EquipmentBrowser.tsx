@@ -54,13 +54,28 @@ export function EquipmentBrowser({
   const total = catalogOrder.length;
 
   const sortedAll = useMemo(() => {
-    return [...catalogOrder].sort((a, b) => {
-      const ra = lastActivity(a.item.id) ?? "";
-      const rb = lastActivity(b.item.id) ?? "";
-      if (ra !== rb) return rb.localeCompare(ra);
-      return a.idx - b.idx;
-    });
-  }, [catalogOrder, lastActivity]);
+    return [...catalogOrder]
+      .sort((a, b) => {
+        const ra = lastActivity(a.item.id) ?? "";
+        const rb = lastActivity(b.item.id) ?? "";
+        if (ra !== rb) return rb.localeCompare(ra);
+        return a.idx - b.idx;
+      })
+      .map(({ item, idx, category }) => ({
+        item,
+        idx,
+        category,
+        sortedMoves: (item.moves ?? [])
+          .map((mv, catalogIdx) => ({ mv, catalogIdx }))
+          .sort((a, b) => {
+            const ra = lastMoveActivity(item.id, a.mv.id) ?? "";
+            const rb = lastMoveActivity(item.id, b.mv.id) ?? "";
+            if (ra !== rb) return rb.localeCompare(ra);
+            return a.catalogIdx - b.catalogIdx;
+          })
+          .map(({ mv }) => mv),
+      }));
+  }, [catalogOrder, lastActivity, lastMoveActivity]);
 
   type FilteredCategory = { category: EquipmentCategory; items: FilteredItem[] };
 
@@ -142,11 +157,11 @@ export function EquipmentBrowser({
 
       {selected.size === 0 ? (
         <ul className="space-y-3">
-          {sortedAll.map(({ item }) => (
+          {sortedAll.map(({ item, sortedMoves }) => (
             <EquipmentRow
               key={item.id}
               item={item}
-              visibleMoves={item.moves ?? []}
+              visibleMoves={sortedMoves}
               hasImage={available.has(item.id)}
             />
           ))}
