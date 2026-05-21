@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { TrendChart } from "@/components/TrendChart";
 import { MuscleFilter } from "@/components/MuscleFilter";
 import {
@@ -36,6 +37,7 @@ export function TrendsView({
   const [selectedGroups, setSelectedGroups] = useState<Set<string>>(
     () => new Set(),
   );
+  const scrolled = useRef(false);
 
   useEffect(() => {
     fetch("/api/buddy/entries")
@@ -63,6 +65,19 @@ export function TrendsView({
         setLoading(false);
       });
   }, []);
+
+  useEffect(() => {
+    if (loading || scrolled.current) return;
+    const params = new URLSearchParams(window.location.search);
+    const eq = params.get("eq");
+    scrolled.current = true;
+    if (!eq) return;
+    const mv = params.get("mv");
+    const el = mv
+      ? document.getElementById(`trend-${eq}-${mv}`)
+      : document.querySelector(`[id^="trend-${eq}-"]`);
+    if (el) (el as HTMLElement).scrollIntoView({ behavior: "smooth", block: "center" });
+  }, [loading]);
 
   const visibleUsers = useMemo(
     () => users.filter((u) => selectedUsers.has(u.id)),
@@ -243,9 +258,9 @@ export function TrendsView({
           ) : (
             <>
               No logged entries yet. Head to{" "}
-              <a href="/equipment" className="underline hover:text-white">
+              <Link href="/equipment" className="underline hover:text-white">
                 Equipment
-              </a>{" "}
+              </Link>{" "}
               and log a few weights to see trends here.
             </>
           )}
@@ -264,7 +279,8 @@ export function TrendsView({
                       key={`${item.id}:${mv.id}`}
                       equipmentId={item.id}
                       moveId={mv.id}
-                      moveName={`${mv.name} — ${item.name}`}
+                      moveName={mv.name}
+                      equipmentName={item.name}
                       allEntries={allEntries}
                       users={visibleUsers}
                     />

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { FormVideoButton } from "@/components/FormVideoButton";
 import { MoveLogger } from "@/components/MoveLogger";
 import { MuscleFilter } from "@/components/MuscleFilter";
@@ -33,7 +33,19 @@ export function EquipmentBrowser({
   availableImageIds: string[];
 }) {
   const [selected, setSelected] = useState<Set<string>>(() => new Set());
-  const { lastActivity, lastMoveActivity } = useEntries();
+  const { lastActivity, lastMoveActivity, loading: entriesLoading } = useEntries();
+  const scrolled = useRef(false);
+
+  useEffect(() => {
+    if (entriesLoading || scrolled.current) return;
+    const params = new URLSearchParams(window.location.search);
+    const eq = params.get("eq");
+    scrolled.current = true;
+    if (!eq) return;
+    const mv = params.get("mv");
+    const el = document.getElementById(mv ? `move-${eq}-${mv}` : `eq-${eq}`);
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, [entriesLoading]);
 
   const available = useMemo(
     () => new Set(availableImageIds),
@@ -208,12 +220,14 @@ function EquipmentRow({
   const hidden = totalMoves - visibleMoves.length;
 
   return (
-    <li className="rounded-2xl bg-[var(--surface-soft)] ring-1 ring-[var(--ring)] p-4 sm:p-5">
+    <li id={`eq-${item.id}`} className="rounded-2xl bg-[var(--surface-soft)] ring-1 ring-[var(--ring)] p-4 sm:p-5">
       {/* Header: name + voice-note row on the left, clickable image top-right */}
       <header className="flex items-start justify-between gap-3 mb-4">
         <div className="min-w-0 pt-1 flex-1">
           <h3 className="font-semibold text-white tracking-tight text-lg sm:text-xl truncate">
-            {item.name}
+            <Link href={`/trends?eq=${item.id}`} className="hover:underline">
+              {item.name}
+            </Link>
           </h3>
           <div className="mt-2 grid grid-cols-2 gap-1.5 max-w-[7rem]">
             <VoiceNoteButton

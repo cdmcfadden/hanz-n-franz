@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { type EntryMap, type LogEntry, keys } from "@/lib/log-store";
 import { type BuddyUser } from "@/lib/buddy";
 
@@ -7,12 +8,14 @@ export function TrendChart({
   equipmentId,
   moveId,
   moveName,
+  equipmentName,
   allEntries,
   users,
 }: {
   equipmentId: string;
   moveId: string;
   moveName: string;
+  equipmentName: string;
   allEntries: EntryMap;
   users: BuddyUser[];
 }) {
@@ -24,9 +27,23 @@ export function TrendChart({
   const hasAny = Object.values(series).some((s) => s.length > 0);
 
   return (
-    <div className="rounded-2xl bg-[var(--surface-soft)] p-3 ring-1 ring-[var(--ring)]">
+    <div id={`trend-${equipmentId}-${moveId}`} className="rounded-2xl bg-[var(--surface-soft)] p-3 ring-1 ring-[var(--ring)]">
       <div className="flex items-baseline justify-between gap-2 mb-2 flex-wrap">
-        <h3 className="text-sm font-medium text-white truncate">{moveName}</h3>
+        <h3 className="text-sm font-medium text-white min-w-0">
+          <Link
+            href={`/equipment?eq=${equipmentId}&mv=${moveId}`}
+            className="hover:underline"
+          >
+            {moveName}
+          </Link>
+          {" — "}
+          <Link
+            href={`/equipment?eq=${equipmentId}`}
+            className="text-neutral-400 hover:text-white hover:underline"
+          >
+            {equipmentName}
+          </Link>
+        </h3>
         <div className="flex gap-3 text-[11px] tabular-nums shrink-0">
           {users.map((u) => {
             const entries = series[u.id] ?? [];

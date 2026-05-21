@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { useEntries } from "@/contexts/EntriesContext";
 import { todayISO } from "@/lib/log-store";
@@ -65,12 +66,15 @@ export function MoveLogger({
   }
 
   return (
-    <div className="rounded-lg bg-black/40 px-3 py-2.5 ring-1 ring-[var(--ring)]">
+    <div id={`move-${equipmentId}-${moveId}`} className="rounded-lg bg-black/40 px-3 py-2.5 ring-1 ring-[var(--ring)]">
       {/* Name line: move name + latest log. Always full width. */}
       <div className="flex items-baseline justify-between gap-2 mb-2">
-        <span className="text-sm font-medium text-white truncate">
+        <Link
+          href={`/trends?eq=${equipmentId}&mv=${moveId}`}
+          className="text-sm font-medium text-white truncate hover:underline"
+        >
           {moveName}
-        </span>
+        </Link>
         <span className="text-[11px] text-neutral-500 tabular-nums shrink-0">
           {loading ? (
             "loading…"
