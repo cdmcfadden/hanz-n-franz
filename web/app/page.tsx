@@ -38,7 +38,7 @@ export default function Home() {
     }
   }, []);
 
-  useEffect(() => {
+  function loadPrOfDay() {
     const key = prKey();
     try {
       const cached = localStorage.getItem(key);
@@ -61,6 +61,11 @@ export default function Home() {
         setPrOfDay(val);
       })
       .catch(() => setPrOfDay(null));
+  }
+
+  useEffect(() => {
+    loadPrOfDay();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function generate() {
@@ -89,7 +94,9 @@ export default function Home() {
 
   function clearWorkout() {
     localStorage.removeItem(todayKey());
+    localStorage.removeItem(prKey());
     setWorkout(null);
+    loadPrOfDay();
   }
 
   return (
