@@ -121,7 +121,8 @@ export function TrendsView({
       const items = itemsByCategory[cat] ?? [];
       const moves = items.flatMap((item) =>
         (item.moves ?? [])
-          .filter((mv) => {
+          .map((mv, catalogIdx) => ({ mv, catalogIdx }))
+          .filter(({ mv }) => {
             const hasEntry = visibleUsers.some((u) => {
               const list = allEntries.get(
                 keys.userMoveKey(u.id, item.id, mv.id),
@@ -134,8 +135,25 @@ export function TrendsView({
             for (const g of groups) if (selectedGroups.has(g)) return true;
             return false;
           })
-          .map((mv) => ({ item, mv })),
+          .map(({ mv, catalogIdx }) => ({ item, mv, catalogIdx })),
       );
+      const latestDate = ({ item, mv }: { item: EquipmentItem; mv: { id: string } }) => {
+        let best = "";
+        for (const u of visibleUsers) {
+          const list = allEntries.get(keys.userMoveKey(u.id, item.id, mv.id));
+          if (list && list.length > 0) {
+            const d = list[list.length - 1].date;
+            if (d > best) best = d;
+          }
+        }
+        return best;
+      };
+      moves.sort((a, b) => {
+        const la = latestDate(a);
+        const lb = latestDate(b);
+        if (la !== lb) return lb.localeCompare(la);
+        return a.catalogIdx - b.catalogIdx;
+      });
       if (moves.length === 0) return null;
       return { cat, moves };
     });
