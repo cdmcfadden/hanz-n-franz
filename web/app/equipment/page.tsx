@@ -8,8 +8,8 @@ import {
 import { ResetButton } from "@/components/ResetButton";
 import { CATEGORIES } from "@/lib/equipment";
 import { loadEquipmentData } from "@/lib/equipment-server";
-
-export const dynamic = "force-static";
+import { getServerSupabase } from "@/lib/supabase-server";
+import { fetchLastActivityMaps } from "@/lib/log-store-server";
 
 function getAvailableImageIds(): string[] {
   try {
@@ -23,13 +23,18 @@ function getAvailableImageIds(): string[] {
 }
 
 export default async function EquipmentPage() {
-  const data = await loadEquipmentData();
+  const [data, sb] = await Promise.all([loadEquipmentData(), getServerSupabase()]);
   const availableImageIds = getAvailableImageIds();
 
   const itemsByCategory: ItemsByCategory = {};
   for (const cat of CATEGORIES) {
     if (data[cat]?.length) itemsByCategory[cat] = data[cat];
   }
+
+  const { data: { user } } = await sb.auth.getUser();
+  const { lastActivityMap, lastMoveActivityMap } = user
+    ? await fetchLastActivityMaps(user.id)
+    : { lastActivityMap: {}, lastMoveActivityMap: {} };
 
   return (
     <main className="mx-auto max-w-3xl px-4 sm:px-6 py-4 sm:py-6 w-full">
@@ -38,13 +43,15 @@ export default async function EquipmentPage() {
           Your gym
         </h1>
         <p className="text-sm text-neutral-500 mt-1">
-          Filter by what you're training. Log per-move weights.
+          Filter by what you&apos;re training. Log per-move weights.
         </p>
       </div>
 
       <EquipmentBrowser
         itemsByCategory={itemsByCategory}
         availableImageIds={availableImageIds}
+        initialLastActivity={lastActivityMap}
+        initialLastMoveActivity={lastMoveActivityMap}
       />
 
       <footer className="mt-12 flex items-center justify-between gap-4 text-xs text-neutral-600">

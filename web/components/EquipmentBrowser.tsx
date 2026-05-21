@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { FormVideoButton } from "@/components/FormVideoButton";
 import { MoveLogger } from "@/components/MoveLogger";
 import { MuscleFilter } from "@/components/MuscleFilter";
@@ -28,13 +28,31 @@ type FilteredItem = {
 export function EquipmentBrowser({
   itemsByCategory,
   availableImageIds,
+  initialLastActivity,
+  initialLastMoveActivity,
 }: {
   itemsByCategory: ItemsByCategory;
   availableImageIds: string[];
+  initialLastActivity?: Record<string, string>;
+  initialLastMoveActivity?: Record<string, string>;
 }) {
   const [selected, setSelected] = useState<Set<string>>(() => new Set());
   const { lastActivity, lastMoveActivity, loading: entriesLoading } = useEntries();
   const scrolled = useRef(false);
+
+  const effectiveLastActivity = useCallback(
+    (id: string) =>
+      entriesLoading ? (initialLastActivity?.[id] ?? null) : lastActivity(id),
+    [entriesLoading, initialLastActivity, lastActivity],
+  );
+
+  const effectiveLastMoveActivity = useCallback(
+    (eqId: string, mvId: string) =>
+      entriesLoading
+        ? (initialLastMoveActivity?.[`${eqId}:${mvId}`] ?? null)
+        : lastMoveActivity(eqId, mvId),
+    [entriesLoading, initialLastMoveActivity, lastMoveActivity],
+  );
 
   useEffect(() => {
     if (entriesLoading || scrolled.current) return;
@@ -68,8 +86,8 @@ export function EquipmentBrowser({
   const sortedAll = useMemo(() => {
     return [...catalogOrder]
       .sort((a, b) => {
-        const ra = lastActivity(a.item.id) ?? "";
-        const rb = lastActivity(b.item.id) ?? "";
+        const ra = effectiveLastActivity(a.item.id) ?? "";
+        const rb = effectiveLastActivity(b.item.id) ?? "";
         if (ra !== rb) return rb.localeCompare(ra);
         return a.idx - b.idx;
       })
@@ -80,14 +98,14 @@ export function EquipmentBrowser({
         sortedMoves: (item.moves ?? [])
           .map((mv, catalogIdx) => ({ mv, catalogIdx }))
           .sort((a, b) => {
-            const ra = lastMoveActivity(item.id, a.mv.id) ?? "";
-            const rb = lastMoveActivity(item.id, b.mv.id) ?? "";
+            const ra = effectiveLastMoveActivity(item.id, a.mv.id) ?? "";
+            const rb = effectiveLastMoveActivity(item.id, b.mv.id) ?? "";
             if (ra !== rb) return rb.localeCompare(ra);
             return a.catalogIdx - b.catalogIdx;
           })
           .map(({ mv }) => mv),
       }));
-  }, [catalogOrder, lastActivity, lastMoveActivity]);
+  }, [catalogOrder, effectiveLastActivity, effectiveLastMoveActivity]);
 
   type FilteredCategory = { category: EquipmentCategory; items: FilteredItem[] };
 
@@ -107,8 +125,8 @@ export function EquipmentBrowser({
             return false;
           })
           .sort((a, b) => {
-            const ra = lastMoveActivity(item.id, a.mv.id) ?? "";
-            const rb = lastMoveActivity(item.id, b.mv.id) ?? "";
+            const ra = effectiveLastMoveActivity(item.id, a.mv.id) ?? "";
+            const rb = effectiveLastMoveActivity(item.id, b.mv.id) ?? "";
             if (ra !== rb) return rb.localeCompare(ra);
             return a.catalogIdx - b.catalogIdx;
           })
@@ -125,7 +143,7 @@ export function EquipmentBrowser({
       byCat.get(category)!.push({
         f: { item, visibleMoves },
         idx,
-        recency: lastActivity(item.id) ?? "",
+        recency: effectiveLastActivity(item.id) ?? "",
       });
     }
 
@@ -140,7 +158,7 @@ export function EquipmentBrowser({
       result.push({ category: cat, items: catItems.map((x) => x.f) });
     }
     return result;
-  }, [catalogOrder, selected, lastActivity, lastMoveActivity]);
+  }, [catalogOrder, selected, effectiveLastActivity, effectiveLastMoveActivity]);
 
   const shownCount = useMemo(
     () => filteredByCategory.reduce((sum, c) => sum + c.items.length, 0),

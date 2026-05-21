@@ -23,15 +23,19 @@ type Row = {
 
 export function TrendsView({
   itemsByCategory,
+  initialEntries,
+  initialUsers,
 }: {
   itemsByCategory: Partial<Record<EquipmentCategory, EquipmentItem[]>>;
+  initialEntries?: EntryMap;
+  initialUsers?: BuddyUser[];
 }) {
-  const [allEntries, setAllEntries] = useState<EntryMap>(() => new Map());
-  const [users, setUsers] = useState<BuddyUser[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [allEntries, setAllEntries] = useState<EntryMap>(() => initialEntries ?? new Map());
+  const [users, setUsers] = useState<BuddyUser[]>(() => initialUsers ?? []);
+  const [loading, setLoading] = useState(!initialEntries);
   const [error, setError] = useState<string | null>(null);
   const [selectedUsers, setSelectedUsers] = useState<Set<string>>(
-    () => new Set(),
+    () => new Set((initialUsers ?? []).map((u) => u.id)),
   );
   const [selectedGroups, setSelectedGroups] = useState<Set<string>>(
     () => new Set(),
