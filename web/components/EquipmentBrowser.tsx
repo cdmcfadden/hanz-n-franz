@@ -53,6 +53,15 @@ export function EquipmentBrowser({
 
   const total = catalogOrder.length;
 
+  const sortedAll = useMemo(() => {
+    return [...catalogOrder].sort((a, b) => {
+      const ra = lastActivity(a.item.id) ?? "";
+      const rb = lastActivity(b.item.id) ?? "";
+      if (ra !== rb) return rb.localeCompare(ra);
+      return a.idx - b.idx;
+    });
+  }, [catalogOrder, lastActivity]);
+
   type FilteredCategory = { category: EquipmentCategory; items: FilteredItem[] };
 
   const filteredByCategory: FilteredCategory[] = useMemo(() => {
@@ -127,21 +136,26 @@ export function EquipmentBrowser({
         onToggle={toggle}
         onSelectAll={() => setSelected(new Set(ALL_GROUP_IDS))}
         onClearAll={() => setSelected(new Set())}
-        shown={shownCount}
+        shown={selected.size === 0 ? total : shownCount}
         total={total}
       />
 
-      {shownCount === 0 && (
+      {selected.size === 0 ? (
+        <ul className="space-y-3">
+          {sortedAll.map(({ item }) => (
+            <EquipmentRow
+              key={item.id}
+              item={item}
+              visibleMoves={item.moves ?? []}
+              hasImage={available.has(item.id)}
+            />
+          ))}
+        </ul>
+      ) : shownCount === 0 ? (
         <div className="text-center py-16 text-neutral-500">
-          <p className="text-sm">
-            {selected.size === 0
-              ? "Tap a muscle group above to see matching equipment."
-              : "No equipment matches the selected filters."}
-          </p>
+          <p className="text-sm">No equipment matches the selected filters.</p>
         </div>
-      )}
-
-      {shownCount > 0 && (
+      ) : (
         <div className="space-y-8">
           {filteredByCategory.map(({ category, items }) => (
             <section key={category}>
