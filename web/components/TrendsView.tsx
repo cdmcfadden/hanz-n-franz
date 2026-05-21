@@ -132,10 +132,21 @@ export function TrendsView({
   }, [itemsByCategory, selectedGroups, totalMoves]);
 
   const sections = useMemo(() => {
+    const latestMoveDate = (item: EquipmentItem, mvId: string) => {
+      let best = "";
+      for (const u of visibleUsers) {
+        const list = allEntries.get(keys.userMoveKey(u.id, item.id, mvId));
+        if (list && list.length > 0) {
+          const d = list[list.length - 1].date;
+          if (d > best) best = d;
+        }
+      }
+      return best;
+    };
     return CATEGORIES.map((cat) => {
-      const items = itemsByCategory[cat] ?? [];
-      const moves = items.flatMap((item) =>
-        (item.moves ?? [])
+      const rawItems = itemsByCategory[cat] ?? [];
+      const equipmentGroups = rawItems.flatMap((item) => {
+        const moves = (item.moves ?? [])
           .map((mv, catalogIdx) => ({ mv, catalogIdx }))
           .filter(({ mv }) => {
             const hasEntry = visibleUsers.some((u) => {
@@ -150,33 +161,33 @@ export function TrendsView({
             for (const g of groups) if (selectedGroups.has(g)) return true;
             return false;
           })
-          .map(({ mv, catalogIdx }) => ({ item, mv, catalogIdx })),
-      );
-      const latestDate = ({ item, mv }: { item: EquipmentItem; mv: { id: string } }) => {
-        let best = "";
-        for (const u of visibleUsers) {
-          const list = allEntries.get(keys.userMoveKey(u.id, item.id, mv.id));
-          if (list && list.length > 0) {
-            const d = list[list.length - 1].date;
-            if (d > best) best = d;
-          }
-        }
-        return best;
-      };
-      moves.sort((a, b) => {
-        const la = latestDate(a);
-        const lb = latestDate(b);
-        if (la !== lb) return lb.localeCompare(la);
-        return a.catalogIdx - b.catalogIdx;
+          .sort((a, b) => {
+            const ra = latestMoveDate(item, a.mv.id);
+            const rb = latestMoveDate(item, b.mv.id);
+            if (ra !== rb) return rb.localeCompare(ra);
+            return a.catalogIdx - b.catalogIdx;
+          })
+          .map(({ mv }) => mv);
+        if (moves.length === 0) return [];
+        const itemLatest = moves.reduce((best, mv) => {
+          const d = latestMoveDate(item, mv.id);
+          return d > best ? d : best;
+        }, "");
+        return [{ item, moves, itemLatest }];
       });
-      if (moves.length === 0) return null;
-      return { cat, moves };
+      equipmentGroups.sort((a, b) => b.itemLatest.localeCompare(a.itemLatest));
+      if (equipmentGroups.length === 0) return null;
+      return { cat, equipmentGroups };
     });
   }, [itemsByCategory, allEntries, visibleUsers, selectedGroups]);
 
   const totalRendered = useMemo(
     () =>
-      sections.reduce((acc, s) => acc + (s ? s.moves.length : 0), 0),
+      sections.reduce(
+        (acc, s) =>
+          acc + (s ? s.equipmentGroups.reduce((a, g) => a + g.moves.length, 0) : 0),
+        0,
+      ),
     [sections],
   );
 
@@ -270,20 +281,31 @@ export function TrendsView({
           {sections.map((s) =>
             s ? (
               <section key={s.cat}>
-                <h2 className="text-xs font-semibold tracking-widest uppercase text-neutral-500 mb-3">
+                <h2 className="text-xs font-semibold tracking-widest uppercase text-neutral-500 mb-4">
                   {categoryLabels[s.cat]}
                 </h2>
-                <div className="space-y-2">
-                  {s.moves.map(({ item, mv }) => (
-                    <TrendChart
-                      key={`${item.id}:${mv.id}`}
-                      equipmentId={item.id}
-                      moveId={mv.id}
-                      moveName={mv.name}
-                      equipmentName={item.name}
-                      allEntries={allEntries}
-                      users={visibleUsers}
-                    />
+                <div className="space-y-6">
+                  {s.equipmentGroups.map(({ item, moves }) => (
+                    <div key={item.id}>
+                      <h3 className="text-sm font-semibold text-neutral-300 mb-2">
+                        <Link href={`/equipment?eq=${item.id}`} className="hover:text-white hover:underline">
+                          {item.name}
+                        </Link>
+                      </h3>
+                      <div className="space-y-2">
+                        {moves.map((mv) => (
+                          <TrendChart
+                            key={`${item.id}:${mv.id}`}
+                            equipmentId={item.id}
+                            moveId={mv.id}
+                            moveName={mv.name}
+                            equipmentName={item.name}
+                            allEntries={allEntries}
+                            users={visibleUsers}
+                          />
+                        ))}
+                      </div>
+                    </div>
                   ))}
                 </div>
               </section>
