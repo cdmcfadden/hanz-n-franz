@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useUser } from "@/contexts/UserContext";
+import { isAdmin } from "@/lib/admin";
 
 export function UserSwitcher() {
   const { currentUser, signOut, hydrated } = useUser();
@@ -62,6 +63,15 @@ export function UserSwitcher() {
           >
             Account
           </a>
+          {isAdmin(currentUser.id) && (
+            <a
+              href="/admin"
+              onClick={() => setOpen(false)}
+              className="block w-full px-4 py-3 text-sm text-white hover:bg-neutral-800 transition-colors border-b border-[var(--ring)]"
+            >
+              Admin
+            </a>
+          )}
           <button
             onClick={() => {
               setOpen(false);

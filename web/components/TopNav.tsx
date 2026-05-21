@@ -3,8 +3,6 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { UserSwitcher } from "@/components/UserSwitcher";
-import { useUser } from "@/contexts/UserContext";
-import { isAdmin } from "@/lib/admin";
 
 const TABS = [
   { id: "workout", label: "Workout", href: "/" },
@@ -23,8 +21,6 @@ function activeTab(pathname: string): string {
 export function TopNav() {
   const pathname = usePathname() ?? "/";
   const active = activeTab(pathname);
-  const { currentUser, hydrated } = useUser();
-
   return (
     <header className="sticky top-0 z-20 px-4 sm:px-6 pt-4 pb-3 bg-[var(--bg)]/95 backdrop-blur-md border-b border-[var(--ring)]">
       <div className="mx-auto max-w-3xl">
@@ -71,19 +67,7 @@ export function TopNav() {
               </Link>
             );
           })}
-          {hydrated && currentUser && isAdmin(currentUser.id) && (
-            <Link
-              href="/admin"
-              className={
-                pathname.startsWith("/admin")
-                  ? "px-4 py-2 rounded-full bg-white text-black font-semibold"
-                  : "px-4 py-2 rounded-full text-neutral-500 hover:text-white hover:bg-neutral-900 transition-colors font-medium"
-              }
-              aria-current={pathname.startsWith("/admin") ? "page" : undefined}
-            >
-              Admin
-            </Link>
-          )}
+
         </nav>
       </div>
     </header>
