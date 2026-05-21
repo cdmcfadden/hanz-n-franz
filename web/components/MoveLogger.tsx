@@ -54,7 +54,7 @@ export function MoveLogger({
   }
 
   const inputClass =
-    "text-sm rounded-md border-0 bg-black ring-1 ring-[var(--ring)] text-white placeholder:text-neutral-600 px-1.5 py-1.5 focus:ring-2 focus:ring-[var(--accent)] focus:outline-none";
+    "text-sm rounded-md border-0 bg-black ring-1 ring-[var(--ring)] text-white placeholder:text-neutral-600 px-2.5 py-1.5 focus:ring-2 focus:ring-[var(--accent)] focus:outline-none";
 
   const usesPicker = weightType === "barbell" || weightType === "plates";
   const hasBreakdown = weightType === "barbell" || weightType === "plates";
@@ -101,7 +101,7 @@ export function MoveLogger({
 
       {/* Input row — grid gives every card the same column sizes, so stacked
           rows line up perfectly regardless of the move name above. */}
-      <div className={`grid gap-1.5 items-center ${isDumbbell ? "grid-cols-[11rem_1fr_auto_auto]" : "grid-cols-[4rem_1fr_auto_auto]"}`}>
+      <div className={`grid gap-1.5 items-center ${isDumbbell ? "grid-cols-[6rem_1fr_auto_auto]" : "grid-cols-[4rem_1fr_auto_auto]"}`}>
         <input
           type="number"
           step="0.5"
