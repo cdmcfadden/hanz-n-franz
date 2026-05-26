@@ -144,7 +144,7 @@ function Chart({
 
   return (
     <div className="flex">
-      <div className="flex flex-col justify-between text-[10px] text-neutral-500 pr-2 py-0.5 tabular-nums shrink-0">
+      <div className="flex flex-col justify-between text-right text-[10px] text-neutral-500 pr-3 py-1 tabular-nums shrink-0 border-r border-[var(--ring)]/60">
         {sameWeight ? (
           <span className="my-auto">{wMax} lb</span>
         ) : (
@@ -155,7 +155,7 @@ function Chart({
         )}
       </div>
 
-      <div className="flex-1 min-w-0">
+      <div className="flex-1 min-w-0 pl-3">
         <svg
           width="100%"
           viewBox={`0 0 ${w} ${h}`}

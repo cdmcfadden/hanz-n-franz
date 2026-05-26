@@ -106,18 +106,18 @@ export default function Home() {
   return (
     <main className="mx-auto max-w-2xl px-4 sm:px-6 py-4 sm:py-6 w-full">
       {prOfDay && (
-        <div className="mb-4 rounded-xl bg-[var(--surface-soft)] ring-1 ring-[var(--accent)] p-4 flex items-center gap-3">
-          <span className="text-xs font-bold uppercase tracking-wider text-[var(--accent)] shrink-0">
-            PR of the Day!
+        <Link
+          href={`/equipment/${prOfDay.equipmentId}`}
+          className="mb-4 rounded-xl bg-[var(--surface-soft)] ring-1 ring-[var(--ring)] hover:ring-[var(--accent)] p-3 flex items-center gap-3 transition-colors group"
+        >
+          <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--accent)] shrink-0">
+            PR
           </span>
-          <Link
-            href={`/equipment/${prOfDay.equipmentId}`}
-            className="font-medium text-white hover:text-[var(--accent)] transition-colors"
-          >
+          <span className="text-sm font-medium text-white truncate group-hover:text-[var(--accent)] transition-colors">
             {prOfDay.equipmentName}
-            <span className="text-neutral-400 font-normal"> · {prOfDay.moveName}</span>
-          </Link>
-        </div>
+            <span className="text-neutral-500 font-normal"> · {prOfDay.moveName}</span>
+          </span>
+        </Link>
       )}
 
       {!workout && (

@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { TopNav } from "@/components/TopNav";
+import { BottomNav } from "@/components/BottomNav";
 import { FirstVisitRedirect } from "@/components/FirstVisitRedirect";
 import { EntriesProvider } from "@/contexts/EntriesContext";
 import { NotesProvider } from "@/contexts/NotesContext";
@@ -50,7 +51,7 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">
+      <body className="min-h-full flex flex-col pb-[calc(env(safe-area-inset-bottom)+64px)] sm:pb-0">
         <UserProvider>
           <EntriesProvider>
             <NotesProvider>
@@ -58,6 +59,7 @@ export default function RootLayout({
                 <TopNav />
                 <FirstVisitRedirect />
                 {children}
+                <BottomNav />
               </VideosProvider>
             </NotesProvider>
           </EntriesProvider>

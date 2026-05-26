@@ -20,3 +20,13 @@ web/public/equipment/frames_backup/
 # Logs
 *.log
 
+# Playwright MCP browser profile (holds Google session cookies)
+.playwright-profile/
+
+# Playwright MCP captures + config (local to this repo, not for commit)
+.playwright-mcp/
+.mcp.json
+
+# Ad-hoc screenshots taken during assessment passes
+/[0-9][0-9]*-*.png
+/[0-9][0-9][a-z]-*.png

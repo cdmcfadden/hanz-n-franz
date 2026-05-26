@@ -223,7 +223,7 @@ export function FormVideoButton({
           "w-full aspect-square rounded-lg flex flex-col items-center justify-center gap-0.5 text-[10px] font-semibold transition-colors ring-1",
           captured
             ? "bg-emerald-700 text-emerald-50 ring-emerald-700 hover:bg-emerald-600"
-            : "bg-sky-300 text-sky-950 ring-sky-300 hover:bg-sky-200",
+            : "bg-neutral-900 text-neutral-200 ring-[var(--ring-strong)] hover:bg-neutral-800 hover:text-white",
         ].join(" ")}
       >
         {captured ? (

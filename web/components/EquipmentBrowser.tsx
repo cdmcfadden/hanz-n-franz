@@ -225,6 +225,8 @@ export function EquipmentBrowser({
   );
 }
 
+const COLLAPSE_THRESHOLD = 3;
+
 function EquipmentRow({
   item,
   visibleMoves,
@@ -236,6 +238,10 @@ function EquipmentRow({
 }) {
   const totalMoves = item.moves?.length ?? 0;
   const hidden = totalMoves - visibleMoves.length;
+  const [showAll, setShowAll] = useState(false);
+  const shouldCollapse = visibleMoves.length > COLLAPSE_THRESHOLD;
+  const movesToShow =
+    shouldCollapse && !showAll ? visibleMoves.slice(0, 2) : visibleMoves;
 
   return (
     <li id={`eq-${item.id}`} className="rounded-2xl bg-[var(--surface-soft)] ring-1 ring-[var(--ring)] p-4 sm:p-5">
@@ -288,7 +294,7 @@ function EquipmentRow({
 
       {visibleMoves.length > 0 && (
         <div className="space-y-2">
-          {visibleMoves.map((mv) => (
+          {movesToShow.map((mv) => (
             <MoveLogger
               key={mv.id}
               equipmentId={item.id}
@@ -297,6 +303,16 @@ function EquipmentRow({
               weightType={mv.weight_type ?? item.weight_type}
             />
           ))}
+          {shouldCollapse && (
+            <button
+              onClick={() => setShowAll((v) => !v)}
+              className="w-full text-xs text-neutral-400 hover:text-white py-1.5 rounded-md ring-1 ring-[var(--ring)] hover:ring-[var(--ring-strong)] transition-colors"
+            >
+              {showAll
+                ? `Hide ${visibleMoves.length - 2} moves`
+                : `Show ${visibleMoves.length - 2} more ${visibleMoves.length - 2 === 1 ? "move" : "moves"}`}
+            </button>
+          )}
           {hidden > 0 && (
             <p className="text-[11px] text-neutral-600 italic pl-1">
               +{hidden} other {hidden === 1 ? "move" : "moves"} hidden by filter

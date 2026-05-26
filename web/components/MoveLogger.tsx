@@ -30,6 +30,7 @@ export function MoveLogger({
   const [err, setErr] = useState<string | null>(null);
   const [showPicker, setShowPicker] = useState(false);
   const [breakdownWeight, setBreakdownWeight] = useState<number | null>(null);
+  const [showDate, setShowDate] = useState(false);
 
   async function save(w?: number, d?: string) {
     const entered = w ?? parseFloat(weight);
@@ -42,6 +43,7 @@ export function MoveLogger({
       await add(equipmentId, moveId, dateVal, weightVal);
       setWeight("");
       setDate(todayISO());
+      setShowDate(false);
     } catch (e) {
       setErr(e instanceof Error ? e.message : "save failed");
     } finally {
@@ -100,9 +102,9 @@ export function MoveLogger({
         </span>
       </div>
 
-      {/* Input row — grid gives every card the same column sizes, so stacked
-          rows line up perfectly regardless of the move name above. */}
-      <div className={`grid gap-1.5 items-center ${isDumbbell ? "grid-cols-[9rem_1fr_auto_auto]" : "grid-cols-[4rem_1fr_auto_auto]"}`}>
+      {/* Input row — weight stretches; Log + history pinned right. Date is a
+          chip below for the rare case the user backdates. */}
+      <div className={`grid gap-1.5 items-center ${isDumbbell ? "grid-cols-[1fr_auto_auto]" : "grid-cols-[1fr_auto_auto]"}`}>
         <input
           type="number"
           step="0.5"
@@ -113,13 +115,7 @@ export function MoveLogger({
           onKeyDown={handleKey}
           onClick={usesPicker ? () => setShowPicker(true) : undefined}
           placeholder={isDumbbell ? "lb per dumbbell" : "lb"}
-          className={`${inputClass} w-full${usesPicker ? " cursor-pointer" : ""}`}
-        />
-        <input
-          type="date"
-          value={date}
-          onChange={(e) => setDate(e.target.value)}
-          className={`${dateInputClass} w-full min-w-0`}
+          className={`${inputClass} w-full min-w-0${usesPicker ? " cursor-pointer" : ""}`}
         />
         <button
           onClick={() => save()}
@@ -136,6 +132,39 @@ export function MoveLogger({
         >
           {expanded ? "×" : entries.length || ""}
         </button>
+      </div>
+
+      {/* Date row — collapsed by default. Click "Today" to backdate. */}
+      <div className="mt-1.5 flex items-center gap-1.5">
+        {!showDate && date === todayISO() ? (
+          <button
+            type="button"
+            onClick={() => setShowDate(true)}
+            className="text-[11px] text-neutral-500 hover:text-white"
+          >
+            Today · <span className="underline decoration-dotted underline-offset-2">change date</span>
+          </button>
+        ) : (
+          <>
+            <input
+              type="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              className={`${dateInputClass} w-auto`}
+              autoFocus={showDate}
+            />
+            <button
+              type="button"
+              onClick={() => {
+                setDate(todayISO());
+                setShowDate(false);
+              }}
+              className="text-[11px] text-neutral-500 hover:text-white"
+            >
+              today
+            </button>
+          </>
+        )}
       </div>
 
       {err && <p className="mt-1 text-[11px] text-rose-300">{err}</p>}
