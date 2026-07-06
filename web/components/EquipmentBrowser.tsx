@@ -244,7 +244,7 @@ function EquipmentRow({
     shouldCollapse && !showAll ? visibleMoves.slice(0, 2) : visibleMoves;
 
   return (
-    <li id={`eq-${item.id}`} className="rounded-2xl bg-[var(--surface-soft)] ring-1 ring-[var(--ring)] p-4 sm:p-5">
+    <li id={`eq-${item.id}`} className="card-lift rounded-2xl bg-[var(--surface-soft)] ring-1 ring-[var(--ring)] p-4 sm:p-5">
       {/* Header: name + voice-note row on the left, clickable image top-right */}
       <header className="flex items-start justify-between gap-3 mb-4">
         <div className="min-w-0 pt-1 flex-1">

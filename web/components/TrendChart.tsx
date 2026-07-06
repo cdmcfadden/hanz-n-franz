@@ -27,7 +27,7 @@ export function TrendChart({
   const hasAny = Object.values(series).some((s) => s.length > 0);
 
   return (
-    <div id={`trend-${equipmentId}-${moveId}`} className="rounded-2xl bg-[var(--surface-soft)] p-3 ring-1 ring-[var(--ring)]">
+    <div id={`trend-${equipmentId}-${moveId}`} className="card-lift rounded-2xl bg-[var(--surface-soft)] p-3 ring-1 ring-[var(--ring)]">
       <div className="flex items-baseline justify-between gap-2 mb-2 flex-wrap">
         <h3 className="text-sm font-medium text-white min-w-0">
           <Link

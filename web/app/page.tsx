@@ -108,9 +108,13 @@ export default function Home() {
       {prOfDay && (
         <Link
           href={`/equipment/${prOfDay.equipmentId}`}
-          className="mb-4 rounded-xl bg-[var(--surface-soft)] ring-1 ring-[var(--ring)] hover:ring-[var(--accent)] p-3 flex items-center gap-3 transition-colors group"
+          className="card-lift mb-4 rounded-xl bg-[var(--surface-soft)] ring-1 ring-[var(--ring)] p-3 flex items-center gap-3 group glow-fade-in"
         >
-          <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--accent)] shrink-0">
+          <span className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-[var(--accent)] shrink-0">
+            <span
+              className="pulse-dot inline-block w-1.5 h-1.5 rounded-full bg-[var(--accent)]"
+              aria-hidden="true"
+            />
             PR
           </span>
           <span className="text-sm font-medium text-white truncate group-hover:text-[var(--accent)] transition-colors">
@@ -154,9 +158,16 @@ export default function Home() {
           <button
             onClick={generate}
             disabled={loading}
-            className="w-full bg-[var(--accent)] hover:bg-[var(--accent-strong)] text-white py-3 rounded-lg font-semibold text-base disabled:opacity-40 transition-colors"
+            className="relative w-full bg-[var(--accent)] hover:bg-[var(--accent-strong)] text-white py-3 rounded-lg font-semibold text-base disabled:opacity-40 transition-[background-color,box-shadow,transform] shadow-[0_8px_24px_-12px_var(--accent-glow)] hover:shadow-[0_12px_32px_-10px_var(--accent-glow)] active:translate-y-[1px] active:shadow-none"
           >
-            {loading ? "Generating…" : "Generate today's workout"}
+            {loading ? (
+              <span className="inline-flex items-center gap-2">
+                <span className="inline-block w-3 h-3 rounded-full border-2 border-white/40 border-t-white animate-spin" />
+                Generating…
+              </span>
+            ) : (
+              "Generate today's workout"
+            )}
           </button>
 
           {error && (
@@ -201,16 +212,22 @@ export default function Home() {
         .form-control {
           width: 100%;
           font-size: 0.875rem;
-          border-radius: 0.375rem;
+          border-radius: 0.5rem;
           border: 0;
           box-shadow: 0 0 0 1px var(--ring);
           background: #000;
           color: var(--text);
-          padding: 0.5rem 0.625rem;
+          padding: 0.55rem 0.65rem;
+          transition: box-shadow 150ms ease;
+        }
+        .form-control:hover {
+          box-shadow: 0 0 0 1px var(--ring-strong);
         }
         .form-control:focus {
           outline: none;
-          box-shadow: 0 0 0 2px var(--accent);
+          box-shadow:
+            0 0 0 1px var(--accent),
+            0 0 0 4px rgba(217, 32, 39, 0.18);
         }
         .form-control::placeholder {
           color: var(--text-faint);

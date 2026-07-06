@@ -56,7 +56,7 @@ export function MoveLogger({
   }
 
   const inputClass =
-    "text-sm rounded-md border-0 bg-black ring-1 ring-[var(--ring)] text-white placeholder:text-neutral-600 px-2.5 py-1.5 focus:ring-2 focus:ring-[var(--accent)] focus:outline-none";
+    "text-sm rounded-md border-0 bg-black ring-1 ring-[var(--ring)] text-white placeholder:text-neutral-600 px-2.5 py-1.5 focus-glow transition-shadow hover:ring-[var(--ring-strong)]";
   const dateInputClass = inputClass.replace("text-sm", "text-xs");
 
   const usesPicker = weightType === "barbell" || weightType === "plates";

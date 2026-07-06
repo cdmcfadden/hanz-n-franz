@@ -14,6 +14,7 @@
   --text-faint: #6a6a6a;
   --accent: #d92027;
   --accent-strong: #ef4444;
+  --accent-glow: rgba(217, 32, 39, 0.35);
 }
 
 @theme inline {
@@ -37,6 +38,21 @@ body {
 
 body {
   font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  /* Atmospheric backdrop: a soft accent halo top-right + a deeper one bottom-left.
+     Fixed attachment so the gradient doesn't scroll with content. */
+  background-color: var(--bg);
+  background-image:
+    radial-gradient(
+      ellipse 80% 50% at 100% -10%,
+      rgba(217, 32, 39, 0.10),
+      transparent 60%
+    ),
+    radial-gradient(
+      ellipse 60% 40% at 0% 110%,
+      rgba(217, 32, 39, 0.06),
+      transparent 60%
+    );
+  background-attachment: fixed;
 }
 
 ::-webkit-scrollbar {
@@ -52,4 +68,62 @@ body {
 }
 ::-webkit-scrollbar-thumb:hover {
   background: var(--ring-strong);
+}
+
+/* Selection: accent red on white text */
+::selection {
+  background: var(--accent);
+  color: #fff;
+}
+
+/* Subtle reusable animations */
+@keyframes pulse-dot {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.55;
+    transform: scale(0.85);
+  }
+}
+.pulse-dot {
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+
+@keyframes glow-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(-2px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.glow-fade-in {
+  animation: glow-fade-in 0.35s ease-out;
+}
+
+/* Card hover lift — applied selectively via .card-lift utility */
+.card-lift {
+  transition:
+    transform 200ms ease,
+    box-shadow 200ms ease,
+    border-color 200ms ease;
+}
+.card-lift:hover {
+  transform: translateY(-1px);
+  box-shadow:
+    0 0 0 1px var(--accent-glow),
+    0 10px 30px -12px rgba(0, 0, 0, 0.6);
+}
+
+/* Focus ring with accent glow on form controls */
+.focus-glow:focus,
+.focus-glow:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 1px var(--accent),
+    0 0 0 4px rgba(217, 32, 39, 0.18);
 }
