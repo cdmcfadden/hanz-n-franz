@@ -13,12 +13,21 @@ type PrOfDay = {
   equipmentName: string;
 } | null;
 
+type Summary = {
+  text: string;
+  isReturning: boolean;
+} | null;
+
 function todayKey() {
   return `cadet:workout:${new Date().toISOString().slice(0, 10)}`;
 }
 
 function prKey() {
   return `cadet:pr-of-day:${new Date().toISOString().slice(0, 10)}`;
+}
+
+function summaryKey() {
+  return `cadet:summary:${new Date().toISOString().slice(0, 10)}`;
 }
 
 export default function Home() {
@@ -28,6 +37,7 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [workout, setWorkout] = useState<Workout | null>(null);
   const [prOfDay, setPrOfDay] = useState<PrOfDay | undefined>(undefined);
+  const [summary, setSummary] = useState<Summary | undefined>(undefined);
 
   useEffect(() => {
     try {
@@ -72,6 +82,46 @@ export default function Home() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  function loadSummary() {
+    const key = summaryKey();
+    try {
+      const cached = localStorage.getItem(key);
+      if (cached !== null) {
+        const parsed = JSON.parse(cached);
+        if (parsed?.v === 1) {
+          setSummary(parsed.data);
+          return;
+        }
+      }
+    } catch {
+      // ignore corrupt storage
+    }
+    fetch("/api/summary")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        const val: Summary = data?.text
+          ? { text: data.text, isReturning: !!data.isReturning }
+          : null;
+        // Only cache a real summary. Caching a null — from a 401 before the
+        // session cookie is live, a network blip, or a model error — would
+        // suppress the card for the rest of the day.
+        if (val) {
+          try {
+            localStorage.setItem(key, JSON.stringify({ v: 1, data: val }));
+          } catch {
+            // ignore storage errors
+          }
+        }
+        setSummary(val);
+      })
+      .catch(() => setSummary(null));
+  }
+
+  useEffect(() => {
+    loadSummary();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   async function generate() {
     setLoading(true);
     setError(null);
@@ -105,6 +155,15 @@ export default function Home() {
 
   return (
     <main className="mx-auto max-w-2xl px-4 sm:px-6 py-4 sm:py-6 w-full">
+      {summary && (
+        <div className="mb-4 rounded-xl bg-[var(--surface-soft)] ring-1 ring-[var(--ring)] p-4 glow-fade-in">
+          <span className="block text-[10px] font-bold uppercase tracking-widest text-[var(--accent)] mb-1.5">
+            {summary.isReturning ? "Welcome back" : "Recap"}
+          </span>
+          <p className="text-sm text-neutral-200 leading-relaxed">{summary.text}</p>
+        </div>
+      )}
+
       {prOfDay && (
         <Link
           href={`/equipment/${prOfDay.equipmentId}`}
