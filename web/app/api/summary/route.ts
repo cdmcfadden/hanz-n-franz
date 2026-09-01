@@ -22,6 +22,24 @@ function dateStr(dayNum: number): string {
   return new Date(dayNum * DAY_MS).toISOString().slice(0, 10);
 }
 
+// Plain, non-AI recap used when the Haiku call fails, so a Gateway hiccup
+// doesn't blank out the whole welcome/recap card.
+function fallbackSummaryText(stats: {
+  isReturning: boolean;
+  daysSinceLastLog: number;
+  sessionsInWindow: number;
+  movesWorked: number;
+  recentPRs: Array<{ equipmentName: string; moveName: string; weight: number }>;
+}): string {
+  if (stats.isReturning) {
+    return `It's been ${stats.daysSinceLastLog} days since your last logged session — let's get back to it today.`;
+  }
+  const sessionWord = stats.sessionsInWindow === 1 ? "session" : "sessions";
+  const top = stats.recentPRs[0];
+  const prNote = top ? ` including a PR on ${top.moveName} at ${top.weight} lbs` : "";
+  return `You've logged ${stats.sessionsInWindow} ${sessionWord} across ${stats.movesWorked} moves recently${prNote}.`;
+}
+
 export async function GET() {
   const supabase = await getServerSupabase();
   const {
@@ -48,12 +66,15 @@ export async function GET() {
   const isReturning = daysSinceLastLog > RETURNING_THRESHOLD_DAYS;
 
   // Max weight ever hit per (equipment_id, move_id), and the date it was set.
+  // `weight` is a Postgres `numeric` column, which PostgREST serializes as a
+  // string — compare numerically or "100" < "95" lexicographically wins.
   const prMap = new Map<string, { maxWeight: number; maxDate: string }>();
   for (const entry of entries) {
     const key = `${entry.equipment_id}::${entry.move_id}`;
+    const weight = Number(entry.weight);
     const existing = prMap.get(key);
-    if (!existing || entry.weight > existing.maxWeight) {
-      prMap.set(key, { maxWeight: entry.weight, maxDate: entry.log_date });
+    if (!existing || weight > existing.maxWeight) {
+      prMap.set(key, { maxWeight: weight, maxDate: entry.log_date });
     }
   }
 
@@ -113,12 +134,22 @@ export async function GET() {
     recentPRs: recentPRs.slice(0, 3),
   };
 
-  const { text } = await generateText({
-    model: "anthropic/claude-haiku-4-5",
-    system: buildSummarySystemPrompt(),
-    prompt: buildSummaryUserPrompt(stats),
-    temperature: 0.6,
-  });
+  let text: string;
+  try {
+    const result = await generateText({
+      model: "anthropic/claude-haiku-4-5",
+      system: buildSummarySystemPrompt(),
+      prompt: buildSummaryUserPrompt(stats),
+      temperature: 0.6,
+    });
+    text = result.text.trim();
+  } catch (err) {
+    // A model/Gateway hiccup shouldn't blank out the whole card — fall back
+    // to a plain templated recap built from the same stats.
+    console.error("[/api/summary] generateText failed, using fallback text:", err);
+    text = "";
+  }
+  if (!text) text = fallbackSummaryText(stats);
 
   return NextResponse.json({
     text: text.trim().slice(0, 400),

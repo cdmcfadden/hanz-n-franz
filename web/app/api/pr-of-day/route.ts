@@ -24,12 +24,15 @@ export async function GET() {
   }
 
   // Track the max weight and date it was achieved per (equipment_id, move_id)
+  // `weight` is a Postgres `numeric` column, which PostgREST serializes as a
+  // string — compare numerically or "100" < "95" lexicographically wins.
   const prMap = new Map<string, { maxWeight: number; maxDate: string }>();
   for (const entry of entries) {
     const key = `${entry.equipment_id}::${entry.move_id}`;
+    const weight = Number(entry.weight);
     const existing = prMap.get(key);
-    if (!existing || entry.weight > existing.maxWeight) {
-      prMap.set(key, { maxWeight: entry.weight, maxDate: entry.log_date });
+    if (!existing || weight > existing.maxWeight) {
+      prMap.set(key, { maxWeight: weight, maxDate: entry.log_date });
     }
   }
 
