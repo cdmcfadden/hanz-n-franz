@@ -39,7 +39,11 @@ export async function GET() {
     .order("log_date", { ascending: true });
 
   if (!entries || entries.length === 0) {
-    return NextResponse.json({ text: null });
+    return NextResponse.json({
+      text: "Welcome to C.A.D.E.T. Generate your first workout below, then log your weights to start building a recap here.",
+      isReturning: false,
+      isNew: true,
+    });
   }
 
   const lastLogDate = entries[entries.length - 1].log_date;
@@ -48,12 +52,15 @@ export async function GET() {
   const isReturning = daysSinceLastLog > RETURNING_THRESHOLD_DAYS;
 
   // Max weight ever hit per (equipment_id, move_id), and the date it was set.
+  // `weight` is a Postgres `numeric` column, which PostgREST serializes as a
+  // string — coerce before comparing or this becomes lexicographic ("9" > "80").
   const prMap = new Map<string, { maxWeight: number; maxDate: string }>();
   for (const entry of entries) {
     const key = `${entry.equipment_id}::${entry.move_id}`;
+    const weight = Number(entry.weight);
     const existing = prMap.get(key);
-    if (!existing || entry.weight > existing.maxWeight) {
-      prMap.set(key, { maxWeight: entry.weight, maxDate: entry.log_date });
+    if (!existing || weight > existing.maxWeight) {
+      prMap.set(key, { maxWeight: weight, maxDate: entry.log_date });
     }
   }
 
@@ -113,15 +120,39 @@ export async function GET() {
     recentPRs: recentPRs.slice(0, 3),
   };
 
-  const { text } = await generateText({
-    model: "anthropic/claude-haiku-4-5",
-    system: buildSummarySystemPrompt(),
-    prompt: buildSummaryUserPrompt(stats),
-    temperature: 0.6,
-  });
+  let text: string;
+  try {
+    const result = await generateText({
+      model: "anthropic/claude-haiku-4-5",
+      system: buildSummarySystemPrompt(),
+      prompt: buildSummaryUserPrompt(stats),
+      temperature: 0.6,
+    });
+    text = result.text.trim().slice(0, 400);
+  } catch (err) {
+    console.error("Failed to generate workout summary, falling back to templated recap:", err);
+    text = buildFallbackText(stats);
+  }
 
   return NextResponse.json({
-    text: text.trim().slice(0, 400),
+    text,
     isReturning,
   });
+}
+
+// Plain templated recap used when the Haiku call fails, so the card still
+// renders instead of going blank on a Gateway hiccup.
+function buildFallbackText(stats: {
+  isReturning: boolean;
+  daysSinceLastLog: number;
+  sessionsInWindow: number;
+  movesWorked: number;
+  recentPRs: Array<{ equipmentName: string; moveName: string; weight: number }>;
+}): string {
+  if (stats.isReturning) {
+    return `Welcome back — it's been ${stats.daysSinceLastLog} days since your last session. Jump back in today.`;
+  }
+  const topPr = stats.recentPRs[0];
+  const prPart = topPr ? ` Nice work hitting ${topPr.weight} lbs on ${topPr.moveName}.` : "";
+  return `${stats.sessionsInWindow} session${stats.sessionsInWindow === 1 ? "" : "s"} logged across ${stats.movesWorked} move${stats.movesWorked === 1 ? "" : "s"} recently.${prPart}`;
 }
