@@ -39,7 +39,11 @@ export async function GET() {
     .order("log_date", { ascending: true });
 
   if (!entries || entries.length === 0) {
-    return NextResponse.json({ text: null });
+    return NextResponse.json({
+      text: "Welcome to C.A.D.E.T. Log your first session on any piece of equipment to start building PR history and daily recaps here.",
+      isReturning: false,
+      isNew: true,
+    });
   }
 
   const lastLogDate = entries[entries.length - 1].log_date;

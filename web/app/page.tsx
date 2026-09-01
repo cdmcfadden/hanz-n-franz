@@ -16,6 +16,7 @@ type PrOfDay = {
 type Summary = {
   text: string;
   isReturning: boolean;
+  isNew?: boolean;
 } | null;
 
 function todayKey() {
@@ -100,7 +101,7 @@ export default function Home() {
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => {
         const val: Summary = data?.text
-          ? { text: data.text, isReturning: !!data.isReturning }
+          ? { text: data.text, isReturning: !!data.isReturning, isNew: !!data.isNew }
           : null;
         // Only cache a real summary. Caching a null — from a 401 before the
         // session cookie is live, a network blip, or a model error — would
@@ -158,7 +159,7 @@ export default function Home() {
       {summary && (
         <div className="mb-4 rounded-xl bg-[var(--surface-soft)] ring-1 ring-[var(--ring)] p-4 glow-fade-in">
           <span className="block text-[10px] font-bold uppercase tracking-widest text-[var(--accent)] mb-1.5">
-            {summary.isReturning ? "Welcome back" : "Recap"}
+            {summary.isReturning ? "Welcome back" : summary.isNew ? "Welcome" : "Recap"}
           </span>
           <p className="text-sm text-neutral-200 leading-relaxed">{summary.text}</p>
         </div>
