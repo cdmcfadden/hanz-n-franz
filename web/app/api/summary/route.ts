@@ -11,8 +11,15 @@ const RECENT_WINDOW_DAYS = 60;
 const RETURNING_THRESHOLD_DAYS = 14;
 const DAY_MS = 1000 * 60 * 60 * 24;
 
-function daysBetween(a: Date, b: Date): number {
-  return Math.floor((a.getTime() - b.getTime()) / DAY_MS);
+// All date math here is calendar-day math on YYYY-MM-DD strings. Parsing one of
+// those into a Date yields UTC midnight, so subtracting a local timestamp from
+// it drifts by a day depending on the hour — count epoch days instead.
+function dayNumber(dateStr: string): number {
+  return Math.round(Date.parse(`${dateStr}T00:00:00Z`) / DAY_MS);
+}
+
+function dateStr(dayNum: number): string {
+  return new Date(dayNum * DAY_MS).toISOString().slice(0, 10);
 }
 
 export async function GET() {
@@ -35,9 +42,9 @@ export async function GET() {
     return NextResponse.json({ text: null });
   }
 
-  const today = new Date();
   const lastLogDate = entries[entries.length - 1].log_date;
-  const daysSinceLastLog = daysBetween(today, new Date(lastLogDate));
+  const lastLogDay = dayNumber(lastLogDate);
+  const daysSinceLastLog = dayNumber(new Date().toISOString().slice(0, 10)) - lastLogDay;
   const isReturning = daysSinceLastLog > RETURNING_THRESHOLD_DAYS;
 
   // Max weight ever hit per (equipment_id, move_id), and the date it was set.
@@ -52,10 +59,8 @@ export async function GET() {
 
   // Look back from the last logged day rather than "today" so a returning
   // user's recap covers their last active stretch instead of an empty window.
-  const statsWindowEnd = new Date(lastLogDate);
-  const statsWindowStart = new Date(statsWindowEnd.getTime() - RECENT_WINDOW_DAYS * DAY_MS);
-  const statsWindowStartStr = statsWindowStart.toISOString().slice(0, 10);
-  const statsWindowEndStr = statsWindowEnd.toISOString().slice(0, 10);
+  const statsWindowStartStr = dateStr(lastLogDay - RECENT_WINDOW_DAYS);
+  const statsWindowEndStr = lastLogDate;
 
   const windowEntries = entries.filter(
     (e) => e.log_date >= statsWindowStartStr && e.log_date <= statsWindowEndStr,
@@ -70,7 +75,7 @@ export async function GET() {
 
   let longestGapDays = 0;
   for (let i = 1; i < sessionDates.length; i++) {
-    const gap = daysBetween(new Date(sessionDates[i]), new Date(sessionDates[i - 1]));
+    const gap = dayNumber(sessionDates[i]) - dayNumber(sessionDates[i - 1]);
     if (gap > longestGapDays) longestGapDays = gap;
   }
 

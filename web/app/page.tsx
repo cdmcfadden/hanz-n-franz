@@ -97,13 +97,20 @@ export default function Home() {
       // ignore corrupt storage
     }
     fetch("/api/summary")
-      .then((r) => r.json())
+      .then((r) => (r.ok ? r.json() : null))
       .then((data) => {
-        const val: Summary = data.text ? { text: data.text, isReturning: !!data.isReturning } : null;
-        try {
-          localStorage.setItem(key, JSON.stringify({ v: 1, data: val }));
-        } catch {
-          // ignore storage errors
+        const val: Summary = data?.text
+          ? { text: data.text, isReturning: !!data.isReturning }
+          : null;
+        // Only cache a real summary. Caching a null — from a 401 before the
+        // session cookie is live, a network blip, or a model error — would
+        // suppress the card for the rest of the day.
+        if (val) {
+          try {
+            localStorage.setItem(key, JSON.stringify({ v: 1, data: val }));
+          } catch {
+            // ignore storage errors
+          }
         }
         setSummary(val);
       })
