@@ -8,6 +8,7 @@ import {
 import { ResetButton } from "@/components/ResetButton";
 import { CATEGORIES } from "@/lib/equipment";
 import { loadEquipmentData } from "@/lib/equipment-server";
+import { currentGymId } from "@/lib/gym";
 import { getServerSupabase } from "@/lib/supabase-server";
 import { fetchLastActivityMaps } from "@/lib/log-store-server";
 
@@ -23,7 +24,10 @@ function getAvailableImageIds(): string[] {
 }
 
 export default async function EquipmentPage() {
-  const [data, sb] = await Promise.all([loadEquipmentData(), getServerSupabase()]);
+  const [data, sb] = await Promise.all([
+    currentGymId().then(loadEquipmentData),
+    getServerSupabase(),
+  ]);
   const availableImageIds = getAvailableImageIds();
 
   const itemsByCategory: ItemsByCategory = {};

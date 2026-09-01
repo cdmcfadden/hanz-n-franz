@@ -71,6 +71,10 @@
     { "id": "iso_row_pl", "name": "Iso-lateral row", "count": 1, "confidence": "high", "weight_type": "plates", "muscles": ["lats", "rhomboids", "rear delts", "biceps"], "moves": [
       { "id": "iso_row", "name": "Iso row" }
     ] },
+    { "id": "iso_chest_back_pl", "name": "Iso-Lateral Chest/Back", "brand_guess": "Hammer Strength", "count": 1, "confidence": "high", "weight_type": "plates", "muscles": ["chest", "front delts", "triceps", "lats", "rhomboids", "rear delts", "biceps"], "moves": [
+      { "id": "iso_chest_press_combo", "name": "Iso-lateral chest press" },
+      { "id": "iso_mid_row_combo", "name": "Iso-lateral mid row" }
+    ] },
     { "id": "iso_shoulder_press_pl", "name": "Iso-lateral shoulder press", "count": 1, "confidence": "high", "weight_type": "plates", "muscles": ["shoulders", "triceps"], "moves": [
       { "id": "iso_shoulder_press", "name": "Iso shoulder press" }
     ] },

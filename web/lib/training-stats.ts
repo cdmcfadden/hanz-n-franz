@@ -5,9 +5,20 @@ import { CATEGORIES } from "@/lib/equipment";
 export type LogEntry = {
   equipment_id: string;
   move_id: string;
+  movement_id?: string | null;
   weight: number;
   log_date: string;
 };
+
+/**
+ * Postgres `numeric` can reach the client as a string depending on the driver
+ * and column type, and `"95" > "100"` is true. Every comparison in this module
+ * would be wrong above 99 lbs if that ever happened, so coerce once on the way
+ * in rather than trusting the declared type.
+ */
+export function normalizeEntries(rows: unknown[]): LogEntry[] {
+  return (rows as LogEntry[]).map((r) => ({ ...r, weight: Number(r.weight) }));
+}
 
 export type MoveNames = { equipmentName: string; moveName: string };
 
@@ -32,14 +43,9 @@ export function moveKey(equipmentId: string, moveId: string): string {
   return `${equipmentId}::${moveId}`;
 }
 
-function splitKey(key: string): { equipmentId: string; moveId: string } {
-  const sep = key.indexOf("::");
-  return { equipmentId: key.slice(0, sep), moveId: key.slice(sep + 2) };
-}
-
 /** Flat (equipmentId::moveId) → display names for everything in the catalog. */
-export async function buildCatalogLookup(): Promise<Map<string, MoveNames>> {
-  const equipment = await loadEquipmentData();
+export async function buildCatalogLookup(gymId?: string | null): Promise<Map<string, MoveNames>> {
+  const equipment = await loadEquipmentData(gymId);
   const lookup = new Map<string, MoveNames>();
   for (const cat of CATEGORIES) {
     for (const item of equipment[cat]) {
@@ -55,6 +61,11 @@ export async function buildCatalogLookup(): Promise<Map<string, MoveNames>> {
 }
 
 export type MoveHistory = {
+  // Which gym equipment the most recent entry came from. History is grouped by
+  // movement, but a member should read "Hammer Strength chest press", not
+  // "barbell_bench_press", so display names resolve through this.
+  equipmentId: string;
+  moveId: string;
   peakWeight: number;
   peakDate: string;
   latestWeight: number;
@@ -62,16 +73,23 @@ export type MoveHistory = {
 };
 
 /**
- * All-time best and most recent working weight per move.
+ * Group by canonical movement when the row has one, and fall back to the gym's
+ * own (equipment, move) pair when it doesn't. That fallback is what lets a
+ * member's history survive changing gyms: two gyms' ids collapse onto one
+ * movement, while an unmapped move still gets its own bucket instead of
+ * disappearing.
+ *
  * Entries must be sorted by log_date ascending.
  */
 export function buildMoveHistory(entries: LogEntry[]): Map<string, MoveHistory> {
   const history = new Map<string, MoveHistory>();
   for (const entry of entries) {
-    const key = moveKey(entry.equipment_id, entry.move_id);
+    const key = entry.movement_id ?? moveKey(entry.equipment_id, entry.move_id);
     const existing = history.get(key);
     if (!existing) {
       history.set(key, {
+        equipmentId: entry.equipment_id,
+        moveId: entry.move_id,
         peakWeight: entry.weight,
         peakDate: entry.log_date,
         latestWeight: entry.weight,
@@ -85,6 +103,8 @@ export function buildMoveHistory(entries: LogEntry[]): Map<string, MoveHistory> 
     }
     existing.latestWeight = entry.weight;
     existing.latestDate = entry.log_date;
+    existing.equipmentId = entry.equipment_id;
+    existing.moveId = entry.move_id;
   }
   return history;
 }
@@ -111,11 +131,11 @@ export function pickStalePr(
 ): StalePr | null {
   const cutoff = dateStr(dayNumber(asOf) - STALE_PR_DAYS);
   const candidates: StalePr[] = [];
-  for (const [key, { peakDate }] of history) {
-    if (peakDate > cutoff) continue;
-    const names = catalog.get(key);
+  for (const h of history.values()) {
+    if (h.peakDate > cutoff) continue;
+    const names = catalog.get(moveKey(h.equipmentId, h.moveId));
     if (!names) continue;
-    candidates.push({ ...splitKey(key), ...names });
+    candidates.push({ equipmentId: h.equipmentId, moveId: h.moveId, ...names });
   }
   if (candidates.length === 0) return null;
   return candidates[Math.floor(Math.random() * candidates.length)];
@@ -152,7 +172,7 @@ export function findRegressions(
   sinceDate: string,
 ): Regression[] {
   const out: Regression[] = [];
-  for (const [key, h] of history) {
+  for (const h of history.values()) {
     if (h.latestDate < sinceDate) continue;
     if (h.latestWeight >= h.peakWeight) continue;
     if (h.peakDate >= h.latestDate) continue;
@@ -160,7 +180,7 @@ export function findRegressions(
     const pctDown = Math.round(((h.peakWeight - h.latestWeight) / h.peakWeight) * 100);
     if (pctDown < REGRESSION_MIN_PCT) continue;
 
-    const names = catalog.get(key);
+    const names = catalog.get(moveKey(h.equipmentId, h.moveId));
     if (!names) continue;
 
     const deficit = h.peakWeight - h.latestWeight;

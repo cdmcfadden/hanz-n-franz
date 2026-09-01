@@ -5,12 +5,16 @@ import {
   type EquipmentItem,
 } from "@/lib/equipment";
 import { loadEquipmentData } from "@/lib/equipment-server";
+import { currentGymId } from "@/lib/gym";
 import { getServerSupabase } from "@/lib/supabase-server";
 import { fetchBuddyData } from "@/lib/buddy-server";
 import { type EntryMap, keys } from "@/lib/log-store";
 
 export default async function TrendsPage() {
-  const [data, sb] = await Promise.all([loadEquipmentData(), getServerSupabase()]);
+  const [data, sb] = await Promise.all([
+    currentGymId().then(loadEquipmentData),
+    getServerSupabase(),
+  ]);
   const itemsByCategory: Partial<Record<EquipmentCategory, EquipmentItem[]>> =
     {};
   for (const cat of CATEGORIES) {

@@ -1,6 +1,7 @@
 import { NextResponse, after } from "next/server";
 import { generateObject } from "ai";
 import { loadEquipmentJson } from "@/lib/equipment-server";
+import { resolveGymId } from "@/lib/gym";
 import { maybeAutoLearn } from "@/lib/memory-learn";
 import { loadAthleteContext } from "@/lib/memory-store";
 import { buildSystemPrompt, buildUserPrompt } from "@/lib/prompt";
@@ -16,12 +17,15 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
   }
 
-  const equipmentJson = await loadEquipmentJson();
-
   const sb = await getServerSupabase();
   const {
     data: { user },
   } = await sb.auth.getUser();
+
+  // The catalog is per gym, so it has to be resolved from the athlete, not
+  // loaded once for the whole app.
+  const gymId = user ? await resolveGymId(user.id) : null;
+  const equipmentJson = await loadEquipmentJson(gymId);
   const athleteContext = user ? await loadAthleteContext(sb, user.id) : null;
 
   const result = await generateObject({
