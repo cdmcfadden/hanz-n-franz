@@ -1,4 +1,12 @@
-export function buildSystemPrompt(equipmentJson: string): string {
+export function buildSystemPrompt(equipmentJson: string, athleteContext?: string | null): string {
+  const memorySection = athleteContext
+    ? `\nATHLETE CONTEXT (learned goals, preferences, habits, and upcoming events for this specific user):
+${athleteContext}
+- Use this to steer exercise choice, intensity, and the coach_note. If an upcoming event implies tapering or a different emphasis (e.g. a marathon means favor running-compatible volume and avoid heavy leg soreness close to the date), adjust accordingly and say why in coach_note.
+- Do not invent facts about the athlete beyond what's stated here.
+`
+    : "";
+
   return `You are a strength coach writing a single day's workout.
 
 CONSTRAINTS:
@@ -10,7 +18,7 @@ CONSTRAINTS:
 - Total session time (including rest) should fit the user's budget.
 - Prefer the user's equipment by id when possible; use the human name as well.
 - Do not add per-exercise notes.
-
+${memorySection}
 AVAILABLE EQUIPMENT (JSON):
 ${equipmentJson}
 
