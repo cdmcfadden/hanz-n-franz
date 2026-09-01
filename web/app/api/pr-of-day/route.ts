@@ -28,8 +28,9 @@ export async function GET() {
   for (const entry of entries) {
     const key = `${entry.equipment_id}::${entry.move_id}`;
     const existing = prMap.get(key);
-    if (!existing || entry.weight > existing.maxWeight) {
-      prMap.set(key, { maxWeight: entry.weight, maxDate: entry.log_date });
+    const weight = Number(entry.weight);
+    if (!existing || weight > existing.maxWeight) {
+      prMap.set(key, { maxWeight: weight, maxDate: entry.log_date });
     }
   }
 

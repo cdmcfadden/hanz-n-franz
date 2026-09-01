@@ -22,6 +22,21 @@ function dateStr(dayNum: number): string {
   return new Date(dayNum * DAY_MS).toISOString().slice(0, 10);
 }
 
+function buildFallbackSummary(stats: {
+  isReturning: boolean;
+  daysSinceLastLog: number;
+  sessionsInWindow: number;
+  movesWorked: number;
+  recentPRs: Array<{ equipmentName: string; moveName: string; weight: number }>;
+}): string {
+  if (stats.isReturning) {
+    return `Welcome back — it's been ${stats.daysSinceLastLog} days since your last session. Jump back in today.`;
+  }
+  const top = stats.recentPRs[0];
+  const prNote = top ? ` Top recent PR: ${top.moveName} on ${top.equipmentName} at ${top.weight} lbs.` : "";
+  return `${stats.sessionsInWindow} sessions logged, ${stats.movesWorked} moves worked recently.${prNote}`;
+}
+
 export async function GET() {
   const supabase = await getServerSupabase();
   const {
@@ -39,7 +54,11 @@ export async function GET() {
     .order("log_date", { ascending: true });
 
   if (!entries || entries.length === 0) {
-    return NextResponse.json({ text: null });
+    return NextResponse.json({
+      text: "Welcome to C.A.D.E.T. Generate your first workout below to get started.",
+      isReturning: false,
+      isNew: true,
+    });
   }
 
   const lastLogDate = entries[entries.length - 1].log_date;
@@ -52,8 +71,9 @@ export async function GET() {
   for (const entry of entries) {
     const key = `${entry.equipment_id}::${entry.move_id}`;
     const existing = prMap.get(key);
-    if (!existing || entry.weight > existing.maxWeight) {
-      prMap.set(key, { maxWeight: entry.weight, maxDate: entry.log_date });
+    const weight = Number(entry.weight);
+    if (!existing || weight > existing.maxWeight) {
+      prMap.set(key, { maxWeight: weight, maxDate: entry.log_date });
     }
   }
 
@@ -113,15 +133,22 @@ export async function GET() {
     recentPRs: recentPRs.slice(0, 3),
   };
 
-  const { text } = await generateText({
-    model: "anthropic/claude-haiku-4-5",
-    system: buildSummarySystemPrompt(),
-    prompt: buildSummaryUserPrompt(stats),
-    temperature: 0.6,
-  });
+  let text: string;
+  try {
+    const result = await generateText({
+      model: "anthropic/claude-haiku-4-5",
+      system: buildSummarySystemPrompt(),
+      prompt: buildSummaryUserPrompt(stats),
+      temperature: 0.6,
+    });
+    text = result.text.trim().slice(0, 400);
+  } catch (err) {
+    console.error("summary: generateText failed, falling back to templated recap", err);
+    text = buildFallbackSummary(stats);
+  }
 
   return NextResponse.json({
-    text: text.trim().slice(0, 400),
+    text,
     isReturning,
   });
 }
