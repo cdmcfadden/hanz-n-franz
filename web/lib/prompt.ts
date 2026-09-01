@@ -39,3 +39,41 @@ export function buildUserPrompt(args: {
   if (args.avoid && args.avoid.length) parts.push(`Avoid: ${args.avoid.join(", ")}`);
   return parts.join("\n");
 }
+
+export function buildSummarySystemPrompt(): string {
+  return `You are a strength coach writing a one-line welcome note for the top of the app's home screen.
+
+Rules:
+- 1-2 short sentences, under 220 characters total.
+- Terse, encouraging gym-coach tone. No preamble, no emoji, no markdown, no exclamation-point spam.
+- If the status is "returning after a break", acknowledge the time away without guilt-tripping, then encourage them to jump back in today.
+- If the status is "active" and personal records are listed, call out the single most impressive one by name and weight.
+- Never invent facts beyond what's given below.`;
+}
+
+export function buildSummaryUserPrompt(stats: {
+  isReturning: boolean;
+  daysSinceLastLog: number;
+  sessionsInWindow: number;
+  movesWorked: number;
+  longestGapDays: number;
+  recentPRs: Array<{ equipmentName: string; moveName: string; weight: number }>;
+}): string {
+  const lines = [
+    `Status: ${stats.isReturning ? "returning after a break" : "active"}`,
+    `Days since last logged session: ${stats.daysSinceLastLog}`,
+    `Sessions logged in the relevant window: ${stats.sessionsInWindow}`,
+    `Distinct moves worked in that window: ${stats.movesWorked}`,
+  ];
+  if (stats.longestGapDays >= 5) {
+    lines.push(`Longest gap between sessions in that window: ${stats.longestGapDays} days`);
+  }
+  if (stats.recentPRs.length > 0) {
+    lines.push(
+      `Personal records set in that window: ${stats.recentPRs
+        .map((pr) => `${pr.moveName} on ${pr.equipmentName} at ${pr.weight} lbs`)
+        .join("; ")}`,
+    );
+  }
+  return lines.join("\n");
+}
