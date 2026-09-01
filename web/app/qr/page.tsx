@@ -7,6 +7,7 @@ import {
   type EquipmentItem,
 } from "@/lib/equipment";
 import { loadEquipmentData } from "@/lib/equipment-server";
+import { currentGymId } from "@/lib/gym";
 
 // Reads request headers, so cannot be statically pre-rendered
 export const dynamic = "force-dynamic";
@@ -21,7 +22,7 @@ async function makeQrSvg(url: string): Promise<string> {
 }
 
 export default async function QrSheetPage() {
-  const data = await loadEquipmentData();
+  const data = await loadEquipmentData(await currentGymId());
   const h = await headers();
   const host = h.get("host") ?? "localhost:3001";
   const proto =

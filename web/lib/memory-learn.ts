@@ -57,7 +57,7 @@ export async function refreshAthleteMemory(userId: string): Promise<string> {
     sb.from("athlete_memory").select("summary").eq("user_id", userId).maybeSingle(),
     sb
       .from("log_entries")
-      .select("equipment_id, move_id, log_date, weight")
+      .select("equipment_id, move_id, movement_id, log_date, weight")
       .eq("user_id", userId)
       .gte("log_date", cutoffStr)
       .order("log_date", { ascending: true })
@@ -77,7 +77,7 @@ export async function refreshAthleteMemory(userId: string): Promise<string> {
   }
 
   const logLines = logRows
-    .map((l) => `- ${l.log_date}: ${l.equipment_id}/${l.move_id} @ ${l.weight}`)
+    .map((l) => `- ${l.log_date}: ${l.movement_id ?? `${l.equipment_id}/${l.move_id}`} @ ${l.weight}`)
     .join("\n");
   const noteLines = noteRows.map((n) => `- ${n.equipment_id}: ${n.summary}`).join("\n");
   const existingSummary = (existingMemory?.summary as string | undefined)?.trim();

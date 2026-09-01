@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { generateText } from "ai";
 import { getServerSupabase } from "@/lib/supabase-server";
+import { resolveGymId } from "@/lib/gym";
 import { buildSummarySystemPrompt, buildSummaryUserPrompt } from "@/lib/prompt";
 import {
   buildCatalogLookup,
@@ -8,9 +9,9 @@ import {
   dateStr,
   dayNumber,
   findRegressions,
+  normalizeEntries,
   pickStalePr,
   today,
-  type LogEntry,
 } from "@/lib/training-stats";
 
 export const runtime = "nodejs";
@@ -30,11 +31,11 @@ export async function GET() {
 
   const { data } = await supabase
     .from("log_entries")
-    .select("equipment_id, move_id, weight, log_date")
+    .select("equipment_id, move_id, movement_id, weight, log_date")
     .eq("user_id", user.id)
     .order("log_date", { ascending: true });
 
-  const entries = (data ?? []) as LogEntry[];
+  const entries = normalizeEntries(data ?? []);
   if (entries.length === 0) {
     return NextResponse.json({ text: null });
   }
@@ -67,7 +68,8 @@ export async function GET() {
         dayNumber(sessionDates[sessionDates.length - 2])
       : 0;
 
-  const catalog = await buildCatalogLookup();
+  const gymId = await resolveGymId(user.id);
+  const catalog = await buildCatalogLookup(gymId);
   const history = buildMoveHistory(entries);
 
   const recentPRs = [];
@@ -88,7 +90,9 @@ export async function GET() {
     lastGapDays,
     longestGapDays,
     sessionsInWindow: sessionDates.length,
-    movesWorked: new Set(windowEntries.map((e) => `${e.equipment_id}::${e.move_id}`)).size,
+    movesWorked: new Set(
+      windowEntries.map((e) => e.movement_id ?? `${e.equipment_id}::${e.move_id}`),
+    ).size,
     recentPRs: recentPRs.slice(0, 3),
     regressions: regressions.slice(0, 2),
     suggestion: suggestion

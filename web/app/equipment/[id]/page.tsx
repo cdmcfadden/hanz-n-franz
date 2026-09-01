@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { EquipmentDetail } from "@/components/EquipmentDetail";
 import { CATEGORIES, type EquipmentItem } from "@/lib/equipment";
 import { loadEquipmentData } from "@/lib/equipment-server";
+import { currentGymId } from "@/lib/gym";
 
 export const dynamic = "force-static";
 
@@ -33,7 +34,7 @@ export default async function EquipmentItemPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const data = await loadEquipmentData();
+  const data = await loadEquipmentData(await currentGymId());
   const item = findItem(data, id);
   if (!item) notFound();
 
@@ -45,6 +46,8 @@ export default async function EquipmentItemPage({
 }
 
 export async function generateStaticParams(): Promise<{ id: string }[]> {
+  // Runs at build time with no request, so there is no gym to resolve — these
+  // params only prime the route, and the page itself loads the viewer's gym.
   const data = await loadEquipmentData();
   const ids: string[] = [];
   for (const cat of CATEGORIES) {
