@@ -35,10 +35,12 @@ export async function loadAthleteContext(
   const parts: string[] = [];
   if (summary) parts.push(summary);
   if (upcoming.length > 0) {
-    const today = new Date();
+    // Compare date-to-date, not date-to-timestamp: event_date parses as UTC
+    // midnight, so subtracting "now" would round a same-day event to 0 or -1.
+    const today = Date.parse(`${new Date().toISOString().slice(0, 10)}T00:00:00Z`);
     const lines = upcoming.map((e) => {
-      const days = Math.ceil(
-        (new Date(e.event_date).getTime() - today.getTime()) / (1000 * 60 * 60 * 24),
+      const days = Math.round(
+        (Date.parse(`${e.event_date}T00:00:00Z`) - today) / (1000 * 60 * 60 * 24),
       );
       const notes = e.notes ? ` — ${e.notes}` : "";
       return `- ${e.title} on ${e.event_date} (${days} days away)${notes}`;
