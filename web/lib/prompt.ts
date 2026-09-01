@@ -1,3 +1,5 @@
+import { WEIGHT_INCREMENT_LB } from "@/lib/training-stats";
+
 export function buildSystemPrompt(equipmentJson: string, athleteContext?: string | null): string {
   const memorySection = athleteContext
     ? `\nATHLETE CONTEXT (learned goals, preferences, habits, and upcoming events for this specific user):
@@ -41,23 +43,43 @@ export function buildUserPrompt(args: {
 }
 
 export function buildSummarySystemPrompt(): string {
-  return `You are a strength coach writing a one-line welcome note for the top of the app's home screen.
+  return `You are a strength coach writing the briefing at the top of an athlete's home screen. They see this before they train today.
+
+Write 3-5 sentences, under 700 characters. Terse, specific, encouraging gym-coach voice. No preamble, no emoji, no markdown, no bullet points, no exclamation-point spam.
+
+Cover, in this order, whichever apply:
+- Time away. If they just came back from a layoff, name it plainly ("three weeks off") without guilt-tripping.
+- Where they stand. If a lift is below their own best, say which one and give both numbers — what they last lifted and what they peaked at.
+- What to do about it. Give a concrete next step using the figures provided: the suggested next weight, and roughly how many sessions of steady progression it takes to get back to their record. Frame regaining lost ground as fast work, because it is.
+- Recent wins. If they set personal records lately, call out the most impressive one by name and weight.
+- If a stale personal record is listed, suggest revisiting that lift today.
 
 Rules:
-- 1-2 short sentences, under 220 characters total.
-- Terse, encouraging gym-coach tone. No preamble, no emoji, no markdown, no exclamation-point spam.
-- If the status is "returning after a break", acknowledge the time away without guilt-tripping, then encourage them to jump back in today.
-- If the status is "active" and personal records are listed, call out the single most impressive one by name and weight.
-- Never invent facts beyond what's given below.`;
+- Use ONLY the figures given below. Never invent a weight, date, count, or exercise name.
+- Every weight is in pounds.
+- Do not repeat a number more than once; write like a coach talking, not a stats table.`;
 }
 
 export function buildSummaryUserPrompt(stats: {
   isReturning: boolean;
   daysSinceLastLog: number;
+  lastGapDays: number;
+  longestGapDays: number;
   sessionsInWindow: number;
   movesWorked: number;
-  longestGapDays: number;
   recentPRs: Array<{ equipmentName: string; moveName: string; weight: number }>;
+  regressions: Array<{
+    equipmentName: string;
+    moveName: string;
+    peakWeight: number;
+    peakDate: string;
+    currentWeight: number;
+    currentDate: string;
+    pctDown: number;
+    suggestedNextWeight: number;
+    sessionsToRegain: number;
+  }>;
+  suggestion: { equipmentName: string; moveName: string } | null;
 }): string {
   const lines = [
     `Status: ${stats.isReturning ? "returning after a break" : "active"}`,
@@ -65,9 +87,20 @@ export function buildSummaryUserPrompt(stats: {
     `Sessions logged in the relevant window: ${stats.sessionsInWindow}`,
     `Distinct moves worked in that window: ${stats.movesWorked}`,
   ];
-  if (stats.longestGapDays >= 5) {
+
+  if (stats.lastGapDays >= 10) {
+    lines.push(`Break taken just before their most recent session: ${stats.lastGapDays} days`);
+  }
+  if (stats.longestGapDays >= 5 && stats.longestGapDays !== stats.lastGapDays) {
     lines.push(`Longest gap between sessions in that window: ${stats.longestGapDays} days`);
   }
+
+  for (const r of stats.regressions) {
+    lines.push(
+      `Lift below their best: ${r.moveName} on ${r.equipmentName} — last lifted ${r.currentWeight} lbs on ${r.currentDate}, personal record ${r.peakWeight} lbs set ${r.peakDate} (${r.pctDown}% below). Suggested next working weight: ${r.suggestedNextWeight} lbs. At ${WEIGHT_INCREMENT_LB} lbs added per session that is about ${r.sessionsToRegain} sessions back to the record.`,
+    );
+  }
+
   if (stats.recentPRs.length > 0) {
     lines.push(
       `Personal records set in that window: ${stats.recentPRs
@@ -75,5 +108,12 @@ export function buildSummaryUserPrompt(stats: {
         .join("; ")}`,
     );
   }
+
+  if (stats.suggestion) {
+    lines.push(
+      `Personal record that has stood untouched for a while, worth another attempt: ${stats.suggestion.moveName} on ${stats.suggestion.equipmentName}`,
+    );
+  }
+
   return lines.join("\n");
 }

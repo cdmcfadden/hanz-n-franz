@@ -6,24 +6,21 @@ import type { Workout } from "@/lib/schema";
 
 type Focus = "push" | "pull" | "legs" | "chest" | "back" | "shoulders/arms" | "core" | "";
 
-type PrOfDay = {
+type Suggestion = {
   equipmentId: string;
   moveId: string;
   moveName: string;
   equipmentName: string;
-} | null;
+};
 
 type Summary = {
   text: string;
   isReturning: boolean;
+  suggestion: Suggestion | null;
 } | null;
 
 function todayKey() {
   return `cadet:workout:${new Date().toISOString().slice(0, 10)}`;
-}
-
-function prKey() {
-  return `cadet:pr-of-day:${new Date().toISOString().slice(0, 10)}`;
 }
 
 function summaryKey() {
@@ -36,7 +33,6 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [workout, setWorkout] = useState<Workout | null>(null);
-  const [prOfDay, setPrOfDay] = useState<PrOfDay | undefined>(undefined);
   const [summary, setSummary] = useState<Summary | undefined>(undefined);
 
   useEffect(() => {
@@ -48,47 +44,15 @@ export default function Home() {
     }
   }, []);
 
-  function loadPrOfDay() {
-    const key = prKey();
-    try {
-      const cached = localStorage.getItem(key);
-      if (cached !== null) {
-        const parsed = JSON.parse(cached);
-        // v:1 marks values cached after catalog-filter fix; discard older entries
-        if (parsed?.v === 1) {
-          setPrOfDay(parsed.data);
-          return;
-        }
-      }
-    } catch {
-      // ignore corrupt storage
-    }
-    fetch("/api/pr-of-day")
-      .then((r) => r.json())
-      .then((data) => {
-        const val: PrOfDay = data.candidate ?? null;
-        try {
-          localStorage.setItem(key, JSON.stringify({ v: 1, data: val }));
-        } catch {
-          // ignore storage errors
-        }
-        setPrOfDay(val);
-      })
-      .catch(() => setPrOfDay(null));
-  }
-
-  useEffect(() => {
-    loadPrOfDay();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   function loadSummary() {
     const key = summaryKey();
     try {
       const cached = localStorage.getItem(key);
       if (cached !== null) {
         const parsed = JSON.parse(cached);
-        if (parsed?.v === 1) {
+        // v:2 marks values cached after the PR banner was folded in;
+        // discard older entries, which have no suggestion.
+        if (parsed?.v === 2) {
           setSummary(parsed.data);
           return;
         }
@@ -100,14 +64,18 @@ export default function Home() {
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => {
         const val: Summary = data?.text
-          ? { text: data.text, isReturning: !!data.isReturning }
+          ? {
+              text: data.text,
+              isReturning: !!data.isReturning,
+              suggestion: data.suggestion ?? null,
+            }
           : null;
         // Only cache a real summary. Caching a null — from a 401 before the
         // session cookie is live, a network blip, or a model error — would
         // suppress the card for the rest of the day.
         if (val) {
           try {
-            localStorage.setItem(key, JSON.stringify({ v: 1, data: val }));
+            localStorage.setItem(key, JSON.stringify({ v: 2, data: val }));
           } catch {
             // ignore storage errors
           }
@@ -148,39 +116,43 @@ export default function Home() {
 
   function clearWorkout() {
     localStorage.removeItem(todayKey());
-    localStorage.removeItem(prKey());
+    localStorage.removeItem(summaryKey());
     setWorkout(null);
-    loadPrOfDay();
+    loadSummary();
   }
 
   return (
     <main className="mx-auto max-w-2xl px-4 sm:px-6 py-4 sm:py-6 w-full">
       {summary && (
         <div className="mb-4 rounded-xl bg-[var(--surface-soft)] ring-1 ring-[var(--ring)] p-4 glow-fade-in">
-          <span className="block text-[10px] font-bold uppercase tracking-widest text-[var(--accent)] mb-1.5">
-            {summary.isReturning ? "Welcome back" : "Recap"}
-          </span>
-          <p className="text-sm text-neutral-200 leading-relaxed">{summary.text}</p>
-        </div>
-      )}
-
-      {prOfDay && (
-        <Link
-          href={`/equipment/${prOfDay.equipmentId}`}
-          className="card-lift mb-4 rounded-xl bg-[var(--surface-soft)] ring-1 ring-[var(--ring)] p-3 flex items-center gap-3 group glow-fade-in"
-        >
-          <span className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-[var(--accent)] shrink-0">
+          <span className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-[var(--accent)] mb-1.5">
             <span
               className="pulse-dot inline-block w-1.5 h-1.5 rounded-full bg-[var(--accent)]"
               aria-hidden="true"
             />
-            PR
+            {summary.isReturning ? "Welcome back" : "Recap"}
           </span>
-          <span className="text-sm font-medium text-white truncate group-hover:text-[var(--accent)] transition-colors">
-            {prOfDay.equipmentName}
-            <span className="text-neutral-500 font-normal"> · {prOfDay.moveName}</span>
-          </span>
-        </Link>
+          <p className="text-sm text-neutral-200 leading-relaxed whitespace-pre-line">
+            {summary.text}
+          </p>
+          {summary.suggestion && (
+            <Link
+              href={`/equipment/${summary.suggestion.equipmentId}`}
+              className="group mt-3 pt-3 border-t border-[var(--ring)] flex items-center gap-2 text-sm"
+            >
+              <span className="text-[10px] font-bold uppercase tracking-widest text-neutral-500 shrink-0">
+                Revisit
+              </span>
+              <span className="font-medium text-white truncate group-hover:text-[var(--accent)] transition-colors">
+                {summary.suggestion.equipmentName}
+                <span className="text-neutral-500 font-normal">
+                  {" · "}
+                  {summary.suggestion.moveName}
+                </span>
+              </span>
+            </Link>
+          )}
+        </div>
       )}
 
       {!workout && (
