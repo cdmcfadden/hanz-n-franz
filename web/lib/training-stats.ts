@@ -1,4 +1,5 @@
 import "server-only";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { loadEquipmentData } from "@/lib/equipment-server";
 import { CATEGORIES } from "@/lib/equipment";
 
@@ -196,4 +197,42 @@ export function findRegressions(
     });
   }
   return out.sort((a, b) => b.pctDown - a.pctDown);
+}
+
+/**
+ * Loads an athlete's log entries, with or without the canonical movement column.
+ *
+ * movement_id arrives with migrate_008. Selecting a column that doesn't exist
+ * yet makes PostgREST reject the whole query and hand back an error rather than
+ * throwing — which reads downstream as "this athlete has no history," silently.
+ * So: ask for it, and fall back to the pre-migration shape when the column
+ * isn't there, loudly enough to show up in the logs.
+ */
+export async function fetchLogEntries(
+  sb: SupabaseClient,
+  userId: string,
+  opts: { since?: string; limit?: number } = {},
+): Promise<LogEntry[]> {
+  const run = async (columns: string) => {
+    let q = sb.from("log_entries").select(columns).eq("user_id", userId);
+    if (opts.since) q = q.gte("log_date", opts.since);
+    q = q.order("log_date", { ascending: true });
+    if (opts.limit) q = q.limit(opts.limit);
+    return q;
+  };
+
+  const withMovement = await run("equipment_id, move_id, movement_id, weight, log_date");
+  if (!withMovement.error) return normalizeEntries(withMovement.data ?? []);
+
+  const legacy = await run("equipment_id, move_id, weight, log_date");
+  if (legacy.error) {
+    console.error("[stats] log_entries query failed", legacy.error);
+    return [];
+  }
+
+  console.warn(
+    "[stats] movement_id unavailable, falling back to gym-local move keys —",
+    "run migrate_008 to enable cross-gym history",
+  );
+  return normalizeEntries(legacy.data ?? []);
 }

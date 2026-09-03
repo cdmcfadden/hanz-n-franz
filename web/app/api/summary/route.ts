@@ -8,8 +8,8 @@ import {
   buildMoveHistory,
   dateStr,
   dayNumber,
+  fetchLogEntries,
   findRegressions,
-  normalizeEntries,
   pickStalePr,
   today,
 } from "@/lib/training-stats";
@@ -29,13 +29,7 @@ export async function GET() {
     return NextResponse.json({ text: null }, { status: 401 });
   }
 
-  const { data } = await supabase
-    .from("log_entries")
-    .select("equipment_id, move_id, movement_id, weight, log_date")
-    .eq("user_id", user.id)
-    .order("log_date", { ascending: true });
-
-  const entries = normalizeEntries(data ?? []);
+  const entries = await fetchLogEntries(supabase, user.id);
   if (entries.length === 0) {
     return NextResponse.json({ text: null });
   }

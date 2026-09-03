@@ -2,6 +2,7 @@ import "server-only";
 import { generateObject } from "ai";
 import { z } from "zod";
 import { getAdminSupabase } from "@/lib/supabase-admin";
+import { fetchLogEntries } from "@/lib/training-stats";
 
 // How stale the learned summary has to be before a workout request triggers a
 // background refresh. Learning is cheap (Haiku, one call) but not free, and an
@@ -53,15 +54,9 @@ export async function refreshAthleteMemory(userId: string): Promise<string> {
   cutoff.setDate(cutoff.getDate() - 90);
   const cutoffStr = cutoff.toISOString().slice(0, 10);
 
-  const [{ data: existingMemory }, { data: logs }, { data: notes }] = await Promise.all([
+  const [{ data: existingMemory }, logs, { data: notes }] = await Promise.all([
     sb.from("athlete_memory").select("summary").eq("user_id", userId).maybeSingle(),
-    sb
-      .from("log_entries")
-      .select("equipment_id, move_id, movement_id, log_date, weight")
-      .eq("user_id", userId)
-      .gte("log_date", cutoffStr)
-      .order("log_date", { ascending: true })
-      .limit(300),
+    fetchLogEntries(sb, userId, { since: cutoffStr, limit: 300 }),
     sb
       .from("equipment_notes")
       .select("equipment_id, summary, created_at")
@@ -70,7 +65,7 @@ export async function refreshAthleteMemory(userId: string): Promise<string> {
       .limit(20),
   ]);
 
-  const logRows = logs ?? [];
+  const logRows = logs;
   const noteRows = notes ?? [];
   if (logRows.length < MIN_LOGS_TO_LEARN && noteRows.length === 0) {
     throw new NotEnoughDataError();
